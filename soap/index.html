@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Communication Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        
+        .mermaid-container {
+            position: relative;
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            height: 600px;
+        }
+
+        .mermaid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12 max-w-7xl mx-auto">
+
+    <!-- Load Mermaid -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        
+        // Wait for DOM to be fully loaded before initializing
+        window.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+            
+            // Render the diagram and then apply pan/zoom
+            mermaid.run({
+                querySelector: '.mermaid',
+                postRenderCallback: (id) => {
+                    const svgElement = document.querySelector(`#${id}`);
+                    if (svgElement) {
+                        // We must explicitly set width and height for svg-pan-zoom to calculate correctly
+                        svgElement.setAttribute('width', '100%');
+                        svgElement.setAttribute('height', '100%');
+                        
+                        const panZoomInstance = svgPanZoom(svgElement, {
+                            zoomEnabled: true,
+                            controlIconsEnabled: true,
+                            fit: true,
+                            center: true,
+                            minZoom: 0.5,
+                            maxZoom: 5
+                        });
+
+                        // Handle window resize
+                        window.addEventListener('resize', function() {
+                            panZoomInstance.resize();
+                            panZoomInstance.fit();
+                            panZoomInstance.center();
+                        });
+                    }
+                }
+            });
+        });
+
+        // Data for sidebar
+        const stepDetails = {
+            'AppClient': { 
+                title: '1. Client Application', 
+                overview: 'The originating software system (e.g., a web frontend, background worker, or microservice) that needs to consume a remote SOAP service to fetch data or trigger an action.',
+                devImpact: 'Developers write standard local method calls (e.g., `paymentService.processCharge(cardDetails)`). They interact with standard language objects, completely oblivious to the fact that an XML network call is happening under the hood.',
+                interaction: 'Passes arguments to the locally instantiated Proxy class.',
+                branching: 'If the data provided to the method is invalid locally (e.g., passing a string instead of an integer), the application throws an exception before the network is even engaged.'
+            },
+            'Proxy': { 
+                title: '2. Client Proxy / Stub', 
+                overview: 'A piece of code generated automatically from the WSDL file. It acts as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.',
+                devImpact: 'Developers rarely write this manually. They use tooling (like `wsimport` in Java or `svcutil` in .NET) to point at a WSDL URL and generate these classes. If the remote service changes its contract, the dev must regenerate the proxy.',
+                interaction: 'Takes strongly typed objects and passes them to the Serialization framework.',
+                branching: 'The proxy enforces type safety. If the developer tries to call a method not defined in the generated WSDL contract, the compiler prevents the build.'
+            },
+            'Serialize': { 
+                title: '3. Serialize to SOAP Message', 
+                overview: 'The framework\'s engine converts the application\'s native in-memory objects (like Java classes or C# structs) into a structured SOAP XML document format according to XML Schema rules.',
+                devImpact: 'Usually a "black box" handled by the framework (like JAX-WS or WCF). However, devs may need to intervene here to configure XML namespace mappings, inject custom interceptors, or manipulate headers (e.g., adding authentication tokens).',
+                interaction: 'Passes the resulting raw XML string to the Transport Protocol layer.',
+                branching: 'If serialization fails (e.g., encountering a circular reference in the object graph or failing to serialize a complex type), a runtime serialization exception is thrown.'
+            },
+            'TransportProtocol': { 
+                title: '4. Transport Protocol', 
+                overview: 'The Layer 7 delivery mechanism used to transmit the SOAP message over the network. HTTP (Port 80) and HTTPS (Port 443) are the most common, but SOAP can natively ride over SMTP (email) or JMS queues.',
+                devImpact: 'Devs configure endpoint URLs, timeouts, SSL/TLS certificates, and transport-level authentication (like Basic Auth or Mutual TLS).',
+                interaction: 'Wraps the SOAP message in an HTTP Request (e.g., POST with a `SOAPAction` header) and hands it to the OS networking stack.',
+                branching: 'If the network is unreachable or the DNS fails, it throws a Timeout/Connection Exception back to the client application.'
+            },
+            'Envelope': { 
+                title: 'SOAP Envelope', 
+                overview: 'The mandatory root element of a SOAP message (`<soapenv:Envelope>`). It encapsulates the entire payload, defining the XML document explicitly as a SOAP message for the receiving parser.',
+                devImpact: 'Devs rarely construct this manually unless using tools like Postman or SoapUI for testing. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.',
+                interaction: 'Contains exactly two child elements: an optional Header and a mandatory Body.',
+                branching: 'If the Envelope namespace is unrecognized or malformed, the server immediately rejects the request without processing it further.'
+            },
+            'Header': { 
+                title: 'SOAP Header', 
+                overview: 'An optional XML block used for routing and meta-information. It is famous for housing WS-* specifications, such as WS-Security (tokens/signatures) and WS-Addressing.',
+                devImpact: 'This is where SOAP complexity peaks. Devs write middleware/interceptors to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.',
+                interaction: 'Read by server-side interceptors *before* the main Body is parsed or business logic is executed.',
+                branching: 'Headers can have a `mustUnderstand="1"` attribute. If the server does not know how to process that specific header, it must immediately abort and return a SOAP Fault.'
+            },
+            'Body': { 
+                title: 'SOAP Body', 
+                overview: 'The required main payload. It contains the XML data representing the specific method being called and its parameters, or the response data coming back from the server.',
+                devImpact: 'This represents the core domain data. The structure here maps exactly to the request/response models the developer works with in their application code.',
+                interaction: 'Extracted by the server parser and handed directly to the business logic layer.',
+                branching: 'If processing is successful, it returns a standard response Body. If an error occurs, it returns a Body containing a standard `<soap:Fault>` element.'
+            },
+            'Fault': { 
+                title: 'SOAP Fault', 
+                overview: 'A standardized error block nested strictly inside the Body. It provides structured error reporting containing a fault code, a human-readable fault string, and technical details.',
+                devImpact: 'When the proxy receives a Fault, it translates it into a language-specific Exception (e.g., `SoapFaultException`). The dev must wrap calls in try/catch blocks to handle these gracefully.',
+                interaction: 'Returns backwards through the network to inform the Client Application of the failure.',
+                branching: 'A Fault dictates that normal execution failed. It immediately branches the client application into its error-handling (catch) flow.'
+            },
+            'TCP': { 
+                title: 'OSI Layers 1-4', 
+                overview: 'The lower-level network stack that breaks the HTTP payload into packets, establishes the connection across the network/internet (TCP Handshake), and handles reliable, ordered delivery.',
+                devImpact: 'Mostly an infrastructure/DevOps concern. However, devs may need to debug this layer using Wireshark or tcpdump if there are firewall drops, MTU size issues, or TLS cipher mismatches.',
+                interaction: 'Carries the payload across switches, routers, and firewalls to the Server Transport listener.',
+                branching: 'If packets are lost, TCP automatically retries. If the connection drops entirely, a Connection Reset (RST) is passed up to the transport layer.'
+            },
+            'ServerTransport': { 
+                title: '5. Web Server / Listener', 
+                overview: 'The server-side endpoint (like IIS, Tomcat, Apache, or API Gateway) that receives the network connection, terminates TLS, and strips away the HTTP headers to extract the raw XML payload.',
+                devImpact: 'DevOps configures reverse proxies, thread pools, request limits, and load balancers at this layer to handle traffic volume.',
+                interaction: 'Passes the raw SOAP XML payload to the backend application\'s Deserializer.',
+                branching: 'If the server is overloaded, it may reject the connection here with an HTTP 503 (Service Unavailable) before parsing the XML.'
+            },
+            'Deserialize': { 
+                title: '6. Parse SOAP XML', 
+                overview: 'The server-side SOAP engine reads the raw XML string and translates it back into native server-side memory objects that the backend logic can understand and execute.',
+                devImpact: 'Framework handles this. Devs configure the server-side XML parsers and ensure their endpoint is correctly mapped to the incoming URL route.',
+                interaction: 'Sends the parsed objects to the Validation layer.',
+                branching: 'If the XML is malformed (e.g., missing a closing tag), the parser throws an immediate fatal error and returns an HTTP 500 or Bad Request Fault.'
+            },
+            'Validate': { 
+                title: '7. WSDL Contract Validation', 
+                overview: 'The server strictly checks the parsed XML against its XML Schema Definition (XSD). This enforces strong typing and strict structural rules.',
+                devImpact: 'Provides strict contract enforcement. Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape.',
+                interaction: 'If valid, triggers the execution of the Application Service Logic.',
+                branching: 'Unlike REST which often ignores extra JSON fields, SOAP is strict. If data types are wrong, fields are missing, or extra unauthorized fields exist, it rejects it immediately and branches to generate a validation Fault.'
+            },
+            'AppServer': { 
+                title: '8. Service Business Logic', 
+                overview: 'The actual backend code that executes the requested operation—calculating taxes, saving user data to a database, triggering emails, etc.',
+                devImpact: 'This is where backend engineers spend the majority of their time writing actual business rules. They receive clean, validated objects from the layer above.',
+                interaction: 'Completes the work, generates a response object, and sends it backward through the stack (Serialize -> ServerTransport -> TCP -> Client).',
+                branching: 'If business rules succeed, a standard response object is returned. If a business rule fails (e.g., "Account not found"), the dev manually throws an exception which the framework translates into a SOAP Fault.'
+            }
+        };
+
+        // Global function to handle clicks from Mermaid diagram
+        window.showDetails = function(nodeId) {
+            const sidebarContent = document.getElementById('sidebar-content');
+            const data = stepDetails[nodeId];
+            
+            if (data) {
+                sidebarContent.innerHTML = `
+                    <div class="animate-fade-in space-y-4">
+                        <div class="border-b border-slate-200 pb-3">
+                            <h3 class="text-2xl font-bold text-blue-700">${data.title}</h3>
+                            <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100">
+                                Identifier: ${nodeId}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Overview
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${data.overview}</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                Developer Impact
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${data.devImpact}</p>
+                        </div>
+
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                Next Steps
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${data.interaction}</p>
+                        </div>
+
+                        <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                Branching & Flow
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${data.branching}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+    </script>
+    
+    <!-- Load svg-pan-zoom library -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+    <div class="space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">SOAP Communication Architecture</h1>
+            <p class="text-slate-600 mb-6">Visualizing the layers and message structure of a Simple Object Access Protocol interaction.</p>
+            
+            <!-- Global Language Switcher -->
+            <div class="flex justify-center mb-4">
+                <div class="inline-flex bg-slate-200 rounded-lg p-1 shadow-inner">
+                    <button onclick="setGlobalLanguage('java')" id="lang-java" class="lang-btn px-6 py-2.5 rounded-md font-semibold text-sm bg-white shadow-sm text-blue-700 transition-all duration-200">Java</button>
+                    <button onclick="setGlobalLanguage('dotnet')" id="lang-dotnet" class="lang-btn px-6 py-2.5 rounded-md font-semibold text-sm text-slate-600 hover:text-slate-800 transition-all duration-200">.NET / C#</button>
+                    <button onclick="setGlobalLanguage('python')" id="lang-python" class="lang-btn px-6 py-2.5 rounded-md font-semibold text-sm text-slate-600 hover:text-slate-800 transition-all duration-200">Python</button>
+                </div>
+            </div>
+            <p class="text-sm text-blue-600 font-medium">✨ Use your mouse wheel to zoom, click/drag to pan, and click on nodes for details.</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Diagram Container -->
+            <main class="mermaid-container w-full lg:w-2/3">
+                <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eff6ff', 'primaryTextColor': '#1e293b', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#fef2f2'}}}%%
+graph TD
+    classDef osiLayer fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef process fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
+    classDef soapLayer fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef payload fill:#dcfce3,stroke:#22c55e,stroke-width:2px;
+    classDef clickable cursor:pointer,transition:all 0.2s;
+
+    %% Client Side Process
+    subgraph Client [Client Application Environment]
+        AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
+        Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
+        class AppClient,Proxy,Serialize process;
+        class AppClient,Proxy,Serialize clickable;
+    end
+
+    %% Network / OSI Layers Mapping
+    subgraph OSILayer7 [OSI Layer 7: Application]
+        Serialize -->|Wraps in HTTP/SMTP| TransportProtocol[4. Transport Protocol]
+        class TransportProtocol process;
+        class TransportProtocol clickable;
+        
+        %% The actual SOAP structure
+        subgraph SOAPMessage [SOAP Message Structure]
+            Envelope[SOAP Envelope]
+            Header[SOAP Header - Optional]
+            Body[SOAP Body - Required]
+            Fault[SOAP Fault - Optional Error Info]
+            
+            Envelope --- Header
+            Envelope --- Body
+            Body -.- Fault
+            
+            class Envelope,Header,Body,Fault soapLayer;
+            class Envelope,Header,Body,Fault clickable;
+        end
+        TransportProtocol -.-> SOAPMessage
+    end
+
+    %% Network transit
+    subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
+        TCP[TCP/IP Routing]
+        class TCP osiLayer;
+        class TCP clickable;
+    end
+    TransportProtocol -->|Transmits via Port 80/443| TCP
+
+    %% Server Side Process
+    subgraph Server [Server Provider Environment]
+        TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
+        ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
+        Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
+        Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
+        class ServerTransport,Deserialize,Validate,AppServer process;
+        class ServerTransport,Deserialize,Validate,AppServer clickable;
+    end
+
+    %% Return path
+    AppServer -.->|Generates Response XML| ServerTransport
+    
+    %% Styling notes
+    class Client,Server osiLayer;
+    class OSILayer7 osiLayer;
+
+    %% Interactive Click Events
+    click AppClient call showDetails() "Details on Client"
+    click Proxy call showDetails() "Details on Proxy"
+    click Serialize call showDetails() "Details on Serialization"
+    click TransportProtocol call showDetails() "Details on Transport"
+    click Envelope call showDetails() "Details on Envelope"
+    click Header call showDetails() "Details on Header"
+    click Body call showDetails() "Details on Body"
+    click Fault call showDetails() "Details on Fault"
+    click TCP call showDetails() "Details on Networking"
+    click ServerTransport call showDetails() "Details on Web Server"
+    click Deserialize call showDetails() "Details on Parsing"
+    click Validate call showDetails() "Details on Validation"
+    click AppServer call showDetails() "Details on Logic"
+                </pre>
+            </main>
+
+            <!-- Interactive Sidebar -->
+            <aside class="w-full lg:w-1/3 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-[600px]">
+                <div class="p-4 border-b border-slate-100 bg-slate-50 rounded-t-lg">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Component Details <span id="sidebar-lang-badge" class="ml-2 text-xs font-bold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Java</span>
+                    </h2>
+                </div>
+                <div id="sidebar-content" class="p-6 flex-grow overflow-y-auto">
+                    <div class="h-full flex flex-col items-center justify-center text-center text-slate-400">
+                        <svg class="w-12 h-12 mb-4 text-slate-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                        <p class="text-sm">Click on any colored component<br>in the diagram to view its details here.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <h2 class="text-xl font-semibold mb-4 text-slate-800">Understanding the Layers</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
+                <div>
+                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">OSI Layer 7 (Application)</h3>
+                    <p>SOAP operates entirely within the Application Layer. While it often uses HTTP as its transport mechanism (treating HTTP like a lower-level network protocol), it can conceptually sit on top of any Layer 7 protocol, including SMTP or FTP. The heavy lifting of security (WS-Security) and routing (WS-Addressing) happens here, inside the XML envelope.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">The Role of the Proxy</h3>
+                    <p>A key difference between SOAP and REST is the strong typing provided by WSDL (Web Services Description Language). The WSDL defines the exact shape of the XML required. Development tools use this to generate a "Proxy" class, allowing developers to call a remote API exactly like a local function, hiding all the XML serialization complexity.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <h2 class="text-xl font-semibold mb-4 text-slate-800">The Proxy & Facade Pattern Abstraction</h2>
+            <div class="text-sm text-slate-600 space-y-4">
+                <p>SOAP inherently relies on the <strong>Proxy Pattern</strong>, which acts much like a <strong>Facade</strong> to completely abstract the complexity of network calls away from the developer. The foundation of this is the WSDL, which IDEs use to auto-generate Client Proxies (stubs).</p>
+                
+                <div class="grid md:grid-cols-2 gap-6 mt-4">
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            1. The Developer's View (The Facade)
+                        </h4>
+                        <p class="mb-4">To the developer writing the application logic, calling the remote server looks exactly like calling a local method on a local object. They do not write HTTP clients or parse XML.</p>
+                        
+                        <!-- Dynamic Facade Code Blocks -->
+                        <div id="facade-java" class="facade-code block">
+                            <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-sm overflow-x-auto font-mono shadow-inner"><code>// Java implementation
+PaymentService proxy = new PaymentService();
+boolean success = proxy.processCharge(cardNum, amt);</code></pre>
+                        </div>
+                        <div id="facade-dotnet" class="facade-code hidden">
+                            <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-sm overflow-x-auto font-mono shadow-inner"><code>// C# .NET implementation
+var proxy = new PaymentServiceClient();
+bool success = proxy.ProcessCharge(cardNum, amt);</code></pre>
+                        </div>
+                        <div id="facade-python" class="facade-code hidden">
+                            <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-sm overflow-x-auto font-mono shadow-inner"><code># Python implementation
+client = Client('http://api.example.com/payment?wsdl')
+success = client.service.processCharge(card_num, amt)</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-5 rounded-lg border border-blue-100">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                            2. The Hidden Complexity
+                        </h4>
+                        <p class="mb-3">When the developer calls that method, the generated Proxy intercepts it and handles massive complexity behind the scenes:</p>
+                        <ul class="list-disc pl-5 space-y-1.5 text-sm">
+                            <li><strong>Serialization:</strong> Converts native objects into XML structure.</li>
+                            <li><strong>Envelope Construction:</strong> Wraps payload in SOAP Headers/Body.</li>
+                            <li><strong>Network Transport:</strong> Opens HTTP/TCP connections and sends data.</li>
+                            <li><strong>Error Translation:</strong> Parses returning XML and translates SOAP Faults into native language Exceptions.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200 flex items-start gap-3">
+                    <svg class="w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <strong class="text-slate-900 block mb-1">The "Leaky Abstraction" Drawback</strong> 
+                        While this abstraction enables rapid development, it completely hides the network. Because remote calls look identical to local method calls, developers can easily forget they incur significant network latency (e.g., carelessly placing a proxy call inside a tight `for` loop), leading to severe performance bottlenecks known as the N+1 problem.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <h2 class="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
+                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Tooling: Generating Proxies
+            </h2>
+            <div class="text-sm text-slate-600 space-y-4">
+                <p>Because the WSDL acts as a strict, machine-readable contract, developers rarely write the SOAP XML or the network routing code manually. Instead, they rely on language-specific tools to generate the local Proxy classes (stubs) and data models.</p>
+
+                <!-- Java Content -->
+                <div id="tooling-java" class="tooling-content block mt-6 animate-fade-in">
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-red-500 rounded-full"></span> Java CLI Tool: <code>wsimport</code>
+                        </h4>
+                        <p class="mb-3">Java developers typically use the <code>wsimport</code> tool (or Apache CXF's <code>wsdl2java</code>). It parses the WSDL and physically generates the native <code>.java</code> files containing the strongly-typed interfaces.</p>
+                        <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-xs overflow-x-auto font-mono shadow-inner"><code># Generates Java classes in the specified package
+wsimport -keep -p com.enterprise.billing \
+         http://api.example.com/billing?wsdl</code></pre>
+                    </div>
+                </div>
+
+                <!-- .NET Content -->
+                <div id="tooling-dotnet" class="tooling-content hidden mt-6 animate-fade-in">
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full"></span> .NET CLI Tool: <code>svcutil</code>
+                        </h4>
+                        <p class="mb-3">In the Microsoft ecosystem (WCF), developers use the ServiceModel Metadata Utility Tool (<code>svcutil.exe</code>) or the modern <code>dotnet-svcutil</code> to generate C# client code and configuration.</p>
+                        <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-xs overflow-x-auto font-mono shadow-inner"><code># Generates the C# proxy class and config file
+svcutil.exe http://api.example.com/billing?wsdl \
+            /out:BillingClient.cs</code></pre>
+                    </div>
+                </div>
+
+                <!-- Python Content -->
+                <div id="tooling-python" class="tooling-content hidden mt-6 animate-fade-in">
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full"></span> Python Library: <code>Zeep</code>
+                        </h4>
+                        <p class="mb-3">Unlike Java and .NET which heavily rely on static build-time generation, modern Python uses libraries like <strong>Zeep</strong>. Zeep dynamically reads the WSDL at runtime and generates the proxy objects in memory, embracing Python's dynamic typing.</p>
+                        <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-xs overflow-x-auto font-mono shadow-inner"><code>from zeep import Client
+
+# Zeep fetches and parses the XML schema dynamically
+client = Client(wsdl='http://api.example.com/billing?wsdl')
+
+# Call the remote SOAP service as if it were a local Python method
+result = client.service.processCharge('1234-5678', 50.00)
+print(result)</code></pre>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-200 text-slate-700 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <div>
+                        <strong id="cicd-title" class="text-slate-900 block mb-1">The CI/CD Build-Time Guarantee (For Compiled Languages)</strong>
+                        <span id="cicd-text">In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their WSDL, the CI/CD pipeline fetches the new WSDL, attempts to regenerate the classes, and <em>fails the build immediately</em> because the new contract breaks the existing application code.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Data and Global State Scripts -->
+    <script>
+        // Global State
+        let currentLang = 'java';
+        let currentActiveNode = null;
+
+        // Data for sidebar (Updated to support language variants and code snippets)
+        const stepDetails = {
+            'AppClient': { 
+                title: '1. Client Application', 
+                overview: 'The originating software system that needs to consume a remote SOAP service to fetch data or trigger an action.',
+                devImpact: {
+                    java: 'Developers write standard local method calls (e.g., `paymentService.processCharge(...)`). They interact with strongly typed Java objects.',
+                    dotnet: 'Developers write standard local method calls (e.g., `paymentService.ProcessCharge(...)`). They interact with strongly typed C# objects.',
+                    python: 'Developers write standard local method calls (e.g., `client.service.processCharge(...)`). They pass standard Python data structures like dicts.'
+                },
+                interaction: 'Passes arguments to the locally instantiated Proxy class.',
+                branching: 'If the data provided to the method is invalid locally, the application throws an exception before the network is even engaged.',
+                codeSnippet: {
+                    java: 'PaymentService proxy = new PaymentService();\nboolean success = proxy.processCharge("1234-5678", 50.00);',
+                    dotnet: 'var proxy = new PaymentServiceClient();\nbool success = proxy.ProcessCharge("1234-5678", 50.00);',
+                    python: 'result = client.service.processCharge("1234-5678", 50.00)'
+                }
+            },
+            'Proxy': { 
+                title: '2. Client Proxy / Stub', 
+                overview: 'A piece of code acting as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.',
+                devImpact: {
+                    java: 'Developers rarely write this manually. They use tooling like `wsimport` (JAX-WS) or `wsdl2java` (Apache CXF) to point at a WSDL URL and generate these classes.',
+                    dotnet: 'Developers rarely write this manually. They use tooling like `svcutil` (WCF) or `dotnet-svcutil` to point at a WSDL URL and generate these C# classes.',
+                    python: 'Developers use libraries like Zeep, which dynamically parses the WSDL at runtime and generates proxy objects in memory, embracing Python\'s dynamic typing.'
+                },
+                interaction: 'Takes language-specific objects and passes them to the Serialization framework.',
+                branching: 'The proxy enforces type safety. If the developer tries to call a method not defined in the WSDL contract, it fails (at compile time for Java/.NET, or runtime for Python).',
+                codeSnippet: {
+                    java: '// Auto-generated interface stub\n@WebService(targetNamespace = "http://api.example.com/")\npublic interface PaymentService {\n    @WebMethod\n    boolean processCharge(String card, double amt);\n}',
+                    dotnet: '// Auto-generated interface stub\n[System.ServiceModel.ServiceContractAttribute]\npublic interface IPaymentService {\n    [System.ServiceModel.OperationContractAttribute]\n    bool ProcessCharge(string card, double amt);\n}',
+                    python: '# Zeep parses the WSDL dynamically at runtime\n# No physical stub classes are generated.\nclient = Client(wsdl="http://api.example.com/pay?wsdl")'
+                }
+            },
+            'Serialize': { 
+                title: '3. Serialize to SOAP Message', 
+                overview: 'The framework\'s engine converts the application\'s native in-memory objects into a structured SOAP XML document format according to XML Schema rules.',
+                devImpact: {
+                    java: 'Usually a "black box" handled by frameworks like JAX-WS or Apache CXF. Devs intervene here to configure XML namespace mappings or inject interceptors.',
+                    dotnet: 'Usually a "black box" handled by the Windows Communication Foundation (WCF). Devs use behaviors and message inspectors to manipulate headers.',
+                    python: 'Handled under the hood by Zeep (using lxml). Developers can pass standard Python dictionaries, and Zeep securely maps them to the required XML Schema.'
+                },
+                interaction: 'Passes the resulting raw XML string to the Transport Protocol layer.',
+                branching: 'If serialization fails (e.g., encountering a circular reference), a runtime serialization exception is thrown.',
+                codeSnippet: {
+                    java: '// Injecting a custom interceptor during serialization\nBindingProvider bp = (BindingProvider) proxy;\nList<Handler> handlers = new ArrayList<>();\nhandlers.add(new MySecurityHandler());\nbp.getBinding().setHandlerChain(handlers);',
+                    dotnet: '// Injecting an endpoint behavior in WCF\nproxy.Endpoint.EndpointBehaviors.Add(\n    new MyLoggingBehavior()\n);',
+                    python: 'from zeep.plugins import HistoryPlugin\n# Zeep plugins can inspect/modify the XML tree\nhistory = HistoryPlugin()\nclient = Client(wsdl, plugins=[history])'
+                }
+            },
+            'TransportProtocol': { 
+                title: '4. Transport Protocol', 
+                overview: 'The Layer 7 delivery mechanism used to transmit the SOAP message over the network. HTTP and HTTPS are the most common.',
+                devImpact: 'Devs configure endpoint URLs, timeouts, SSL/TLS certificates, and transport-level authentication.',
+                interaction: 'Wraps the SOAP message in an HTTP Request (e.g., POST with a `SOAPAction` header) and hands it to the OS networking stack.',
+                branching: 'If the network is unreachable, it throws a Timeout/Connection Exception back to the client application.',
+                codeSnippet: {
+                    java: 'Map<String, Object> reqCtx = bp.getRequestContext();\nreqCtx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "https://secure-api.com");\nreqCtx.put("javax.xml.ws.client.connectionTimeout", 5000);',
+                    dotnet: 'var binding = new BasicHttpsBinding();\nbinding.SendTimeout = TimeSpan.FromSeconds(5);\nproxy.Endpoint.Binding = binding;',
+                    python: 'from zeep.transports import Transport\nimport requests\nsession = requests.Session()\nsession.verify = False # Bypass TLS if needed\ntransport = Transport(session=session, timeout=5)\nclient = Client(wsdl, transport=transport)'
+                }
+            },
+            'Envelope': { 
+                title: 'SOAP Envelope', 
+                overview: 'The mandatory root element of a SOAP message (`<soapenv:Envelope>`). It encapsulates the entire payload, defining the XML document explicitly as a SOAP message.',
+                devImpact: 'Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.',
+                interaction: 'Contains exactly two child elements: an optional Header and a mandatory Body.',
+                branching: 'If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.',
+                codeSnippet: '&lt;?xml version="1.0" encoding="UTF-8"?&gt;\n&lt;soapenv:Envelope \n    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" \n    xmlns:pay="http://api.example.com/payment"&gt;\n  &lt;!-- Header and Body go here --&gt;\n&lt;/soapenv:Envelope&gt;'
+            },
+            'Header': { 
+                title: 'SOAP Header', 
+                overview: 'An optional XML block used for routing and meta-information. It is famous for housing WS-* specifications, such as WS-Security.',
+                devImpact: 'This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.',
+                interaction: 'Read by server-side interceptors *before* the main Body is parsed or business logic is executed.',
+                branching: 'Headers can have a `mustUnderstand="1"` attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.',
+                codeSnippet: '&lt;soapenv:Header&gt;\n  &lt;wsse:Security soapenv:mustUnderstand="1"&gt;\n    &lt;wsse:UsernameToken&gt;\n      &lt;wsse:Username&gt;admin&lt;/wsse:Username&gt;\n      &lt;wsse:Password&gt;secret123&lt;/wsse:Password&gt;\n    &lt;/wsse:UsernameToken&gt;\n  &lt;/wsse:Security&gt;\n&lt;/soapenv:Header&gt;'
+            },
+            'Body': { 
+                title: 'SOAP Body', 
+                overview: 'The required main payload. It contains the XML data representing the specific method being called and its parameters.',
+                devImpact: 'This represents the core domain data. The structure here maps exactly to the request/response models the developer works with in their application code.',
+                interaction: 'Extracted by the server parser and handed directly to the business logic layer.',
+                branching: 'If processing is successful, it returns a standard response Body. If an error occurs, it returns a Body containing a standard `<soap:Fault>` element.',
+                codeSnippet: '&lt;soapenv:Body&gt;\n  &lt;pay:processCharge&gt;\n    &lt;cardNumber&gt;1234-5678&lt;/cardNumber&gt;\n    &lt;amount&gt;50.00&lt;/amount&gt;\n  &lt;/pay:processCharge&gt;\n&lt;/soapenv:Body&gt;'
+            },
+            'Fault': { 
+                title: 'SOAP Fault', 
+                overview: 'A standardized error block nested strictly inside the Body. It provides structured error reporting containing a fault code and a human-readable fault string.',
+                devImpact: {
+                    java: 'When the proxy receives a Fault, it translates it into a `SoapFaultException`. The dev must wrap calls in try/catch blocks.',
+                    dotnet: 'When the proxy receives a Fault, it translates it into a `FaultException`. The dev must wrap calls in try/catch blocks.',
+                    python: 'When the proxy receives a Fault, it translates it into a `zeep.exceptions.Fault`. The dev must wrap calls in try/except blocks.'
+                },
+                interaction: 'Returns backwards through the network to inform the Client Application of the failure.',
+                branching: 'A Fault dictates that normal execution failed. It immediately branches the client application into its error-handling flow.',
+                codeSnippet: {
+                    java: 'try {\n    proxy.processCharge("1234-5678", 50.0);\n} catch (SOAPFaultException ex) {\n    System.out.println("Fault: " + ex.getFault().getFaultString());\n}',
+                    dotnet: 'try {\n    proxy.ProcessCharge("1234-5678", 50.0);\n} catch (FaultException ex) {\n    Console.WriteLine($"SOAP Error: {ex.Message}");\n}',
+                    python: 'import zeep.exceptions\n\ntry:\n    client.service.processCharge("1234-5678", 50.0)\nexcept zeep.exceptions.Fault as ex:\n    print(f"SOAP Fault: {ex.message}")'
+                }
+            },
+            'TCP': { 
+                title: 'OSI Layers 1-4', 
+                overview: 'The lower-level network stack that breaks the HTTP payload into packets, establishes the connection across the network (TCP Handshake).',
+                devImpact: 'Mostly an infrastructure/DevOps concern. However, devs may need to debug this layer using Wireshark if there are TLS cipher mismatches.',
+                interaction: 'Carries the payload across switches, routers, and firewalls to the Server Transport listener.',
+                branching: 'If packets are lost, TCP automatically retries. If the connection drops entirely, a Connection Reset (RST) is passed up.'
+            },
+            'ServerTransport': { 
+                title: '5. Web Server / Listener', 
+                overview: 'The server-side endpoint that receives the network connection, terminates TLS, and strips away the HTTP headers.',
+                devImpact: {
+                    java: 'Deployed on Java App Servers like Apache Tomcat, Jetty, JBoss, or WebLogic.',
+                    dotnet: 'Deployed on Microsoft IIS (Internet Information Services) or modern Kestrel servers.',
+                    python: 'Deployed via WSGI/ASGI servers like Gunicorn or Uvicorn.'
+                },
+                interaction: 'Passes the raw SOAP XML payload to the backend application\'s Deserializer.',
+                branching: 'If the server is overloaded, it may reject the connection here with an HTTP 503 (Service Unavailable).',
+                codeSnippet: {
+                    java: '// JAX-WS Minimal HTTP Server deployment\nEndpoint.publish("http://localhost:8080/payment", \n    new PaymentImpl());',
+                    dotnet: '// WCF Minimal Server deployment\nServiceHost host = new ServiceHost(typeof(PaymentService));\nhost.Open();',
+                    python: 'from spyne.server.wsgi import WsgiApplication\n# Wrap the SOAP app in a WSGI container\nwsgi_app = WsgiApplication(application)'
+                }
+            },
+            'Deserialize': { 
+                title: '6. Parse SOAP XML', 
+                overview: 'The server-side SOAP engine reads the raw XML string and translates it back into native server-side memory objects.',
+                devImpact: 'Framework handles this. Devs configure the server-side XML parsers and ensure their endpoint is correctly mapped to the incoming URL route.',
+                interaction: 'Sends the parsed objects to the Validation layer.',
+                branching: 'If the XML is malformed, the parser throws an immediate fatal error and returns an HTTP 500 or Bad Request Fault.'
+            },
+            'Validate': { 
+                title: '7. WSDL Contract Validation', 
+                overview: 'The server strictly checks the parsed XML against its XML Schema Definition (XSD). This enforces strong typing and strict structural rules.',
+                devImpact: 'Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape.',
+                interaction: 'If valid, triggers the execution of the Application Service Logic.',
+                branching: 'If data types are wrong, fields are missing, or extra unauthorized fields exist, it rejects it immediately and generates a validation Fault.'
+            },
+            'AppServer': { 
+                title: '8. Service Business Logic', 
+                overview: 'The actual backend code that executes the requested operation—calculating taxes, saving user data, etc.',
+                devImpact: {
+                    java: 'Backend engineers write standard Java classes and use annotations like `@WebService` and `@WebMethod` to expose them via SOAP.',
+                    dotnet: 'Backend engineers write standard C# classes and use attributes like `[ServiceContract]` and `[OperationContract]` to expose them.',
+                    python: 'Backend engineers use frameworks like Spyne to define services using standard Python classes and `@rpc` decorators.'
+                },
+                interaction: 'Completes the work, generates a response object, and sends it backward through the stack.',
+                branching: 'If a business rule fails (e.g., "Account not found"), the dev manually throws an exception which the framework translates into a SOAP Fault.',
+                codeSnippet: {
+                    java: '@WebService(targetNamespace = "http://api.example.com/")\npublic class PaymentImpl {\n    @WebMethod\n    public boolean processCharge(String card, double amt) {\n        // Business logic execution...\n        return true;\n    }\n}',
+                    dotnet: '[ServiceBehavior(Namespace = "http://api.example.com/")]\npublic class PaymentService : IPaymentService {\n    public bool ProcessCharge(string card, double amt) {\n        // Business logic execution...\n        return true;\n    }\n}',
+                    python: 'from spyne import ServiceBase, rpc, Unicode, Float, Boolean\n\nclass PaymentService(ServiceBase):\n    @rpc(Unicode, Float, _returns=Boolean)\n    def processCharge(ctx, card, amt):\n        # Business logic execution...\n        return True'
+                }
+            }
+        };
+
+        // Helper function to resolve string vs language-specific object
+        function resolveText(dataField) {
+            if (typeof dataField === 'string') return dataField;
+            return dataField[currentLang] || dataField['java']; // fallback
+        }
+
+        // Global function to handle UI language switching
+        window.setGlobalLanguage = function(lang) {
+            currentLang = lang;
+            
+            // 1. Update Global Buttons Styling
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-700');
+                btn.classList.add('text-slate-600');
+            });
+            const activeBtn = document.getElementById('lang-' + lang);
+            activeBtn.classList.remove('text-slate-600');
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-blue-700');
+
+            // 2. Update Sidebar Badge
+            const badge = document.getElementById('sidebar-lang-badge');
+            badge.innerText = lang === 'dotnet' ? '.NET / C#' : lang.charAt(0).toUpperCase() + lang.slice(1);
+
+            // 3. Toggle Facade Code Blocks
+            document.querySelectorAll('.facade-code').forEach(el => el.classList.add('hidden', 'block'));
+            document.querySelectorAll('.facade-code').forEach(el => el.classList.remove('block'));
+            document.getElementById('facade-' + lang).classList.remove('hidden');
+            document.getElementById('facade-' + lang).classList.add('block');
+
+            // 4. Toggle Tooling Content Blocks
+            document.querySelectorAll('.tooling-content').forEach(el => el.classList.add('hidden', 'block'));
+            document.querySelectorAll('.tooling-content').forEach(el => el.classList.remove('block'));
+            document.getElementById('tooling-' + lang).classList.remove('hidden');
+            document.getElementById('tooling-' + lang).classList.add('block');
+
+            // 5. Adjust Python CI/CD caveat (Python is dynamic, CI/CD text is less relevant)
+            if(lang === 'python') {
+                document.getElementById('cicd-title').innerText = "Dynamic Runtime vs Build-Time Safety";
+                document.getElementById('cicd-text').innerHTML = "Because modern Python uses runtime interpretation with libraries like Zeep, breaking changes to the WSDL might not be caught until the exact lines of code are executed, whereas compiled languages would fail the build immediately.";
+            } else {
+                document.getElementById('cicd-title').innerText = "The CI/CD Build-Time Guarantee (For Compiled Languages)";
+                document.getElementById('cicd-text').innerHTML = "In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their WSDL, the CI/CD pipeline fetches the new WSDL, attempts to regenerate the classes, and <em>fails the build immediately</em> because the new contract breaks the existing application code.";
+            }
+
+            // 6. Refresh Sidebar if a node is currently selected
+            if (currentActiveNode) {
+                showDetails(currentActiveNode);
+            }
+        };
+
+        // Global function to handle clicks from Mermaid diagram
+        window.showDetails = function(nodeId) {
+            currentActiveNode = nodeId;
+            const sidebarContent = document.getElementById('sidebar-content');
+            const data = stepDetails[nodeId];
+            
+            if (data) {
+                // Dynamically build the code block if codeSnippet data exists for this node
+                let codeHtml = '';
+                if (data.codeSnippet) {
+                    const codeContent = resolveText(data.codeSnippet);
+                    codeHtml = `
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 mt-5 shadow-inner">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                Code & Payload Context
+                            </h4>
+                            <pre class="text-emerald-400 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all"><code>${codeContent}</code></pre>
+                        </div>
+                    `;
+                }
+
+                sidebarContent.innerHTML = `
+                    <div class="animate-fade-in space-y-4">
+                        <div class="border-b border-slate-200 pb-3">
+                            <h3 class="text-2xl font-bold text-blue-700">${data.title}</h3>
+                            <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100">
+                                Identifier: ${nodeId}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Overview
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${resolveText(data.overview)}</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                Developer Impact
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${resolveText(data.devImpact)}</p>
+                        </div>
+
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                Next Steps
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${resolveText(data.interaction)}</p>
+                        </div>
+
+                        <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                Branching & Flow
+                            </h4>
+                            <p class="text-slate-700 leading-relaxed text-sm">${resolveText(data.branching)}</p>
+                        </div>
+                        
+                        ${codeHtml}
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
