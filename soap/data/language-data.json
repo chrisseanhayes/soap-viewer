@@ -1,0 +1,135 @@
+{
+  "languages": {
+    "java": { "label": "Java" },
+    "dotnet": { "label": ".NET / C#" },
+    "python": { "label": "Python" }
+  },
+  "nodes": {
+    "AppClient": {
+      "devImpact": {
+        "java": "Developers write standard local method calls (e.g., `paymentService.processCharge(...)`). They interact with strongly typed Java objects.",
+        "dotnet": "Developers write standard local method calls (e.g., `paymentService.ProcessCharge(...)`). They interact with strongly typed C# objects.",
+        "python": "Developers write standard local method calls (e.g., `client.service.processCharge(...)`). They pass standard Python data structures like dicts."
+      },
+      "codeSnippet": {
+        "java": "PaymentService proxy = new PaymentService();\nboolean success = proxy.processCharge(\"1234-5678\", 50.00);",
+        "dotnet": "var proxy = new PaymentServiceClient();\nbool success = proxy.ProcessCharge(\"1234-5678\", 50.00);",
+        "python": "result = client.service.processCharge(\"1234-5678\", 50.00)"
+      }
+    },
+    "Proxy": {
+      "devImpact": {
+        "java": "Developers rarely write this manually. They use tooling like `wsimport` (JAX-WS) or `wsdl2java` (Apache CXF) to point at a WSDL URL and generate these classes.",
+        "dotnet": "Developers rarely write this manually. They use tooling like `svcutil` (WCF) or `dotnet-svcutil` to point at a WSDL URL and generate these C# classes.",
+        "python": "Developers use libraries like Zeep, which dynamically parses the WSDL at runtime and generates proxy objects in memory, embracing Python's dynamic typing."
+      },
+      "codeSnippet": {
+        "java": "// Auto-generated interface stub\n@WebService(targetNamespace = \"http://api.example.com/\")\npublic interface PaymentService {\n    @WebMethod\n    boolean processCharge(String card, double amt);\n}",
+        "dotnet": "// Auto-generated interface stub\n[System.ServiceModel.ServiceContractAttribute]\npublic interface IPaymentService {\n    [System.ServiceModel.OperationContractAttribute]\n    bool ProcessCharge(string card, double amt);\n}",
+        "python": "# Zeep parses the WSDL dynamically at runtime\n# No physical stub classes are generated.\nclient = Client(wsdl=\"http://api.example.com/pay?wsdl\")"
+      }
+    },
+    "Serialize": {
+      "devImpact": {
+        "java": "Usually a \"black box\" handled by frameworks like JAX-WS or Apache CXF. Devs intervene here to configure XML namespace mappings or inject interceptors.",
+        "dotnet": "Usually a \"black box\" handled by the Windows Communication Foundation (WCF). Devs use behaviors and message inspectors to manipulate headers.",
+        "python": "Handled under the hood by Zeep (using lxml). Developers can pass standard Python dictionaries, and Zeep securely maps them to the required XML Schema."
+      },
+      "codeSnippet": {
+        "java": "// Injecting a custom interceptor during serialization\nBindingProvider bp = (BindingProvider) proxy;\nList<Handler> handlers = new ArrayList<>();\nhandlers.add(new MySecurityHandler());\nbp.getBinding().setHandlerChain(handlers);",
+        "dotnet": "// Injecting an endpoint behavior in WCF\nproxy.Endpoint.EndpointBehaviors.Add(\n    new MyLoggingBehavior()\n);",
+        "python": "from zeep.plugins import HistoryPlugin\n# Zeep plugins can inspect/modify the XML tree\nhistory = HistoryPlugin()\nclient = Client(wsdl, plugins=[history])"
+      }
+    },
+    "TransportProtocol": {
+      "codeSnippet": {
+        "java": "Map<String, Object> reqCtx = bp.getRequestContext();\nreqCtx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, \"https://secure-api.com\");\nreqCtx.put(\"javax.xml.ws.client.connectionTimeout\", 5000);",
+        "dotnet": "var binding = new BasicHttpsBinding();\nbinding.SendTimeout = TimeSpan.FromSeconds(5);\nproxy.Endpoint.Binding = binding;",
+        "python": "from zeep.transports import Transport\nimport requests\nsession = requests.Session()\nsession.verify = False # Bypass TLS if needed\ntransport = Transport(session=session, timeout=5)\nclient = Client(wsdl, transport=transport)"
+      }
+    },
+    "ServerTransport": {
+      "title": "5. Web Server / Listener",
+      "overview": "The server-side endpoint that receives the network connection, terminates TLS, and strips away the HTTP headers to extract the raw XML payload.",
+      "interaction": "Passes the raw SOAP XML payload to the backend application's Deserializer.",
+      "branching": "If the server is overloaded, it may reject the connection here with an HTTP 503 (Service Unavailable).",
+      "devImpact": {
+        "java": "Deployed on Java App Servers like Apache Tomcat, Jetty, JBoss, or WebLogic.",
+        "dotnet": "Deployed on Microsoft IIS (Internet Information Services) or modern Kestrel servers.",
+        "python": "Deployed via WSGI/ASGI servers like Gunicorn or Uvicorn."
+      },
+      "codeSnippet": {
+        "java": "// JAX-WS Minimal HTTP Server deployment\nEndpoint.publish(\"http://localhost:8080/payment\", \n    new PaymentImpl());",
+        "dotnet": "// WCF Minimal Server deployment\nServiceHost host = new ServiceHost(typeof(PaymentService));\nhost.Open();",
+        "python": "from spyne.server.wsgi import WsgiApplication\n# Wrap the SOAP app in a WSGI container\nwsgi_app = WsgiApplication(application)"
+      }
+    },
+    "AppServer": {
+      "title": "8. Service Business Logic",
+      "overview": "The actual backend code that executes the requested operation—calculating taxes, saving user data, etc.",
+      "interaction": "Completes the work, generates a response object, and sends it backward through the stack.",
+      "branching": "If a business rule fails (e.g., \"Account not found\"), the dev manually throws an exception which the framework translates into a SOAP Fault.",
+      "devImpact": {
+        "java": "Backend engineers write standard Java classes and use annotations like `@WebService` and `@WebMethod` to expose them via SOAP.",
+        "dotnet": "Backend engineers write standard C# classes and use attributes like `[ServiceContract]` and `[OperationContract]` to expose them.",
+        "python": "Backend engineers use frameworks like Spyne to define services using standard Python classes and `@rpc` decorators."
+      },
+      "codeSnippet": {
+        "java": "@WebService(targetNamespace = \"http://api.example.com/\")\npublic class PaymentImpl {\n    @WebMethod\n    public boolean processCharge(String card, double amt) {\n        // Business logic execution...\n        return true;\n    }\n}",
+        "dotnet": "[ServiceBehavior(Namespace = \"http://api.example.com/\")]\npublic class PaymentService : IPaymentService {\n    public bool ProcessCharge(string card, double amt) {\n        // Business logic execution...\n        return true;\n    }\n}",
+        "python": "from spyne import ServiceBase, rpc, Unicode, Float, Boolean\n\nclass PaymentService(ServiceBase):\n    @rpc(Unicode, Float, _returns=Boolean)\n    def processCharge(ctx, card, amt):\n        # Business logic execution...\n        return True"
+      }
+    },
+    "Fault": {
+      "devImpact": {
+        "java": "When the proxy receives a Fault, it translates it into a `SoapFaultException`. The dev must wrap calls in try/catch blocks.",
+        "dotnet": "When the proxy receives a Fault, it translates it into a `FaultException`. The dev must wrap calls in try/catch blocks.",
+        "python": "When the proxy receives a Fault, it translates it into a `zeep.exceptions.Fault`. The dev must wrap calls in try/except blocks."
+      },
+      "codeSnippet": {
+        "java": "try {\n    proxy.processCharge(\"1234-5678\", 50.0);\n} catch (SOAPFaultException ex) {\n    System.out.println(\"Fault: \" + ex.getFault().getFaultString());\n}",
+        "dotnet": "try {\n    proxy.ProcessCharge(\"1234-5678\", 50.0);\n} catch (FaultException ex) {\n    Console.WriteLine($\"SOAP Error: {ex.Message}\");\n}",
+        "python": "import zeep.exceptions\n\ntry:\n    client.service.processCharge(\"1234-5678\", 50.0)\nexcept zeep.exceptions.Fault as ex:\n    print(f\"SOAP Fault: {ex.message}\")"
+      }
+    }
+  },
+  "facades": {
+    "java": "// Java implementation\nPaymentService proxy = new PaymentService();\nboolean success = proxy.processCharge(cardNum, amt);",
+    "dotnet": "// C# .NET implementation\nvar proxy = new PaymentServiceClient();\nbool success = proxy.ProcessCharge(cardNum, amt);",
+    "python": "# Python implementation\nclient = Client('http://api.example.com/payment?wsdl')\nsuccess = client.service.processCharge(card_num, amt)"
+  },
+  "tooling": {
+    "java": {
+      "dotColor": "bg-red-500",
+      "heading": "Java CLI Tool: <code>wsimport</code>",
+      "body": "Java developers typically use the <code>wsimport</code> tool (or Apache CXF's <code>wsdl2java</code>). It parses the WSDL and physically generates the native <code>.java</code> files containing the strongly-typed interfaces.",
+      "code": "# Generates Java classes in the specified package\nwsimport -keep -p com.enterprise.billing \\\n         http://api.example.com/billing?wsdl"
+    },
+    "dotnet": {
+      "dotColor": "bg-blue-500",
+      "heading": ".NET CLI Tool: <code>svcutil</code>",
+      "body": "In the Microsoft ecosystem (WCF), developers use the ServiceModel Metadata Utility Tool (<code>svcutil.exe</code>) or the modern <code>dotnet-svcutil</code> to generate C# client code and configuration.",
+      "code": "# Generates the C# proxy class and config file\nsvcutil.exe http://api.example.com/billing?wsdl \\\n            /out:BillingClient.cs"
+    },
+    "python": {
+      "dotColor": "bg-yellow-500",
+      "heading": "Python Library: <code>Zeep</code>",
+      "body": "Unlike Java and .NET which heavily rely on static build-time generation, modern Python uses libraries like <strong>Zeep</strong>. Zeep dynamically reads the WSDL at runtime and generates the proxy objects in memory, embracing Python's dynamic typing.",
+      "code": "from zeep import Client\n\n# Zeep fetches and parses the XML schema dynamically\nclient = Client(wsdl='http://api.example.com/billing?wsdl')\n\n# Call the remote SOAP service as if it were a local Python method\nresult = client.service.processCharge('1234-5678', 50.00)\nprint(result)"
+    }
+  },
+  "cicd": {
+    "java": {
+      "title": "The CI/CD Build-Time Guarantee (For Compiled Languages)",
+      "body": "In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their WSDL, the CI/CD pipeline fetches the new WSDL, attempts to regenerate the classes, and <em>fails the build immediately</em> because the new contract breaks the existing application code."
+    },
+    "dotnet": {
+      "title": "The CI/CD Build-Time Guarantee (For Compiled Languages)",
+      "body": "In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their WSDL, the CI/CD pipeline fetches the new WSDL, attempts to regenerate the classes, and <em>fails the build immediately</em> because the new contract breaks the existing application code."
+    },
+    "python": {
+      "title": "Dynamic Runtime vs Build-Time Safety",
+      "body": "Because modern Python uses runtime interpretation with libraries like Zeep, breaking changes to the WSDL might not be caught until the exact lines of code are executed, whereas compiled languages would fail the build immediately."
+    }
+  }
+}
