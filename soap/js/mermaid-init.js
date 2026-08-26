@@ -14,6 +14,16 @@ window.addEventListener('app:rendered', () => {
             svgElement.setAttribute('width', '100%');
             svgElement.setAttribute('height', '100%');
 
+            window._isProgrammaticZoom = false;
+            const handleManualZoomPan = function() {
+                if (!window._isProgrammaticZoom) {
+                    const toggle = document.getElementById('zoom-on-select-toggle');
+                    if (toggle && toggle.checked) {
+                        toggle.checked = false;
+                    }
+                }
+            };
+
             const panZoomInstance = svgPanZoom(svgElement, {
                 zoomEnabled: true,
                 mouseWheelZoomEnabled: false,
@@ -22,6 +32,8 @@ window.addEventListener('app:rendered', () => {
                 center: true,
                 minZoom: 0.5,
                 maxZoom: 5,
+                onZoom: handleManualZoomPan,
+                onPan: handleManualZoomPan
             });
 
             window.addEventListener('resize', () => {
@@ -223,8 +235,10 @@ window.addEventListener('app:rendered', () => {
                         const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
                         const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
                         
+                        window._isProgrammaticZoom = true;
                         panZoomInstance.zoom(currentZoom);
                         panZoomInstance.pan({ x: currentPanX, y: currentPanY });
+                        window._isProgrammaticZoom = false;
                         
                         if (progress < 1) {
                             panZoomInstance._animationId = requestAnimationFrame(step);
@@ -236,6 +250,8 @@ window.addEventListener('app:rendered', () => {
                 };
 
                 if (zoomToggle && !zoomToggle.checked) {
+                    window._isProgrammaticZoom = true;
+                    
                     const originalRelativeZoom = panZoomInstance.getZoom();
                     const originalPan = panZoomInstance.getPan();
                     
@@ -247,6 +263,8 @@ window.addEventListener('app:rendered', () => {
                     
                     panZoomInstance.zoom(originalRelativeZoom);
                     panZoomInstance.pan(originalPan);
+                    
+                    window._isProgrammaticZoom = false;
                     
                     animateTo(targetRelativeZoom, targetPan.x, targetPan.y);
                 } else if (zoomToggle && zoomToggle.checked) {
@@ -351,6 +369,8 @@ window.addEventListener('app:rendered', () => {
                             const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
                             const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
                             
+                            window._isProgrammaticZoom = true;
+                            
                             const originalRelativeZoom = panZoomInstance.getZoom();
                             const originalPan = panZoomInstance.getPan();
                             
@@ -362,6 +382,8 @@ window.addEventListener('app:rendered', () => {
                             
                             panZoomInstance.zoom(originalRelativeZoom);
                             panZoomInstance.pan(originalPan);
+                            
+                            window._isProgrammaticZoom = false;
                             
                             animateTo(relativeZoom, targetPanX, targetPanY);
                         }
