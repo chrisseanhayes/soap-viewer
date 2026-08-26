@@ -137,7 +137,7 @@ window.showBigPicture = function showBigPicture(nodeId) {
         sidebarBigPictureTpl(node.bigPicture, node.title),
         document.getElementById('sidebar-content'),
     );
-    window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: currentActiveNode }));
     updateNavigationUI();
 };
 

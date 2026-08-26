@@ -109,6 +109,7 @@ window.addEventListener('app:rendered', () => {
                         btn.textContent = '?';
                         btn.title = 'How this fits into the big picture';
                         btn.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+                        btn.setAttribute('data-bigpicture-btn', match);
                         Object.assign(btn.style, {
                             width: '18px',
                             height: '18px',
@@ -128,10 +129,12 @@ window.addEventListener('app:rendered', () => {
                             transition: 'color 0.15s, border-color 0.15s',
                         });
                         btn.addEventListener('mouseenter', () => {
+                            if (btn.classList.contains('highlighted-bigpicture-btn')) return;
                             btn.style.color = '#4f46e5';
                             btn.style.borderColor = '#818cf8';
                         });
                         btn.addEventListener('mouseleave', () => {
+                            if (btn.classList.contains('highlighted-bigpicture-btn')) return;
                             btn.style.color = '#94a3b8';
                             btn.style.borderColor = '#cbd5e1';
                         });
@@ -198,6 +201,24 @@ window.addEventListener('app:rendered', () => {
                 svgElement.querySelectorAll('.highlighted-svg-node').forEach(el => el.classList.remove('highlighted-svg-node'));
                 svgElement.querySelectorAll('.highlighted-svg-cluster').forEach(el => el.classList.remove('highlighted-svg-cluster'));
                 svgElement.querySelectorAll('.highlighted-svg-edge-label').forEach(el => el.classList.remove('highlighted-svg-edge-label'));
+                svgElement.querySelectorAll('.highlighted-bigpicture-btn').forEach(btn => {
+                    btn.classList.remove('highlighted-bigpicture-btn');
+                    btn.style.background = 'rgba(255,255,255,0.92)';
+                    btn.style.color = '#94a3b8';
+                    btn.style.borderColor = '#cbd5e1';
+                });
+
+                if (selectedId.endsWith('_BigPicture')) {
+                    const baseId = selectedId.replace('_BigPicture', '');
+                    const btn = svgElement.querySelector(`[data-bigpicture-btn="${baseId}"]`);
+                    if (btn) {
+                        btn.classList.add('highlighted-bigpicture-btn');
+                        btn.style.background = '#4f46e5';
+                        btn.style.color = '#ffffff';
+                        btn.style.borderColor = '#4f46e5';
+                    }
+                    return;
+                }
 
                 // 1. Check Nodes
                 let targetNode = Array.from(svgElement.querySelectorAll('.node')).find(node => {
