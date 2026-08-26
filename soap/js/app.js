@@ -119,21 +119,30 @@ function renderPage() {
     const cicdDefault = langData.cicd['java'];
 
     const pageTpl = html`
-        <header class="text-center">
-            <h1 class="text-3xl font-bold text-slate-900 mb-2">${m.pageTitle}</h1>
-            <p class="text-slate-600 mb-6">${m.pageSubtitle}</p>
-            <div class="flex justify-center mb-4">
-                <div class="inline-flex bg-slate-200 rounded-lg p-1 shadow-inner">
-                    ${langButtonsTpl(langData.languages, currentLang, window.setGlobalLanguage)}
+        <div class="w-full bg-white border-b border-slate-200 pt-6 pb-4 px-4 shadow-sm">
+            <header class="text-center max-w-7xl mx-auto">
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">${m.pageTitle}</h1>
+                <p class="text-slate-600 mb-4">${m.pageSubtitle}</p>
+                <div class="flex justify-center mb-3">
+                    <div class="inline-flex bg-slate-200 rounded-lg p-1 shadow-inner">
+                        ${langButtonsTpl(langData.languages, currentLang, window.setGlobalLanguage)}
+                    </div>
                 </div>
-            </div>
-            <p class="text-sm text-blue-600 font-medium">${m.diagramHint}</p>
-        </header>
+                <p class="text-sm text-blue-600 font-medium">${m.diagramHint}</p>
+            </header>
+        </div>
 
-        ${diagramAndSidebarTpl(sb)}
-        ${understandingLayersTpl(s.understandingLayers)}
-        ${proxyPatternTpl(s.proxyPattern, facadeBlocksTpl(langData.facades))}
-        ${toolingSectionTpl(s.tooling, toolingBlocksTpl(langData.tooling), cicdDefault)}
+        <div class="w-full bg-slate-50 border-b border-slate-200">
+            <div class="w-full p-2 md:p-6">
+                ${diagramAndSidebarTpl(sb)}
+            </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-8">
+            ${understandingLayersTpl(s.understandingLayers)}
+            ${proxyPatternTpl(s.proxyPattern, facadeBlocksTpl(langData.facades))}
+            ${toolingSectionTpl(s.tooling, toolingBlocksTpl(langData.tooling), cicdDefault)}
+        </div>
     `;
 
     // lit-html v3 does not pre-clear the container — explicitly remove the

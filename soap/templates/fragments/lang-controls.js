@@ -10,8 +10,8 @@ export function langButtonsTpl(languages, activeLang, onSelectLang) {
     return Object.entries(languages).map(([key, l]) => {
         const isActive = key === activeLang;
         const cls = isActive
-            ? 'lang-btn px-6 py-2.5 rounded-md font-semibold text-sm bg-white shadow-sm text-blue-700 transition-all duration-200'
-            : 'lang-btn px-6 py-2.5 rounded-md font-semibold text-sm text-slate-600 hover:text-slate-800 transition-all duration-200';
+            ? 'lang-btn px-4 py-1.5 rounded-md font-semibold text-xs md:text-sm bg-white shadow-sm text-blue-700 transition-all duration-200'
+            : 'lang-btn px-4 py-1.5 rounded-md font-semibold text-xs md:text-sm text-slate-600 hover:text-slate-800 transition-all duration-200';
         return html`<button @click=${() => onSelectLang(key)} id=${`lang-${key}`} class=${cls}>${l.label}</button>`;
     });
 }
