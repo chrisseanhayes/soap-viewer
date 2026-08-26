@@ -301,12 +301,47 @@ window.addEventListener('app:rendered', () => {
                             const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
                             const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
                             
+                            const originalRelativeZoom = panZoomInstance.getZoom();
+                            const originalPan = panZoomInstance.getPan();
+                            
                             panZoomInstance.zoom(relativeZoom);
                             
-                            const newRealZoom = panZoomInstance.getSizes().realZoom;
-                            const panX = (sizes.width / 2) - (svgCenterX * newRealZoom);
-                            const panY = (sizes.height / 2) - (svgCenterY * newRealZoom);
-                            panZoomInstance.pan({ x: panX, y: panY });
+                            const targetRealZoom = panZoomInstance.getSizes().realZoom;
+                            const targetPanX = (sizes.width / 2) - (svgCenterX * targetRealZoom);
+                            const targetPanY = (sizes.height / 2) - (svgCenterY * targetRealZoom);
+                            
+                            panZoomInstance.zoom(originalRelativeZoom);
+                            panZoomInstance.pan(originalPan);
+                            
+                            const startTime = performance.now();
+                            const duration = 400; // 400ms transition
+                            const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                            
+                            if (panZoomInstance._animationId) {
+                                cancelAnimationFrame(panZoomInstance._animationId);
+                            }
+                            
+                            const step = (currentTime) => {
+                                const elapsed = currentTime - startTime;
+                                let progress = elapsed / duration;
+                                if (progress > 1) progress = 1;
+                                
+                                const ease = easeInOutCubic(progress);
+                                
+                                const currentZoom = originalRelativeZoom + (relativeZoom - originalRelativeZoom) * ease;
+                                const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
+                                const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
+                                
+                                panZoomInstance.zoom(currentZoom);
+                                panZoomInstance.pan({ x: currentPanX, y: currentPanY });
+                                
+                                if (progress < 1) {
+                                    panZoomInstance._animationId = requestAnimationFrame(step);
+                                } else {
+                                    panZoomInstance._animationId = null;
+                                }
+                            };
+                            panZoomInstance._animationId = requestAnimationFrame(step);
                         }
                     }
                 }
