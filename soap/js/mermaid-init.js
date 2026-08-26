@@ -130,8 +130,8 @@ window.addEventListener('app:rendered', () => {
                         });
                         btn.addEventListener('mouseenter', () => {
                             if (btn.classList.contains('highlighted-bigpicture-btn')) return;
-                            btn.style.color = '#4f46e5';
-                            btn.style.borderColor = '#818cf8';
+                            btn.style.color = '#dc2626';
+                            btn.style.borderColor = '#f87171';
                         });
                         btn.addEventListener('mouseleave', () => {
                             if (btn.classList.contains('highlighted-bigpicture-btn')) return;
@@ -213,9 +213,9 @@ window.addEventListener('app:rendered', () => {
                     const btn = svgElement.querySelector(`[data-bigpicture-btn="${baseId}"]`);
                     if (btn) {
                         btn.classList.add('highlighted-bigpicture-btn');
-                        btn.style.background = '#4f46e5';
+                        btn.style.background = '#dc2626';
                         btn.style.color = '#ffffff';
-                        btn.style.borderColor = '#4f46e5';
+                        btn.style.borderColor = '#dc2626';
                     }
                     return;
                 }
