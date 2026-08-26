@@ -15,6 +15,20 @@ export function sidebarPlaceholderTpl(emptyState) {
     `;
 }
 
+function sectionTpl(title, svgClass, svgPath, content, containerClass = '') {
+    return html`
+        <div class="${containerClass}">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <svg class="w-4 h-4 ${svgClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${svgPath}"/>
+                </svg>
+                ${title}
+            </h4>
+            <p class="text-slate-700 leading-relaxed text-sm">${content}</p>
+        </div>
+    `;
+}
+
 /**
  * Renders the detail panel for a clicked diagram node.
  * @param {object} node    - Merged node data (title, overview, devImpact, interaction, branching, codeSnippet)
@@ -31,45 +45,10 @@ export function sidebarDetailTpl(node, nodeId, label) {
                 </span>
             </div>
 
-            <div>
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Overview
-                </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${node.overview}</p>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                    </svg>
-                    Developer Impact
-                </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${node.devImpact}</p>
-            </div>
-
-            <div>
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                    </svg>
-                    Next Steps
-                </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${node.interaction}</p>
-            </div>
-
-            <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                    </svg>
-                    Branching &amp; Flow
-                </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${node.branching}</p>
-            </div>
+            ${sectionTpl('Overview', 'text-blue-500', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', node.overview)}
+            ${sectionTpl('Developer Impact', 'text-purple-500', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4', node.devImpact, 'bg-slate-50 p-3 rounded-lg border border-slate-100')}
+            ${sectionTpl('Next Steps', 'text-green-500', 'M14 5l7 7m0 0l-7 7m7-7H3', node.interaction)}
+            ${sectionTpl('Branching & Flow', 'text-orange-500', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', node.branching, 'bg-orange-50 p-3 rounded-lg border border-orange-100')}
 
             ${node.codeSnippet ? html`
                 <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 mt-5 shadow-inner">
