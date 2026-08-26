@@ -185,6 +185,69 @@
       "considerations": "Scalability, security, and schema versioning are critical. Changes to the schema must be backward-compatible, or client proxies will break.",
       "devImpact": "The backend dictates the WSDL contract. If the server updates its WSDL, clients must regenerate their proxy classes.",
       "interaction": "Reads incoming SOAP messages, processes the data, and returns a SOAP response or a SOAP Fault."
+    },
+    "EdgeInitiatesRequest": {
+      "title": "Action: Initiates Request",
+      "overview": "The client application calls a method on the generated Proxy object, passing in native programming objects (e.g., a Customer object or a string ID).",
+      "handledBy": "<strong>The Developer:</strong> Calls the local method and provides the arguments.",
+      "considerations": "The application thread will typically block here waiting for a response unless asynchronous methods are used.",
+      "devImpact": "Seems like a local function call, but acts as the gateway to a remote network operation."
+    },
+    "EdgeGeneratesXML": {
+      "title": "Action: Generates XML",
+      "overview": "The proxy intercepts the method call and invokes the SOAP serialization engine to convert the native objects into a strict XML structure according to the WSDL.",
+      "handledBy": "<strong>The SOAP Library:</strong> Automatically performs the object-to-XML mapping.",
+      "considerations": "If the objects contain circular references or unsupported data types, this step will throw a serialization exception.",
+      "devImpact": "Saves the developer from writing manual XML string concatenation and parsing logic."
+    },
+    "EdgeWrapsInHTTP": {
+      "title": "Action: Wraps in HTTP/SMTP",
+      "overview": "The raw XML string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.",
+      "handledBy": "<strong>The Transport Protocol (HTTP Client):</strong> Prepares the message for the network stack.",
+      "considerations": "Custom headers (like Authorization for Basic Auth) must be injected before this step is finalized.",
+      "devImpact": "The HTTP status codes (200 OK, 500 Internal Server Error) often dictate the initial success or failure of the transmission."
+    },
+    "EdgeTransmits": {
+      "title": "Action: Transmits via Port 80/443",
+      "overview": "The operating system takes the HTTP request, breaks it into TCP packets, and routes it across the network to the server's IP address.",
+      "handledBy": "<strong>The Network Layer:</strong> Handles packet routing, retries, and SSL/TLS encryption if using port 443.",
+      "considerations": "Firewalls or network policies may block these ports. TLS handshakes can add latency.",
+      "devImpact": "Network latency is introduced here. Operations that take 1ms locally can take 50-500ms over the wire."
+    },
+    "EdgeReceivesPayload": {
+      "title": "Action: Receives Payload",
+      "overview": "The server's network interface receives the TCP packets, reassembles them into an HTTP request, and passes them to the web server listener (e.g., IIS, Tomcat).",
+      "handledBy": "<strong>The Server OS & Web Server:</strong> Manages the incoming connection and thread pool.",
+      "considerations": "If the server is under heavy load, requests may queue here or be rejected with a 503 Service Unavailable.",
+      "devImpact": "Usually transparent to the application code, but critical for server operations scaling."
+    },
+    "EdgeExtractsXML": {
+      "title": "Action: Extracts XML",
+      "overview": "The web server identifies the request as a SOAP endpoint, extracts the HTTP body (the XML), and passes it to the SOAP engine.",
+      "handledBy": "<strong>The Web Server / SOAP Framework:</strong> Strips transport headers and extracts the payload.",
+      "considerations": "The server must check the Content-Type header to ensure it's receiving a valid XML format.",
+      "devImpact": "Mismatched content types will cause early rejection before any parsing happens."
+    },
+    "EdgeValidatesWSDL": {
+      "title": "Action: Validates vs WSDL",
+      "overview": "The SOAP framework parses the XML and validates it strictly against the service's XML Schema (XSD) defined in the WSDL.",
+      "handledBy": "<strong>The SOAP Framework:</strong> Enforces the strong typing contract.",
+      "considerations": "Any missing required elements, extra unauthorized elements, or type mismatches (e.g., passing a string for an integer field) will cause a Validation Fault.",
+      "devImpact": "Ensures the business logic never receives malformed data. It is a strict gatekeeper."
+    },
+    "EdgeInvokesLogic": {
+      "title": "Action: Invokes Logic",
+      "overview": "Once validated, the framework translates the XML back into native server objects and calls the actual service implementation method written by the backend developer.",
+      "handledBy": "<strong>The SOAP Framework & Backend Developer:</strong> The framework maps the call, and the developer's logic executes.",
+      "considerations": "The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic SOAP Faults if necessary.",
+      "devImpact": "This is where the actual business value is generated (e.g., saving a user, processing a payment)."
+    },
+    "EdgeGeneratesResponseXML": {
+      "title": "Action: Generates Response XML",
+      "overview": "The business logic returns a result (or throws an exception). The SOAP framework serializes this result into a SOAP Response Envelope (or SOAP Fault Envelope) and sends it back down the stack.",
+      "handledBy": "<strong>The SOAP Framework:</strong> Serializes the return values into XML.",
+      "considerations": "If returning large datasets, the response XML can grow massive and slow down the return transmission.",
+      "devImpact": "The client waits in a blocked state until this response traverses back across the network and is deserialized on the client."
     }
   }
 }

@@ -86,7 +86,47 @@ window.addEventListener('app:rendered', () => {
                     // We also want hover effect if possible, but cursor: pointer is enough for now.
                     cluster.addEventListener('click', (e) => {
                         // Prevent triggering if a child node was clicked (handled by mermaid's own click)
-                        if (e.target.closest('.node')) return;
+                        if (e.target.closest('.node') || e.target.closest('.edgeLabel')) return;
+                        window.showDetails(match);
+                        e.stopPropagation();
+                    });
+                }
+            });
+
+            // Also attach click listeners to the text labels on the connecting arrows (edges)
+            const edgeMappings = {
+                'Initiates Request': 'EdgeInitiatesRequest',
+                'Generates XML': 'EdgeGeneratesXML',
+                'Wraps in HTTP/SMTP': 'EdgeWrapsInHTTP',
+                'Transmits via Port 80/443': 'EdgeTransmits',
+                'Receives Payload': 'EdgeReceivesPayload',
+                'Extracts XML': 'EdgeExtractsXML',
+                'Validates vs WSDL': 'EdgeValidatesWSDL',
+                'Invokes Logic': 'EdgeInvokesLogic',
+                'Generates Response XML': 'EdgeGeneratesResponseXML'
+            };
+
+            svgElement.querySelectorAll('.edgeLabel').forEach(label => {
+                const text = label.textContent.trim();
+                let match = null;
+                for (const [key, nodeId] of Object.entries(edgeMappings)) {
+                    if (text.includes(key)) {
+                        match = nodeId;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    label.style.cursor = 'pointer';
+                    // Add a subtle hover hint by styling the foreignObject div if present
+                    const div = label.querySelector('div');
+                    if (div) {
+                        div.style.transition = 'color 0.2s';
+                        label.addEventListener('mouseenter', () => div.style.color = '#2563eb');
+                        label.addEventListener('mouseleave', () => div.style.color = '');
+                    }
+
+                    label.addEventListener('click', (e) => {
                         window.showDetails(match);
                         e.stopPropagation();
                     });
