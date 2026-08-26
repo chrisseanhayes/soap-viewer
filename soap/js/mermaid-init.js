@@ -271,142 +271,7 @@ window.addEventListener('app:rendered', () => {
                     source = e.detail.source || 'click';
                 }
                 
-                // Zoom on select logic
-                const zoomToggle = document.getElementById('zoom-on-select-toggle');
-                const isZoomOn = zoomToggle && zoomToggle.checked;
-                
-                // if it's ON (or triggered by turning the toggle ON), do full zoom.
-                // if it's OFF and triggered by prev/next ('nav'), just pan to it.
-                // if it's OFF and triggered by 'click', do nothing.
-                if (isZoomOn || (source === 'nav')) {
-                    const getParentClusterId = (id) => {
-                        if (id.endsWith('_BigPicture')) id = id.replace('_BigPicture', '');
-                        const map = {
-                            'AppClient': 'Client', 'Proxy': 'Client', 'EdgeInitiatesRequest': 'Client',
-                            'Serialize': 'Client', 'EdgeGeneratesXML': 'Client',
-                            'ClientTransport': 'Client', 'Deserialize2': 'Client', 'EdgeDeserializesResponseXML': 'Client', 'EdgeReturnsResult': 'Client',
-                            
-                            'TransportProtocol': 'OSILayer7',
-                            
-                            'ReqEnvelope': 'SOAPMessage', 'ReqHeader': 'SOAPMessage', 'ReqBody': 'SOAPMessage',
-                            
-                            'TCP': 'OSILowerLayers',
-                            
-                            'ServerTransport': 'Server', 'Deserialize': 'Server',
-                            'Validate': 'Server', 'AppServer': 'Server',
-                            'EdgeExtractsXML': 'Server', 'EdgeValidatesWSDL': 'Server', 
-                            'EdgeInvokesLogic': 'Server', 'EdgeGeneratesResponseXML': 'Server',
-                            
-                            'RespEnvelope': 'SOAPResponse', 'RespHeader': 'SOAPResponse', 'RespBody': 'SOAPResponse', 'RespFault': 'SOAPResponse'
-                        };
-                        const clusters = ['Client', 'OSILayer7', 'SOAPMessage', 'SOAPResponse', 'OSILowerLayers', 'Server'];
-                        if (clusters.includes(id)) return id;
-                        return map[id] || null;
-                    };
-
-                    const clusterId = getParentClusterId(selectedId);
-                    let targetEl = null;
-                    let targetIsCluster = false;
-
-                    if (clusterId) {
-                        targetEl = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
-                            const idAttr = cluster.getAttribute('id') || '';
-                            if (idAttr === clusterId || idAttr.includes('-' + clusterId + '-')) return true;
-                            if (clusterId === 'Client' && cluster.textContent.includes('Client Application')) return true;
-                            if (clusterId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
-                            if (clusterId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
-                            if (clusterId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
-                            if (clusterId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
-                            if (clusterId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
-                            return false;
-                        });
-                        if (targetEl) targetIsCluster = true;
-                    }
-
-                    if (!targetEl) {
-                        targetEl = Array.from(svgElement.querySelectorAll('.node')).find(node => {
-                            const idAttr = node.getAttribute('id') || '';
-                            return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
-                        });
-                        
-                        if (!targetEl) {
-                            const reverseEdgeMappings = {
-                                'EdgeInitiatesRequest': 'Initiates Request', 'EdgeGeneratesXML': 'Generates XML',
-                                'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP', 'EdgeTransmits': 'Transmits via Port 80/443',
-                                'EdgeReceivesPayload': 'Receives Payload', 'EdgeExtractsXML': 'Extracts XML',
-                                'EdgeValidatesWSDL': 'Validates vs WSDL', 'EdgeInvokesLogic': 'Invokes Logic',
-                                'EdgeGeneratesResponseXML': 'Generates Response XML', 'EdgeReturnsViaPort': 'Returns via Port 80/443',
-                                'EdgeDeliversResponse': 'Delivers Response', 'EdgeDeserializesResponseXML': 'Deserializes Response XML',
-                                'EdgeReturnsResult': 'Returns Result / Throws Fault'
-                            };
-                            const edgeText = reverseEdgeMappings[selectedId];
-                            if (edgeText) {
-                                targetEl = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => label.textContent.includes(edgeText));
-                            }
-                        }
-                    }
-
-                    if (targetEl) {
-                        const rectForBounds = targetIsCluster ? (targetEl.querySelector('rect') || targetEl) : targetEl;
-                        const rectBox = rectForBounds.getBoundingClientRect();
-                        const svgBox = svgElement.getBoundingClientRect();
-                        
-                        const screenLeft = rectBox.left - svgBox.left;
-                        const screenTop = rectBox.top - svgBox.top;
-                        
-                        const sizes = panZoomInstance.getSizes();
-                        const currentZoom = sizes.realZoom;
-                        const currentPan = panZoomInstance.getPan();
-                        
-                        const cw = rectBox.width / currentZoom;
-                        const ch = rectBox.height / currentZoom;
-
-                        if (cw > 0 && ch > 0) {
-                            let targetRelativeZoom;
-                            
-                            if (isZoomOn) {
-                                const zoomX = sizes.width / cw;
-                                const zoomY = sizes.height / ch;
-                                
-                                let targetAbsoluteZoom = Math.min(zoomX, zoomY) * (targetIsCluster ? 0.95 : 0.8);
-                                const maxAllowedZoom = targetIsCluster ? 5 : 2;
-                                targetAbsoluteZoom = Math.min(targetAbsoluteZoom, maxAllowedZoom);
-                                
-                                const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
-                                targetRelativeZoom = targetAbsoluteZoom / initialZoom;
-                                targetRelativeZoom = Math.max(0.5, Math.min(targetRelativeZoom, 5));
-                            } else {
-                                targetRelativeZoom = panZoomInstance.getZoom();
-                            }
-                            
-                            const currentScreenCenterX = screenLeft + rectBox.width / 2;
-                            const currentScreenCenterY = screenTop + rectBox.height / 2;
-                            
-                            const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
-                            const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
-                            
-                            window._isProgrammaticZoom = true;
-                            
-                            const originalRelativeZoom = panZoomInstance.getZoom();
-                            const originalPan = panZoomInstance.getPan();
-                            
-                            panZoomInstance.zoom(targetRelativeZoom);
-                            
-                            const targetRealZoom = panZoomInstance.getSizes().realZoom;
-                            const targetPanX = (sizes.width / 2) - (svgCenterX * targetRealZoom);
-                            const targetPanY = (sizes.height / 2) - (svgCenterY * targetRealZoom);
-                            
-                            panZoomInstance.zoom(originalRelativeZoom);
-                            panZoomInstance.pan(originalPan);
-                            
-                            window._isProgrammaticZoom = false;
-                            
-                            animateTo(targetRelativeZoom, targetPanX, targetPanY);
-                        }
-                    }
-                }
-                
-                // Remove existing highlights
+                // 1. UPDATE HIGHLIGHTS FIRST
                 svgElement.querySelectorAll('.highlighted-svg-node').forEach(el => el.classList.remove('highlighted-svg-node'));
                 svgElement.querySelectorAll('.highlighted-svg-cluster').forEach(el => el.classList.remove('highlighted-svg-cluster'));
                 svgElement.querySelectorAll('.highlighted-svg-edge-label').forEach(el => el.classList.remove('highlighted-svg-edge-label'));
@@ -426,63 +291,194 @@ window.addEventListener('app:rendered', () => {
                         btn.style.color = '#ffffff';
                         btn.style.borderColor = '#dc2626';
                     }
-                    return;
-                }
-
-                // 1. Check Nodes
-                let targetNode = Array.from(svgElement.querySelectorAll('.node')).find(node => {
-                    const idAttr = node.getAttribute('id') || '';
-                    return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
-                });
-                
-                if (targetNode) {
-                    targetNode.classList.add('highlighted-svg-node');
-                    return;
-                }
-
-                // 2. Check Clusters (Outer Layers)
-                let targetCluster = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
-                    const idAttr = cluster.getAttribute('id') || '';
-                    if (idAttr === selectedId || idAttr.includes('-' + selectedId + '-')) return true;
-                    // Fallback to label check
-                    if (selectedId === 'Client' && cluster.textContent.includes('Client Application')) return true;
-                    if (selectedId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
-                    if (selectedId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
-                    if (selectedId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
-                    if (selectedId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
-                    if (selectedId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
-                    return false;
-                });
-
-                if (targetCluster) {
-                    targetCluster.classList.add('highlighted-svg-cluster');
-                    return;
-                }
-
-                // 3. Check Edges
-                const reverseEdgeMappings = {
-                    'EdgeInitiatesRequest': 'Initiates Request',
-                    'EdgeGeneratesXML': 'Generates XML',
-                    'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP',
-                    'EdgeTransmits': 'Transmits via Port 80/443',
-                    'EdgeReceivesPayload': 'Receives Payload',
-                    'EdgeExtractsXML': 'Extracts XML',
-                    'EdgeValidatesWSDL': 'Validates vs WSDL',
-                    'EdgeInvokesLogic': 'Invokes Logic',
-                    'EdgeGeneratesResponseXML': 'Generates Response XML',
-                    'EdgeReturnsViaPort': 'Returns via Port 80/443',
-                    'EdgeDeliversResponse': 'Delivers Response',
-                    'EdgeDeserializesResponseXML': 'Deserializes Response XML',
-                    'EdgeReturnsResult': 'Returns Result / Throws Fault'
-                };
-                
-                const edgeText = reverseEdgeMappings[selectedId];
-                if (edgeText) {
-                    let targetEdge = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => {
-                        return label.textContent.includes(edgeText);
+                } else {
+                    let targetNode = Array.from(svgElement.querySelectorAll('.node')).find(node => {
+                        const idAttr = node.getAttribute('id') || '';
+                        return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
                     });
-                    if (targetEdge) {
-                        targetEdge.classList.add('highlighted-svg-edge-label');
+                    
+                    if (targetNode) {
+                        targetNode.classList.add('highlighted-svg-node');
+                    } else {
+                        let targetCluster = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
+                            const idAttr = cluster.getAttribute('id') || '';
+                            if (idAttr === selectedId || idAttr.includes('-' + selectedId + '-')) return true;
+                            if (selectedId === 'Client' && cluster.textContent.includes('Client Application')) return true;
+                            if (selectedId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
+                            if (selectedId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
+                            if (selectedId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
+                            if (selectedId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
+                            if (selectedId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
+                            return false;
+                        });
+
+                        if (targetCluster) {
+                            targetCluster.classList.add('highlighted-svg-cluster');
+                        } else {
+                            const reverseEdgeMappings = {
+                                'EdgeInitiatesRequest': 'Initiates Request', 'EdgeGeneratesXML': 'Generates XML',
+                                'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP', 'EdgeTransmits': 'Transmits via Port 80/443',
+                                'EdgeReceivesPayload': 'Receives Payload', 'EdgeExtractsXML': 'Extracts XML',
+                                'EdgeValidatesWSDL': 'Validates vs WSDL', 'EdgeInvokesLogic': 'Invokes Logic',
+                                'EdgeGeneratesResponseXML': 'Generates Response XML', 'EdgeReturnsViaPort': 'Returns via Port 80/443',
+                                'EdgeDeliversResponse': 'Delivers Response', 'EdgeDeserializesResponseXML': 'Deserializes Response XML',
+                                'EdgeReturnsResult': 'Returns Result / Throws Fault'
+                            };
+                            const edgeText = reverseEdgeMappings[selectedId];
+                            if (edgeText) {
+                                let targetEdge = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => label.textContent.includes(edgeText));
+                                if (targetEdge) targetEdge.classList.add('highlighted-svg-edge-label');
+                            }
+                        }
+                    }
+                }
+
+                // 2. STATE MACHINE: DECIDE VIEWPORT MOVEMENT
+                if (selectedId.endsWith('_BigPicture')) return;
+                
+                const zoomToggle = document.getElementById('zoom-on-select-toggle');
+                const isZoomOn = zoomToggle && zoomToggle.checked;
+                
+                window._isProgrammaticZoom = true;
+                const currentRelativeZoom = panZoomInstance.getZoom();
+                const originalPanForCheck = panZoomInstance.getPan();
+                panZoomInstance.fit();
+                const fitZoom = panZoomInstance.getZoom();
+                panZoomInstance.zoom(currentRelativeZoom);
+                panZoomInstance.pan(originalPanForCheck);
+                window._isProgrammaticZoom = false;
+                
+                const isCurrentlyFit = Math.abs(currentRelativeZoom - fitZoom) < 0.05;
+                
+                let movementAction = 'NONE';
+                if (isZoomOn) {
+                    movementAction = 'ZOOM_TO_NODE';
+                } else if (source === 'nav') {
+                    if (isCurrentlyFit) {
+                        movementAction = 'NONE';
+                    } else {
+                        movementAction = 'PAN_TO_NODE';
+                    }
+                }
+                
+                if (movementAction === 'NONE') return;
+
+                // 3. CALCULATE TARGET AND ANIMATE
+                const getParentClusterId = (id) => {
+                    const map = {
+                        'AppClient': 'Client', 'Proxy': 'Client', 'EdgeInitiatesRequest': 'Client',
+                        'Serialize': 'Client', 'EdgeGeneratesXML': 'Client',
+                        'ClientTransport': 'Client', 'Deserialize2': 'Client', 'EdgeDeserializesResponseXML': 'Client', 'EdgeReturnsResult': 'Client',
+                        'TransportProtocol': 'OSILayer7',
+                        'ReqEnvelope': 'SOAPMessage', 'ReqHeader': 'SOAPMessage', 'ReqBody': 'SOAPMessage',
+                        'TCP': 'OSILowerLayers',
+                        'ServerTransport': 'Server', 'Deserialize': 'Server',
+                        'Validate': 'Server', 'AppServer': 'Server',
+                        'EdgeExtractsXML': 'Server', 'EdgeValidatesWSDL': 'Server', 
+                        'EdgeInvokesLogic': 'Server', 'EdgeGeneratesResponseXML': 'Server',
+                        'RespEnvelope': 'SOAPResponse', 'RespHeader': 'SOAPResponse', 'RespBody': 'SOAPResponse', 'RespFault': 'SOAPResponse'
+                    };
+                    const clusters = ['Client', 'OSILayer7', 'SOAPMessage', 'SOAPResponse', 'OSILowerLayers', 'Server'];
+                    if (clusters.includes(id)) return id;
+                    return map[id] || null;
+                };
+
+                const clusterId = getParentClusterId(selectedId);
+                let targetEl = null;
+                let targetIsCluster = false;
+
+                if (clusterId) {
+                    targetEl = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
+                        const idAttr = cluster.getAttribute('id') || '';
+                        if (idAttr === clusterId || idAttr.includes('-' + clusterId + '-')) return true;
+                        if (clusterId === 'Client' && cluster.textContent.includes('Client Application')) return true;
+                        if (clusterId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
+                        if (clusterId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
+                        if (clusterId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
+                        if (clusterId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
+                        if (clusterId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
+                        return false;
+                    });
+                    if (targetEl) targetIsCluster = true;
+                }
+
+                if (!targetEl) {
+                    targetEl = Array.from(svgElement.querySelectorAll('.node')).find(node => {
+                        const idAttr = node.getAttribute('id') || '';
+                        return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
+                    });
+                    
+                    if (!targetEl) {
+                        const reverseEdgeMappings = {
+                            'EdgeInitiatesRequest': 'Initiates Request', 'EdgeGeneratesXML': 'Generates XML',
+                            'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP', 'EdgeTransmits': 'Transmits via Port 80/443',
+                            'EdgeReceivesPayload': 'Receives Payload', 'EdgeExtractsXML': 'Extracts XML',
+                            'EdgeValidatesWSDL': 'Validates vs WSDL', 'EdgeInvokesLogic': 'Invokes Logic',
+                            'EdgeGeneratesResponseXML': 'Generates Response XML', 'EdgeReturnsViaPort': 'Returns via Port 80/443',
+                            'EdgeDeliversResponse': 'Delivers Response', 'EdgeDeserializesResponseXML': 'Deserializes Response XML',
+                            'EdgeReturnsResult': 'Returns Result / Throws Fault'
+                        };
+                        const edgeText = reverseEdgeMappings[selectedId];
+                        if (edgeText) {
+                            targetEl = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => label.textContent.includes(edgeText));
+                        }
+                    }
+                }
+
+                if (targetEl) {
+                    const rectForBounds = targetIsCluster ? (targetEl.querySelector('rect') || targetEl) : targetEl;
+                    const rectBox = rectForBounds.getBoundingClientRect();
+                    const svgBox = svgElement.getBoundingClientRect();
+                    
+                    const screenLeft = rectBox.left - svgBox.left;
+                    const screenTop = rectBox.top - svgBox.top;
+                    
+                    const sizes = panZoomInstance.getSizes();
+                    const currentZoom = sizes.realZoom;
+                    const currentPan = panZoomInstance.getPan();
+                    
+                    const cw = rectBox.width / currentZoom;
+                    const ch = rectBox.height / currentZoom;
+
+                    if (cw > 0 && ch > 0) {
+                        let targetRelativeZoom;
+                        
+                        if (movementAction === 'ZOOM_TO_NODE') {
+                            const zoomX = sizes.width / cw;
+                            const zoomY = sizes.height / ch;
+                            
+                            let targetAbsoluteZoom = Math.min(zoomX, zoomY) * (targetIsCluster ? 0.95 : 0.8);
+                            const maxAllowedZoom = targetIsCluster ? 5 : 2;
+                            targetAbsoluteZoom = Math.min(targetAbsoluteZoom, maxAllowedZoom);
+                            
+                            const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
+                            targetRelativeZoom = targetAbsoluteZoom / initialZoom;
+                            targetRelativeZoom = Math.max(0.5, Math.min(targetRelativeZoom, 5));
+                        } else if (movementAction === 'PAN_TO_NODE') {
+                            targetRelativeZoom = currentRelativeZoom;
+                        }
+                        
+                        const currentScreenCenterX = screenLeft + rectBox.width / 2;
+                        const currentScreenCenterY = screenTop + rectBox.height / 2;
+                        
+                        const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
+                        const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
+                        
+                        window._isProgrammaticZoom = true;
+                        const originalRelativeZoom = panZoomInstance.getZoom();
+                        const originalPan = panZoomInstance.getPan();
+                        
+                        panZoomInstance.zoom(targetRelativeZoom);
+                        
+                        const targetRealZoom = panZoomInstance.getSizes().realZoom;
+                        const targetPanX = (sizes.width / 2) - (svgCenterX * targetRealZoom);
+                        const targetPanY = (sizes.height / 2) - (svgCenterY * targetRealZoom);
+                        
+                        panZoomInstance.zoom(originalRelativeZoom);
+                        panZoomInstance.pan(originalPan);
+                        window._isProgrammaticZoom = false;
+                        
+                        animateTo(targetRelativeZoom, targetPanX, targetPanY);
                     }
                 }
             });
