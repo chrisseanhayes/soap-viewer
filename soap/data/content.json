@@ -2,7 +2,7 @@
   "meta": {
     "pageTitle": "SOAP Communication Architecture",
     "pageSubtitle": "Visualizing the layers and message structure of a Simple Object Access Protocol interaction.",
-    "diagramHint": "✨ Use your mouse wheel to zoom, click/drag to pan, and click on nodes for details."
+    "diagramHint": "✨ Use toolbar to zoom, click/drag to pan, and click on nodes for details."
   },
   "sidebar": {
     "heading": "Component Details",

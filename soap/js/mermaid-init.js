@@ -16,7 +16,8 @@ window.addEventListener('app:rendered', () => {
 
             const panZoomInstance = svgPanZoom(svgElement, {
                 zoomEnabled: true,
-                controlIconsEnabled: true,
+                mouseWheelZoomEnabled: false,
+                controlIconsEnabled: false,
                 fit: true,
                 center: true,
                 minZoom: 0.5,
@@ -27,6 +28,29 @@ window.addEventListener('app:rendered', () => {
                 panZoomInstance.resize();
                 panZoomInstance.fit();
                 panZoomInstance.center();
+            });
+
+            // Wire up custom zoom controls
+            document.querySelectorAll('.custom-zoom-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const btnEl = e.target.closest('button');
+                    if (!btnEl) return;
+                    const zoomVal = btnEl.getAttribute('data-zoom');
+                    if (zoomVal === 'in') {
+                        panZoomInstance.zoomIn();
+                    } else if (zoomVal === 'out') {
+                        panZoomInstance.zoomOut();
+                    } else if (zoomVal === 'fit') {
+                        panZoomInstance.fit();
+                        panZoomInstance.center();
+                    } else if (zoomVal) {
+                        const scale = parseFloat(zoomVal);
+                        if (!isNaN(scale)) {
+                            panZoomInstance.zoom(scale);
+                            panZoomInstance.center();
+                        }
+                    }
+                });
             });
         },
     });
