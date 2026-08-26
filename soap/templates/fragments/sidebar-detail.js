@@ -47,6 +47,8 @@ export function sidebarDetailTpl(node, nodeId, label) {
             </div>
 
             ${sectionTpl('Overview', 'text-blue-500', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', node.overview)}
+            ${node.handledBy ? sectionTpl('Handled By', 'text-indigo-500', 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', node.handledBy) : nothing}
+            ${node.considerations ? sectionTpl('Developer Considerations', 'text-teal-500', 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z', node.considerations, 'bg-teal-50 p-3 rounded-lg border border-teal-100') : nothing}
             ${sectionTpl('Developer Impact', 'text-purple-500', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4', node.devImpact, 'bg-slate-50 p-3 rounded-lg border border-slate-100')}
             ${sectionTpl('Next Steps', 'text-green-500', 'M14 5l7 7m0 0l-7 7m7-7H3', node.interaction)}
             ${sectionTpl('Branching & Flow', 'text-orange-500', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', node.branching, 'bg-orange-50 p-3 rounded-lg border border-orange-100')}

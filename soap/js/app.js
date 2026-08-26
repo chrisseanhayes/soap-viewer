@@ -55,6 +55,8 @@ function mergeNode(nodeId) {
         branching:   resolveText(lang.branching   || base.branching),
         devImpact:   resolveText(lang.devImpact   || base.devImpact),
         codeSnippet: resolveText(lang.codeSnippet || base.codeSnippet),
+        handledBy:   resolveText(lang.handledBy   || base.handledBy),
+        considerations: resolveText(lang.considerations || base.considerations),
     };
 }
 

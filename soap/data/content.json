@@ -2,7 +2,7 @@
   "meta": {
     "pageTitle": "SOAP Communication Architecture",
     "pageSubtitle": "Visualizing the layers and message structure of a Simple Object Access Protocol interaction.",
-    "diagramHint": "✨ Use toolbar to zoom, click/drag to pan, and click on nodes for details."
+    "diagramHint": "\u2728 Use toolbar to zoom, click/drag to pan, and click on nodes for details."
   },
   "sidebar": {
     "heading": "Component Details",
@@ -53,26 +53,33 @@
       "title": "1. Client Application",
       "overview": "The originating software system that needs to consume a remote SOAP service to fetch data or trigger an action.",
       "interaction": "Passes arguments to the locally instantiated Proxy class.",
-      "branching": "If the data provided to the method is invalid locally, the application throws an exception before the network is even engaged."
+      "branching": "If the data provided to the method is invalid locally, the application throws an exception before the network is even engaged.",
+      "handledBy": "<strong>The Developer:</strong> It's the developer's responsibility to know this and implement this."
     },
     "Proxy": {
       "title": "2. Client Proxy / Stub",
       "overview": "A piece of code acting as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.",
       "interaction": "Takes language-specific objects and passes them to the Serialization framework.",
-      "branching": "The proxy enforces type safety. If the developer tries to call a method not defined in the WSDL contract, it fails (at compile time for Java/.NET, or runtime for Python)."
+      "branching": "The proxy enforces type safety. If the developer tries to call a method not defined in the WSDL contract, it fails (at compile time for Java/.NET, or runtime for Python).",
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
+      "considerations": "Developers need to consider network latency. While proxy methods appear as local calls, they incur significant network overhead. Calling them inside tight loops can lead to severe performance bottlenecks (the N+1 problem)."
     },
     "Serialize": {
       "title": "3. Serialize to SOAP Message",
       "overview": "The framework's engine converts the application's native in-memory objects into a structured SOAP XML document format according to XML Schema rules.",
       "interaction": "Passes the resulting raw XML string to the Transport Protocol layer.",
-      "branching": "If serialization fails (e.g., encountering a circular reference), a runtime serialization exception is thrown."
+      "branching": "If serialization fails (e.g., encountering a circular reference), a runtime serialization exception is thrown.",
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
+      "considerations": "Be mindful of object graph sizes. Serializing extremely large objects or lists can cause massive memory spikes and OutOfMemory errors."
     },
     "TransportProtocol": {
       "title": "4. Transport Protocol",
       "overview": "The Layer 7 delivery mechanism used to transmit the SOAP message over the network. HTTP and HTTPS are the most common.",
       "interaction": "Wraps the SOAP message in an HTTP Request (e.g., POST with a SOAPAction header) and hands it to the OS networking stack.",
       "branching": "If the network is unreachable, it throws a Timeout/Connection Exception back to the client application.",
-      "devImpact": "Devs configure endpoint URLs, timeouts, SSL/TLS certificates, and transport-level authentication."
+      "devImpact": "Devs configure endpoint URLs, timeouts, SSL/TLS certificates, and transport-level authentication.",
+      "handledBy": "<strong>The Network Layer:</strong> It's the network layer's responsibility to handle the transmission.",
+      "considerations": "Developers must configure appropriate timeouts, manage connection pooling, and ensure correct SSL/TLS settings (like providing client certificates for mutual TLS)."
     },
     "Envelope": {
       "title": "SOAP Envelope",
@@ -80,7 +87,9 @@
       "interaction": "Contains exactly two child elements: an optional Header and a mandatory Body.",
       "branching": "If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.",
       "devImpact": "Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.",
-      "codeSnippet": "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;soapenv:Envelope \n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" \n    xmlns:pay=\"http://api.example.com/payment\"&gt;\n  &lt;!-- Header and Body go here --&gt;\n&lt;/soapenv:Envelope&gt;"
+      "codeSnippet": "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;soapenv:Envelope \n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" \n    xmlns:pay=\"http://api.example.com/payment\"&gt;\n  &lt;!-- Header and Body go here --&gt;\n&lt;/soapenv:Envelope&gt;",
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
+      "considerations": "While the framework constructs the envelope, developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used."
     },
     "Header": {
       "title": "SOAP Header",
@@ -88,7 +97,9 @@
       "interaction": "Read by server-side interceptors before the main Body is parsed or business logic is executed.",
       "branching": "Headers can have a mustUnderstand=\"1\" attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.",
       "devImpact": "This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.",
-      "codeSnippet": "&lt;soapenv:Header&gt;\n  &lt;wsse:Security soapenv:mustUnderstand=\"1\"&gt;\n    &lt;wsse:UsernameToken&gt;\n      &lt;wsse:Username&gt;admin&lt;/wsse:Username&gt;\n      &lt;wsse:Password&gt;secret123&lt;/wsse:Password&gt;\n    &lt;/wsse:UsernameToken&gt;\n  &lt;/wsse:Security&gt;\n&lt;/soapenv:Header&gt;"
+      "codeSnippet": "&lt;soapenv:Header&gt;\n  &lt;wsse:Security soapenv:mustUnderstand=\"1\"&gt;\n    &lt;wsse:UsernameToken&gt;\n      &lt;wsse:Username&gt;admin&lt;/wsse:Username&gt;\n      &lt;wsse:Password&gt;secret123&lt;/wsse:Password&gt;\n    &lt;/wsse:UsernameToken&gt;\n  &lt;/wsse:Security&gt;\n&lt;/soapenv:Header&gt;",
+      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to configure this, and the library's responsibility to perform the task.",
+      "considerations": "This is a powerful extension point. Developers can configure the framework to manipulate headers for injecting WS-Security credentials, transaction IDs, or custom routing information."
     },
     "Body": {
       "title": "SOAP Body",
@@ -96,35 +107,43 @@
       "interaction": "Extracted by the server parser and handed directly to the business logic layer.",
       "branching": "If processing is successful, it returns a standard response Body. If an error occurs, it returns a Body containing a standard soap:Fault element.",
       "devImpact": "This represents the core domain data. The structure here maps exactly to the request/response models the developer works with in their application code.",
-      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;pay:processCharge&gt;\n    &lt;cardNumber&gt;1234-5678&lt;/cardNumber&gt;\n    &lt;amount&gt;50.00&lt;/amount&gt;\n  &lt;/pay:processCharge&gt;\n&lt;/soapenv:Body&gt;"
+      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;pay:processCharge&gt;\n    &lt;cardNumber&gt;1234-5678&lt;/cardNumber&gt;\n    &lt;amount&gt;50.00&lt;/amount&gt;\n  &lt;/pay:processCharge&gt;\n&lt;/soapenv:Body&gt;",
+      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to supply data for this, and the library's responsibility to transform/perform the task.",
+      "considerations": "Developers must be aware of the WSDL's strict schema rules. Providing data that violates the schema (e.g., missing required fields, wrong data types) will cause immediate validation failures before business logic executes."
     },
     "Fault": {
       "title": "SOAP Fault",
       "overview": "A standardized error block nested inside the Body. It provides structured error reporting containing a fault code, a human-readable fault string, and technical details.",
       "interaction": "Returns backwards through the network to inform the Client Application of the failure.",
       "branching": "A Fault dictates that normal execution failed. It immediately branches the client application into its error-handling flow.",
-      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;soapenv:Fault&gt;\n    &lt;faultcode&gt;soapenv:Server&lt;/faultcode&gt;\n    &lt;faultstring&gt;Account not found&lt;/faultstring&gt;\n    &lt;detail&gt;&lt;errorCode&gt;404&lt;/errorCode&gt;&lt;/detail&gt;\n  &lt;/soapenv:Fault&gt;\n&lt;/soapenv:Body&gt;"
+      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;soapenv:Fault&gt;\n    &lt;faultcode&gt;soapenv:Server&lt;/faultcode&gt;\n    &lt;faultstring&gt;Account not found&lt;/faultstring&gt;\n    &lt;detail&gt;&lt;errorCode&gt;404&lt;/errorCode&gt;&lt;/detail&gt;\n  &lt;/soapenv:Fault&gt;\n&lt;/soapenv:Body&gt;",
+      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the library's responsibility to transform/perform the task (parse the fault), and the developer's responsibility to handle the resulting exception.",
+      "considerations": "Developers should consider how faults are mapped to native exceptions in their language. They must gracefully catch these exceptions and extract the embedded fault codes to determine if the error is recoverable."
     },
     "TCP": {
       "title": "OSI Layers 1-4",
       "overview": "The lower-level network stack that breaks the HTTP payload into packets, establishes the connection across the network (TCP Handshake).",
       "interaction": "Carries the payload across switches, routers, and firewalls to the Server Transport listener.",
       "branching": "If packets are lost, TCP automatically retries. If the connection drops entirely, a Connection Reset (RST) is passed up.",
-      "devImpact": "Mostly an infrastructure/DevOps concern. However, devs may need to debug this layer using Wireshark if there are TLS cipher mismatches."
+      "devImpact": "Mostly an infrastructure/DevOps concern. However, devs may need to debug this layer using Wireshark if there are TLS cipher mismatches.",
+      "handledBy": "<strong>The Network Layer:</strong> It's the network layer's responsibility to manage the connection and packets."
     },
     "Deserialize": {
       "title": "6. Parse SOAP XML",
       "overview": "The server-side SOAP engine reads the raw XML string and translates it back into native server-side memory objects.",
       "interaction": "Sends the parsed objects to the Validation layer.",
       "branching": "If the XML is malformed, the parser throws an immediate fatal error and returns an HTTP 500 or Bad Request Fault.",
-      "devImpact": "Framework handles this. Devs configure the server-side XML parsers and ensure their endpoint is correctly mapped to the incoming URL route."
+      "devImpact": "Framework handles this. Devs configure the server-side XML parsers and ensure their endpoint is correctly mapped to the incoming URL route.",
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
+      "considerations": "Deserialization is computationally expensive. Developers should consider the impact of receiving massive XML payloads, which can bog down the CPU and memory."
     },
     "Validate": {
       "title": "7. WSDL Contract Validation",
       "overview": "The server strictly checks the parsed XML against its XML Schema Definition (XSD). This enforces strong typing and strict structural rules.",
       "interaction": "If valid, triggers the execution of the Application Service Logic.",
       "branching": "If data types are wrong, fields are missing, or extra unauthorized fields exist, it rejects it immediately and generates a validation Fault.",
-      "devImpact": "Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape."
+      "devImpact": "Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape.",
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task."
     }
   }
 }
