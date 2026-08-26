@@ -334,7 +334,10 @@ window.addEventListener('app:rendered', () => {
                 }
 
                 // 2. STATE MACHINE: DECIDE VIEWPORT MOVEMENT
-                if (selectedId.endsWith('_BigPicture')) return;
+                let zoomTargetId = selectedId;
+                if (selectedId.endsWith('_BigPicture')) {
+                    zoomTargetId = selectedId.replace('_BigPicture', '');
+                }
                 
                 const zoomToggle = document.getElementById('zoom-on-select-toggle');
                 const isZoomOn = zoomToggle && zoomToggle.checked;
@@ -383,7 +386,7 @@ window.addEventListener('app:rendered', () => {
                     return map[id] || null;
                 };
 
-                const clusterId = getParentClusterId(selectedId);
+                const clusterId = getParentClusterId(zoomTargetId);
                 let targetEl = null;
                 let targetIsCluster = false;
 
@@ -405,7 +408,7 @@ window.addEventListener('app:rendered', () => {
                 if (!targetEl) {
                     targetEl = Array.from(svgElement.querySelectorAll('.node')).find(node => {
                         const idAttr = node.getAttribute('id') || '';
-                        return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
+                        return idAttr === zoomTargetId || idAttr.includes('-' + zoomTargetId + '-');
                     });
                     
                     if (!targetEl) {
@@ -418,7 +421,7 @@ window.addEventListener('app:rendered', () => {
                             'EdgeDeliversResponse': 'Delivers Response', 'EdgeDeserializesResponseXML': 'Deserializes Response XML',
                             'EdgeReturnsResult': 'Returns Result / Throws Fault'
                         };
-                        const edgeText = reverseEdgeMappings[selectedId];
+                        const edgeText = reverseEdgeMappings[zoomTargetId];
                         if (edgeText) {
                             targetEl = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => label.textContent.includes(edgeText));
                         }
