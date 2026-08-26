@@ -66,3 +66,48 @@ export function sidebarDetailTpl(node, nodeId, label) {
         </div>
     `;
 }
+/**
+ * Renders the "big picture" panel for a container's role in the RPC journey.
+ * @param {object} bp - The bigPicture object { role, summary, whyItExists, journeyStep }
+ * @param {string} title - Container title
+ */
+export function sidebarBigPictureTpl(bp, title) {
+    return html`
+        <div class="animate-fade-in space-y-4">
+            <div class="border-b border-indigo-100 pb-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wide">Big Picture</span>
+                </div>
+                <h3 class="text-lg font-bold text-indigo-700">${title}</h3>
+                <p class="text-sm font-semibold text-slate-600 mt-1">${bp.role}</p>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                    </svg>
+                    How It Fits
+                </h4>
+                <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(bp.summary)}</p>
+            </div>
+
+            <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Why It Exists
+                </h4>
+                <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(bp.whyItExists)}</p>
+            </div>
+
+            <div class="bg-slate-800 px-4 py-3 rounded-lg flex items-start gap-3">
+                <svg class="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                </svg>
+                <p class="text-indigo-300 text-xs font-mono leading-relaxed">${bp.journeyStep}</p>
+            </div>
+        </div>
+    `;
+}

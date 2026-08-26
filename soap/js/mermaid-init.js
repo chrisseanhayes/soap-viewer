@@ -90,6 +90,58 @@ window.addEventListener('app:rendered', () => {
                         window.showDetails(match);
                         e.stopPropagation();
                     });
+
+                    // Inject a ? button (foreignObject) at the top-left of the cluster
+                    const bgRect = cluster.querySelector('rect');
+                    if (bgRect) {
+                        const bx = parseFloat(bgRect.getAttribute('x') || 0);
+                        const by = parseFloat(bgRect.getAttribute('y') || 0);
+                        const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+                        fo.setAttribute('x', bx + 6);
+                        fo.setAttribute('y', by + 6);
+                        fo.setAttribute('width', '18');
+                        fo.setAttribute('height', '18');
+                        fo.style.overflow = 'visible';
+                        fo.style.pointerEvents = 'all';
+
+                        const btn = document.createElement('button');
+                        btn.textContent = '?';
+                        btn.title = 'How this fits into the big picture';
+                        btn.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+                        Object.assign(btn.style, {
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.92)',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: '1',
+                            padding: '0',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                            transition: 'color 0.15s, border-color 0.15s',
+                        });
+                        btn.addEventListener('mouseenter', () => {
+                            btn.style.color = '#4f46e5';
+                            btn.style.borderColor = '#818cf8';
+                        });
+                        btn.addEventListener('mouseleave', () => {
+                            btn.style.color = '#94a3b8';
+                            btn.style.borderColor = '#cbd5e1';
+                        });
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            window.showBigPicture(match);
+                        });
+
+                        fo.appendChild(btn);
+                        cluster.appendChild(fo);
+                    }
                 }
             });
 

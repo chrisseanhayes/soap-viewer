@@ -152,7 +152,13 @@
       "considerations": "Developers should consider memory constraints, local dependency injection, and overall client configuration before engaging the SOAP service.",
       "devImpact": "Errors inside this boundary are usually local exceptions (e.g. Type mismatch, NullReference), which are much faster and easier to debug than network-level faults.",
       "interaction": "Coordinates local proxies to serialize data and pass it to the transport layer.",
-      "branching": "Local validation failures occur entirely within this zone, saving a round-trip to the server."
+      "branching": "Local validation failures occur entirely within this zone, saving a round-trip to the server.",
+      "bigPicture": {
+        "role": "The Caller — Where the RPC Illusion Begins",
+        "summary": "This is the origin of every SOAP request. The entire premise of RPC (Remote Procedure Call) is that calling a function on a distant server should look and feel identical to calling a local function. That illusion is constructed here. The developer writes <code>paymentService.processCharge(card, amount)</code> — no HTTP, no XML, no network awareness — just a method call. The generated Proxy class silently intercepts it and begins the long journey across the network.",
+        "whyItExists": "Without this abstraction, every developer would have to manually construct XML strings, open HTTP connections, set headers, handle timeouts, and parse responses. RPC frameworks exist to eliminate that accidental complexity so developers can focus on business logic, not networking plumbing.",
+        "journeyStep": "Step 1 of 5: The intent is formed. A local method call is made. The network has not yet been touched."
+      }
     },
     "OSILayer7": {
       "title": "OSI Layer 7: Application",
@@ -160,7 +166,13 @@
       "handledBy": "<strong>The SOAP Library & Transport Layer:</strong> The libraries generate the SOAP format, and the web/transport layer handles HTTP transmission.",
       "considerations": "Developers should understand that although HTTP is traditionally a transport mechanism for the web, SOAP treats HTTP merely as a tunneling protocol.",
       "devImpact": "Troubleshooting at this layer involves inspecting HTTP requests (headers, verbs, body) rather than raw TCP packets.",
-      "interaction": "Receives data from the client, packages it into a SOAP Message, and pushes it down the network stack."
+      "interaction": "Receives data from the client, packages it into a SOAP Message, and pushes it down the network stack.",
+      "bigPicture": {
+        "role": "The Packager — Turning Intent into a Network Message",
+        "summary": "This is where the local method call gets translated into something that can physically travel across the internet. The Proxy serializes your objects into a strict XML structure (the SOAP Message), then wraps that XML inside an HTTP POST request with specific headers like <code>SOAPAction</code> and <code>Content-Type: text/xml</code>. HTTP is just a container here — SOAP doesn't care about web pages or REST semantics. It's tunneling the XML through HTTP purely because port 80/443 is almost always open through corporate firewalls.",
+        "whyItExists": "The network cannot send a Java object or a .NET class. It can only send bytes. This layer bridges that gap — it is the translation engine between the developer's high-level intent and the raw bytes that leave the machine.",
+        "journeyStep": "Step 2 of 5: The intent is encoded. Native objects → XML → HTTP request. Ready for the wire."
+      }
     },
     "SOAPMessage": {
       "title": "SOAP Message Structure",
@@ -168,7 +180,13 @@
       "handledBy": "<strong>The SOAP Library:</strong> The serialization engine guarantees the structure conforms to the W3C SOAP specifications.",
       "considerations": "Developers must ensure that message sizes are kept reasonable, as overly large messages consume significant bandwidth and parsing time.",
       "devImpact": "This is the core payload. Any deviation from the XML schema here will result in immediate rejection by the recipient.",
-      "interaction": "Moves from the client, through the network layers, to the server where it is un-packaged."
+      "interaction": "Moves from the client, through the network layers, to the server where it is un-packaged.",
+      "bigPicture": {
+        "role": "The Contract in Motion — The Shared Language of the RPC Call",
+        "summary": "The SOAP Message is the physical manifestation of the agreed contract (the WSDL). Both the client and server were built against the same WSDL definition, which means this XML structure is the one format both sides are guaranteed to understand. The Envelope is the outer wrapper that identifies the document as SOAP. The Header carries meta-information like security tokens. The Body carries the actual call — the method name and its parameters encoded as XML elements. This is what \"crosses the wire.\"",
+        "whyItExists": "RPC between different systems, languages, and platforms requires a neutral, universally-readable format. XML was chosen because it is self-describing, platform-agnostic, and human-readable. The rigid structure enforced by the WSDL/XSD schema ensures there is zero ambiguity about what data is being exchanged.",
+        "journeyStep": "Step 2b of 5: This is the payload itself — travelling inside the HTTP request through the network."
+      }
     },
     "OSILowerLayers": {
       "title": "OSI Layers 1-4: Transport/Network",
@@ -176,7 +194,13 @@
       "handledBy": "<strong>The Network Infrastructure:</strong> Routers, switches, load balancers, and the OS TCP/IP stack.",
       "considerations": "Network instability, dropped packets, and latency all occur here. Developers must build resiliency (e.g. retry mechanisms) in the application layer to account for this.",
       "devImpact": "Failures here surface as timeouts, connection resets, or DNS resolution errors in the client application.",
-      "interaction": "Carries the serialized SOAP HTTP payload over the wire between the client and server."
+      "interaction": "Carries the serialized SOAP HTTP payload over the wire between the client and server.",
+      "bigPicture": {
+        "role": "The Dumb Pipe — The Physical Reality RPC Tries to Hide",
+        "summary": "This is the part of the journey that RPC frameworks pretend doesn't exist. The HTTP request is broken into thousands of tiny TCP packets by your OS, each one routed independently across the internet through switches, routers, and load balancers, then reassembled in order on the other side. TCP guarantees delivery and ordering — if a packet is lost, it is automatically retransmitted. If you are on HTTPS (port 443), a TLS handshake encrypted everything before the first byte left your machine.",
+        "whyItExists": "The internet was not designed for method calls — it was designed for routing packets between IP addresses. This layer is the fundamental physical infrastructure that all networked software depends on. The latency incurred here (typically 1–500ms) is the unavoidable cost of the RPC abstraction and why carelessly calling a proxy inside a loop is catastrophic.",
+        "journeyStep": "Step 3 of 5: Bytes in transit. The SOAP message is invisible packets crossing the internet."
+      }
     },
     "Server": {
       "title": "Server Provider Environment",
@@ -184,7 +208,13 @@
       "handledBy": "<strong>The Backend Developer & Server OS:</strong> Backend devs implement the service logic and WSDL contracts, while the app server manages threads and HTTP connections.",
       "considerations": "Scalability, security, and schema versioning are critical. Changes to the schema must be backward-compatible, or client proxies will break.",
       "devImpact": "The backend dictates the WSDL contract. If the server updates its WSDL, clients must regenerate their proxy classes.",
-      "interaction": "Reads incoming SOAP messages, processes the data, and returns a SOAP response or a SOAP Fault."
+      "interaction": "Reads incoming SOAP messages, processes the data, and returns a SOAP response or a SOAP Fault.",
+      "bigPicture": {
+        "role": "The Mirror — The RPC Journey in Reverse",
+        "summary": "Everything the client did to prepare the call, the server now does in reverse. The web server receives TCP packets and reassembles the HTTP request. The SOAP engine strips the HTTP wrapper and extracts the XML. The parser converts XML back into native server-side objects. The WSDL validator acts as a strict gatekeeper — ensuring the incoming data perfectly matches the contract before any business logic runs. Finally, the actual service method is invoked. The result follows the same path back: serialize → HTTP response → TCP packets → client receives → deserialize → the developer's method call returns a value.",
+        "whyItExists": "This is the destination of the RPC call. The server is the reason the whole system exists — it exposes business capabilities (process a payment, look up an account) in a standardized, discoverable, strongly-typed way. The SOAP/WSDL contract is what makes those capabilities usable by any client on any platform without custom integration code.",
+        "journeyStep": "Step 4–5 of 5: Arrival, execution, and the response begins its journey back to the waiting client."
+      }
     },
     "EdgeInitiatesRequest": {
       "title": "Action: Initiates Request",

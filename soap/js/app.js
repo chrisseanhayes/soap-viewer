@@ -1,6 +1,6 @@
 import { html, render } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 
-import { sidebarDetailTpl, sidebarPlaceholderTpl }        from '../templates/fragments/sidebar-detail.js';
+import { sidebarDetailTpl, sidebarPlaceholderTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
 import { diagramAndSidebarTpl }                      from '../templates/fragments/diagram.js';
 import { understandingLayersTpl, proxyPatternTpl,
          toolingSectionTpl }                         from '../templates/fragments/sections.js';
@@ -73,6 +73,16 @@ window.showDetails = function showDetails(nodeId) {
     );
 
     window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
+};
+
+window.showBigPicture = function showBigPicture(nodeId) {
+    const node = content.nodes[nodeId];
+    if (!node || !node.bigPicture) return;
+    currentActiveNode = null;
+    render(
+        sidebarBigPictureTpl(node.bigPicture, node.title),
+        document.getElementById('sidebar-content'),
+    );
 };
 
 // ─── Language Switching ───────────────────────────────────────────────────────
