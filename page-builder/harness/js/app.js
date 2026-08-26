@@ -5,9 +5,27 @@ import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
 import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
 import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
 import { iconSvg } from '../templates/fragments/icons.js';
-import { cls } from '../templates/fragments/classes.js';
+import { cls as sharedCls } from '../templates/fragments/classes.js';
+import { theme } from '../templates/fragments/theme.js';
 import { langButtonsTpl, facadeBlocksTpl, toolingBlocksTpl } from '../templates/fragments/lang-controls.js';
 import { errorTpl } from '../templates/fragments/error.js';
+
+const cls = {
+    appContainer: "max-w-7xl mx-auto px-4 py-8 space-y-12 animate-fade-in",
+    appHeader: "text-center space-y-4",
+    appTitle: "text-4xl font-extrabold text-slate-900 tracking-tight",
+    appSubtitle: "text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed",
+    appLangToggleContainer: "flex justify-center mt-6",
+    appLangToggleInner: `inline-flex p-1 rounded-lg border ${theme.colors.langToggle.containerBg} ${theme.colors.langToggle.containerBorder}`,
+    appRootLoading: "text-center text-slate-400 py-20",
+    modalOverlay: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm",
+    modalContent: "bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative",
+    modalCloseBtn: "absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors",
+    modalTitle: "text-xl font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2",
+    modalBody: "text-slate-600 leading-relaxed text-sm",
+    modalFooter: "mt-6 flex justify-end",
+    modalActionBtn: "px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors"
+};
 
 let content = null;
 let langData = null;

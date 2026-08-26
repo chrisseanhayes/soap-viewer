@@ -55,6 +55,13 @@ export const theme = {
             icon: "text-slate-500",
             bg: "bg-slate-100",
             border: "border-slate-200"
+        },
+        langToggle: {
+            containerBg: "bg-slate-100",
+            containerBorder: "border-slate-200",
+            btnActiveBg: "bg-white",
+            btnActiveText: "text-blue-700",
+            btnInactiveText: "text-slate-600"
         }
     }
 };
