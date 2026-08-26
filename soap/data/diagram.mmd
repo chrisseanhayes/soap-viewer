@@ -6,7 +6,7 @@ graph TD
     classDef soapResponse fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
     classDef clickable cursor:pointer,transition:all 0.2s;
 
-    subgraph Client [Client Application Environment]
+    subgraph Client [💻 Client Application Environment]
         AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
         Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
         ClientTransport[9. Client Transport Receives] -->|Deserializes Response XML| Deserialize2[10. Deserialize Response]
@@ -15,7 +15,7 @@ graph TD
         class AppClient,Proxy,Serialize,ClientTransport,Deserialize2 clickable;
     end
 
-    subgraph OSILayer7 [OSI Layer 7: Application]
+    subgraph OSILayer7 [☁️ OSI Layer 7: Application]
         Serialize -->|Wraps in HTTP/SMTP| TransportProtocol[4. Transport Protocol]
         class TransportProtocol process;
         class TransportProtocol clickable;
@@ -32,14 +32,14 @@ graph TD
         TransportProtocol -.->|Contains| SOAPMessage
     end
 
-    subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
+    subgraph OSILowerLayers [☁️ OSI Layers 1-4: Transport/Network]
         TCP[TCP/IP Routing]
         class TCP osiLayer;
         class TCP clickable;
     end
     TransportProtocol -->|Transmits via Port 80/443| TCP
 
-    subgraph Server [Server Provider Environment]
+    subgraph Server [💻 Server Provider Environment]
         TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
         ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
         Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
