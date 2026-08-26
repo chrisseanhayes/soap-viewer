@@ -1,6 +1,6 @@
 import { html, render } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 
-import { sidebarDetailTpl }                          from '../templates/fragments/sidebar-detail.js';
+import { sidebarDetailTpl, sidebarPlaceholderTpl }        from '../templates/fragments/sidebar-detail.js';
 import { diagramAndSidebarTpl }                      from '../templates/fragments/diagram.js';
 import { understandingLayersTpl, proxyPatternTpl,
          toolingSectionTpl }                         from '../templates/fragments/sections.js';
@@ -136,7 +136,18 @@ function renderPage() {
         ${toolingSectionTpl(s.tooling, toolingBlocksTpl(langData.tooling), cicdDefault)}
     `;
 
-    render(pageTpl, document.querySelector('#app-root'));
+    // lit-html v3 does not pre-clear the container — explicitly remove the
+    // "Loading content..." placeholder before rendering the page template in.
+    const appRoot = document.querySelector('#app-root');
+    appRoot.replaceChildren();
+    render(pageTpl, appRoot);
+
+    // Establish lit-html's ownership of #sidebar-content by rendering the placeholder
+    // through the same render() path that showDetails() uses. Without this, the
+    // placeholder lives inside the parent template's managed DOM and showDetails()'s
+    // render() call conflicts with the parent part, leaving the placeholder visible.
+    const sidebarEl = document.getElementById('sidebar-content');
+    render(sidebarPlaceholderTpl(sb.emptyState), sidebarEl);
 
     // Set the mermaid source directly — bypasses lit-html's comment binding markers
     // which would otherwise appear inside the <pre> and break mermaid's parser.
@@ -150,4 +161,8 @@ function renderPage() {
 
 loadData()
     .then(renderPage)
-    .catch(err => render(errorTpl(err), document.querySelector('#app-root')));
+    .catch(err => {
+        const appRoot = document.querySelector('#app-root');
+        appRoot.replaceChildren();
+        render(errorTpl(err), appRoot);
+    });
