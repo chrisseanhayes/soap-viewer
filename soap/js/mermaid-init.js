@@ -96,6 +96,24 @@ window.addEventListener('app:rendered', () => {
 
                 if (match) {
                     cluster.style.cursor = 'pointer';
+
+                    const tooltipMap = {
+                        'Client': 'Compute',
+                        'Server': 'Compute',
+                        'OSILayer7': 'Network',
+                        'OSILowerLayers': 'Network',
+                        'SOAPMessage': 'Serialization',
+                        'SOAPResponse': 'Serialization'
+                    };
+                    if (tooltipMap[match]) {
+                        let titleEl = cluster.querySelector('title');
+                        if (!titleEl) {
+                            titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                            cluster.appendChild(titleEl);
+                        }
+                        titleEl.textContent = tooltipMap[match];
+                    }
+
                     // We also want hover effect if possible, but cursor: pointer is enough for now.
                     cluster.addEventListener('click', (e) => {
                         // Prevent triggering if a child node was clicked (handled by mermaid's own click)
