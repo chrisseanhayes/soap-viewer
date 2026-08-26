@@ -2,7 +2,7 @@
   "meta": {
     "pageTitle": "SOAP Communication Architecture",
     "pageSubtitle": "Visualizing the layers and message structure of a Simple Object Access Protocol interaction.",
-    "diagramHint": "\u2728 Use toolbar to zoom, click/drag to pan, and click on nodes for details."
+    "diagramHint": "✨ Use toolbar to zoom, click/drag to pan, and click on nodes for details."
   },
   "sidebar": {
     "heading": "Component Details",
@@ -87,7 +87,7 @@
       "interaction": "Contains exactly two child elements: an optional Header and a mandatory Body.",
       "branching": "If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.",
       "devImpact": "Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.",
-      "codeSnippet": "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;soapenv:Envelope \n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" \n    xmlns:pay=\"http://api.example.com/payment\"&gt;\n  &lt;!-- Header and Body go here --&gt;\n&lt;/soapenv:Envelope&gt;",
+      "codeSnippet": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soapenv:Envelope \n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" \n    xmlns:pay=\"http://api.example.com/payment\">\n  <!-- Header and Body go here -->\n</soapenv:Envelope>",
       "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
       "considerations": "While the framework constructs the envelope, developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used."
     },
@@ -97,7 +97,7 @@
       "interaction": "Read by server-side interceptors before the main Body is parsed or business logic is executed.",
       "branching": "Headers can have a mustUnderstand=\"1\" attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.",
       "devImpact": "This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.",
-      "codeSnippet": "&lt;soapenv:Header&gt;\n  &lt;wsse:Security soapenv:mustUnderstand=\"1\"&gt;\n    &lt;wsse:UsernameToken&gt;\n      &lt;wsse:Username&gt;admin&lt;/wsse:Username&gt;\n      &lt;wsse:Password&gt;secret123&lt;/wsse:Password&gt;\n    &lt;/wsse:UsernameToken&gt;\n  &lt;/wsse:Security&gt;\n&lt;/soapenv:Header&gt;",
+      "codeSnippet": "<soapenv:Header>\n  <wsse:Security soapenv:mustUnderstand=\"1\">\n    <wsse:UsernameToken>\n      <wsse:Username>admin</wsse:Username>\n      <wsse:Password>secret123</wsse:Password>\n    </wsse:UsernameToken>\n  </wsse:Security>\n</soapenv:Header>",
       "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to configure this, and the library's responsibility to perform the task.",
       "considerations": "This is a powerful extension point. Developers can configure the framework to manipulate headers for injecting WS-Security credentials, transaction IDs, or custom routing information."
     },
@@ -107,7 +107,7 @@
       "interaction": "Extracted by the server parser and handed directly to the business logic layer.",
       "branching": "If processing is successful, it returns a standard response Body. If an error occurs, it returns a Body containing a standard soap:Fault element.",
       "devImpact": "This represents the core domain data. The structure here maps exactly to the request/response models the developer works with in their application code.",
-      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;pay:processCharge&gt;\n    &lt;cardNumber&gt;1234-5678&lt;/cardNumber&gt;\n    &lt;amount&gt;50.00&lt;/amount&gt;\n  &lt;/pay:processCharge&gt;\n&lt;/soapenv:Body&gt;",
+      "codeSnippet": "<soapenv:Body>\n  <pay:processCharge>\n    <cardNumber>1234-5678</cardNumber>\n    <amount>50.00</amount>\n  </pay:processCharge>\n</soapenv:Body>",
       "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to supply data for this, and the library's responsibility to transform/perform the task.",
       "considerations": "Developers must be aware of the WSDL's strict schema rules. Providing data that violates the schema (e.g., missing required fields, wrong data types) will cause immediate validation failures before business logic executes."
     },
@@ -116,7 +116,7 @@
       "overview": "A standardized error block nested inside the Body. It provides structured error reporting containing a fault code, a human-readable fault string, and technical details.",
       "interaction": "Returns backwards through the network to inform the Client Application of the failure.",
       "branching": "A Fault dictates that normal execution failed. It immediately branches the client application into its error-handling flow.",
-      "codeSnippet": "&lt;soapenv:Body&gt;\n  &lt;soapenv:Fault&gt;\n    &lt;faultcode&gt;soapenv:Server&lt;/faultcode&gt;\n    &lt;faultstring&gt;Account not found&lt;/faultstring&gt;\n    &lt;detail&gt;&lt;errorCode&gt;404&lt;/errorCode&gt;&lt;/detail&gt;\n  &lt;/soapenv:Fault&gt;\n&lt;/soapenv:Body&gt;",
+      "codeSnippet": "<soapenv:Body>\n  <soapenv:Fault>\n    <faultcode>soapenv:Server</faultcode>\n    <faultstring>Account not found</faultstring>\n    <detail><errorCode>404</errorCode></detail>\n  </soapenv:Fault>\n</soapenv:Body>",
       "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the library's responsibility to transform/perform the task (parse the fault), and the developer's responsibility to handle the resulting exception.",
       "considerations": "Developers should consider how faults are mapped to native exceptions in their language. They must gracefully catch these exceptions and extract the embedded fault codes to determine if the error is recoverable."
     },
