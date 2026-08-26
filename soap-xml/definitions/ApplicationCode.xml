@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ApplicationCode.xml — Definition node for the "Application Code" concept
+  =========================================================================
+  Represents the 🧑‍💻 Application Code tooltip pill displayed in the sidebar
+  for nodes whose logic is authored directly by a developer.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 65-66)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+
+  Nodes that display this pill:
+    AppClient, AppServer, EdgeInitiatesRequest, EdgeReturnsResult, EdgeInvokesLogic
+-->
+
+<definition id="ApplicationCode">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>🧑‍💻</icon>
+  <label>Application Code</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>🧑‍💻 Application Code</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <!-- Tailwind classes applied to the pill button -->
+  <colorClass>bg-emerald-50 text-emerald-800 border border-emerald-200</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <!-- Displayed as plain text inside the modal <p> element -->
+  <body>
+    This is the business logic and custom code written directly by the developer
+    to solve a specific problem. It is the core reason the application exists.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <!-- Source: sidebar-detail.js line 65 -->
+  <assignedTo>
+    <nodeRef id="AppClient"/>
+    <nodeRef id="AppServer"/>
+    <nodeRef id="EdgeInitiatesRequest"/>
+    <nodeRef id="EdgeReturnsResult"/>
+    <nodeRef id="EdgeInvokesLogic"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="65-66"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

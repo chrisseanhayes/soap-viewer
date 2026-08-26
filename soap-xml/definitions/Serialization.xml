@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Serialization.xml — Definition node for the "Serialization" concept
+  =========================================================================
+  Represents the 📄 Serialization tooltip pill displayed in the sidebar.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 61-62)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+-->
+
+<definition id="Serialization">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>📄</icon>
+  <label>Serialization</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>📄 Serialization</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <colorClass>bg-amber-50 text-amber-800 border border-amber-200</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <body>
+    Serialization is neither pure compute nor network—it's the translator between them. It is the process of converting live, in-memory objects from your application into a standardized text format (like XML or JSON) so they can be safely transmitted across the network and understood by a completely different machine on the other side.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <assignedTo>
+    <nodeRef id="SOAPMessage"/>
+    <nodeRef id="SOAPResponse"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="61-62"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

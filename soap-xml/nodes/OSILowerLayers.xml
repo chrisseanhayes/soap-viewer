@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OSILowerLayers.xml — Source-of-truth data node for "OSI Layers 1-4: Transport/Network"
+  =========================================================================
+  Structure:
+    <node id="OSILowerLayers">  ← subgraph container (OSI Layers 1-4: Transport/Network)
+      <node id="TCP">           ← the diagram node being documented
+-->
+
+<node id="OSILowerLayers"
+      label="☁️ OSI Layers 1-4: Transport/Network"
+      nodeType="Network"
+      nodeTypeIcon="☁️"
+      diagramClass="osiLayer">
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PARENT: OSI Layers 1-4: Transport/Network
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <title>OSI Layers 1-4: Transport/Network</title>
+
+  <overview>
+    The physical and transport infrastructure responsible for routing packets across the internet. This includes IP routing and TCP connection management.
+  </overview>
+
+  <handledBy>
+    &lt;strong&gt;The Network Infrastructure:&lt;/strong&gt; Routers, switches, load balancers, and the OS TCP/IP stack.
+  </handledBy>
+
+  <considerations>
+    Network instability, dropped packets, and latency all occur here. Developers must build resiliency (e.g. retry mechanisms) in the application layer to account for this.
+  </considerations>
+
+  <devImpact>
+    Failures here surface as timeouts, connection resets, or DNS resolution errors in the client application.
+  </devImpact>
+
+  <interaction>
+    Carries the serialized SOAP HTTP payload over the wire between the client and server.
+  </interaction>
+
+  <bigPicture>
+    <role>The Dumb Pipe — The Physical Reality RPC Tries to Hide</role>
+    <summary>
+      This is the part of the journey that RPC frameworks pretend doesn't exist. The HTTP request is broken into thousands of tiny TCP packets by your OS, each one routed independently across the internet through switches, routers, and load balancers, then reassembled in order on the other side. TCP guarantees delivery and ordering — if a packet is lost, it is automatically retransmitted. If you are on HTTPS (port 443), a TLS handshake encrypted everything before the first byte left your machine.
+    </summary>
+    <whyItExists>
+      The internet was not designed for method calls — it was designed for routing packets between IP addresses. This layer is the fundamental physical infrastructure that all networked software depends on. The latency incurred here (typically 1–500ms) is the unavoidable cost of the RPC abstraction and why carelessly calling a proxy inside a loop is catastrophic.
+    </whyItExists>
+    <journeyStep>
+      Step 3 of 5: Bytes in transit. The SOAP message is invisible packets crossing the internet.
+    </journeyStep>
+  </bigPicture>
+
+  <definitionPills>
+    <definitionRef
+      id="Network"
+      file="soap/data/definitions/Network.xml"
+    />
+  </definitionPills>
+
+  <navigation>
+    <sequenceIndex>16</sequenceIndex>
+    <stepCounter>Step 17 of 41</stepCounter>
+    <prev>OSILowerLayers_BigPicture</prev>
+    <next>TCP</next>
+  </navigation>
+
+  <sourceFiles>
+    <file path="soap/data/diagram.mmd"
+          lines="35,69-70"
+          contains="subgraph declaration and osiLayer class assignment"/>
+    <file path="soap/data/content.json"
+          lines="220-233"
+          contains="all OSILowerLayers container sidebar fields and bigPicture"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="58-59"
+          contains="Network tooltip pill assigned to OSILowerLayers node"/>
+    <file path="soap/js/app.js"
+          lines="66"
+          contains="navigation sequence position (index 16)"/>
+  </sourceFiles>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       CHILD: TCP
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <node id="TCP"
+        nodeType="OSHardwareCode"
+        nodeTypeIcon="⚙️">
+
+    <diagram>
+      <nodeLabel>⚙️ TCP/IP Routing</nodeLabel>
+      <nodeId>TCP</nodeId>
+
+      <classes>
+        <class name="osiLayer"  style="fill:#f3f4f6;stroke:#94a3b8;stroke-width:2px;stroke-dasharray:5 5"/>
+        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+      </classes>
+
+      <edges direction="in">
+        <edge
+          from="TransportProtocol"
+          label="⚙️ ☁️ Transmits via Port 80/443"
+          type="solid-arrow"
+          edgeKey="EdgeTransmits"
+        >
+      <sidebar>
+        <title>Action: Transmits via Port 80/443</title>
+        <overview>The operating system takes the HTTP request, breaks it into TCP packets, and routes it across the network to the server's IP address.</overview>
+        <handledBy>&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing, retries, and SSL/TLS encryption if using port 443.</handledBy>
+        <devImpact>Network latency is introduced here. Operations that take 1ms locally can take 50-500ms over the wire.</devImpact>
+        <considerations>Firewalls or network policies may block these ports. TLS handshakes can add latency.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>14</sequenceIndex>
+        <stepCounter>Step 15 of 41</stepCounter>
+        <prev>ReqBody</prev>
+        <next>OSILowerLayers_BigPicture</next>
+      </navigation>
+      </edge>
+        <edge
+          from="SOAPResponse"
+          label="⚙️ ☁️ Returns via Port 80/443"
+          type="solid-arrow"
+          edgeKey="EdgeReturnsViaPort"
+        >
+      <sidebar>
+        <title>Action: Returns via Port 80/443</title>
+        <overview>The server sends the SOAP Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for SOAP Faults — the HTTP layer succeeds; the SOAP layer contains the error).</overview>
+        <handledBy>&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing and SSL/TLS encryption on the return path.</handledBy>
+        <devImpact>The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return.</devImpact>
+        <considerations>Note that SOAP Faults are returned with an HTTP 200 status in SOAP 1.1. In SOAP 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>35</sequenceIndex>
+        <stepCounter>Step 36 of 41</stepCounter>
+        <prev>RespFault</prev>
+        <next>EdgeDeliversResponse</next>
+      </navigation>
+      </edge>
+      </edges>
+
+      <edges direction="out">
+        <edge
+          to="ServerTransport"
+          label="⚙️ ☁️ Receives Payload"
+          type="solid-arrow"
+          edgeKey="EdgeReceivesPayload"
+        >
+      <sidebar>
+        <title>Action: Receives Payload</title>
+        <overview>The server's network interface receives the TCP packets, reassembles them into an HTTP request, and passes them to the web server listener (e.g., IIS, Tomcat).</overview>
+        <handledBy>&lt;strong&gt;The Server OS &amp; Web Server:&lt;/strong&gt; Manages the incoming connection and thread pool.</handledBy>
+        <devImpact>Usually transparent to the application code, but critical for server operations scaling.</devImpact>
+        <considerations>If the server is under heavy load, requests may queue here or be rejected with a 503 Service Unavailable.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>18</sequenceIndex>
+        <stepCounter>Step 19 of 41</stepCounter>
+        <prev>TCP</prev>
+        <next>Server_BigPicture</next>
+      </navigation>
+      </edge>
+        <edge
+          to="ClientTransport"
+          label="⚙️ ☁️ Delivers Response"
+          type="solid-arrow"
+          edgeKey="EdgeDeliversResponse"
+        >
+      <sidebar>
+        <title>Action: Delivers Response</title>
+        <overview>The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the SOAP library.</overview>
+        <handledBy>&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</handledBy>
+        <devImpact>Transparent to developers, but contributes to the total round-trip time the application experiences.</devImpact>
+        <considerations>If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>36</sequenceIndex>
+        <stepCounter>Step 37 of 41</stepCounter>
+        <prev>EdgeReturnsViaPort</prev>
+        <next>ClientTransport</next>
+      </navigation>
+      </edge>
+      </edges>
+
+      <clickHandler>call showDetails() "Details on Networking"</clickHandler>
+    </diagram>
+
+    <sidebar>
+      <title>OSI Layers 1-4</title>
+      <overview>
+        The lower-level network stack that breaks the HTTP payload into packets, establishes the connection across the network (TCP Handshake).
+      </overview>
+      <interaction>
+        Carries the payload across switches, routers, and firewalls to the Server Transport listener.
+      </interaction>
+      <branching>
+        If packets are lost, TCP automatically retries. If the connection drops entirely, a Connection Reset (RST) is passed up.
+      </branching>
+      <devImpact>
+        Mostly an infrastructure/DevOps concern. However, devs may need to debug this layer using Wireshark if there are TLS cipher mismatches.
+      </devImpact>
+      <handledBy>
+        &lt;strong&gt;The Network Layer:&lt;/strong&gt; It's the network layer's responsibility to manage the connection and packets.
+      </handledBy>
+    </sidebar>
+
+    <definitionPills>
+      <definitionRef
+        id="OSHardwareCode"
+        file="soap/data/definitions/OSHardwareCode.xml"
+      />
+    </definitionPills>
+
+    <navigation>
+      <sequenceIndex>17</sequenceIndex>
+      <stepCounter>Step 18 of 41</stepCounter>
+      <prev>OSILowerLayers</prev>
+      <next>EdgeReceivesPayload</next>
+    </navigation>
+
+    <sourceFiles>
+      <file path="soap/data/diagram.mmd"
+            lines="36-38,40,43,65-66,79"
+            contains="mermaid node, classes, edges, click handler"/>
+      <file path="soap/data/content.json"
+            lines="152-159"
+            contains="title, overview, interaction, branching, devImpact, handledBy"/>
+      <file path="soap/templates/fragments/sidebar-detail.js"
+            lines="71-72"
+            contains="OSHardwareCode tooltip pill assignment"/>
+      <file path="soap/js/app.js"
+            lines="66"
+            contains="navigation sequence position (index 17)"/>
+    </sourceFiles>
+
+  </node><!-- /TCP -->
+
+</node><!-- /OSILowerLayers -->

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OSHardwareCode.xml — Definition node for the "OS/Hardware Code" concept
+  =========================================================================
+  Represents the ⚙️ OS/Hardware Code tooltip pill displayed in the sidebar.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 71-72)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+-->
+
+<definition id="OSHardwareCode">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>⚙️</icon>
+  <label>OS/Hardware Code</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>⚙️ OS/Hardware Code</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <colorClass>bg-slate-100 text-slate-800 border border-slate-300</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <body>
+    Low-level code baked into the operating system and network hardware that handles the physical realities of routing bytes.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <assignedTo>
+    <nodeRef id="TransportProtocol"/>
+    <nodeRef id="TCP"/>
+    <nodeRef id="EdgeWrapsInHTTP"/>
+    <nodeRef id="EdgeTransmits"/>
+    <nodeRef id="EdgeReceivesPayload"/>
+    <nodeRef id="EdgeReturnsViaPort"/>
+    <nodeRef id="EdgeDeliversResponse"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="71-72"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

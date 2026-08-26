@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Network.xml — Definition node for the "Network" concept
+  =========================================================================
+  Represents the ☁️ Network tooltip pill displayed in the sidebar
+  for nodes representing network boundaries and transmission.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 58-59)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+-->
+
+<definition id="Network">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>☁️</icon>
+  <label>Network</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>☁️ Network</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <!-- Tailwind classes applied to the pill button -->
+  <colorClass>bg-sky-50 text-sky-800 border border-sky-200</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <!-- Displayed as plain text inside the modal <p> element -->
+  <body>
+    The Network is the unpredictable space between machines. It's the cables, routers, switches, and radio waves that carry data from one place to another. Unlike the predictable Compute environment, the network can drop data, experience latency, or lose connection entirely.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <assignedTo>
+    <nodeRef id="OSILayer7"/>
+    <nodeRef id="OSILowerLayers"/>
+    <nodeRef id="EdgeTransmits"/>
+    <nodeRef id="EdgeReceivesPayload"/>
+    <nodeRef id="EdgeReturnsViaPort"/>
+    <nodeRef id="EdgeDeliversResponse"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="58-59"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

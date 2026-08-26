@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  _definitions.xml — Definitions registry / index
+  =================================================
+  Central index of all definition nodes used in the SOAP Architecture
+  visualiser. Each <definition> entry corresponds to a tooltip pill that
+  can appear in the sidebar detail panel.
+
+  When a diagram node is clicked, sidebarDetailTpl() checks the node ID
+  against hardcoded arrays in sidebar-detail.js and calls tooltipPillTpl()
+  for each matching definition. Clicking a pill calls
+  window.showDefinitionModal(modalTitle, body).
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 33-73)
+
+  ── How to add a new definition ─────────────────────────────────────────
+  1. Create a new file in soap/data/definitions/<DefinitionId>.xml
+  2. Add a <definition> entry here pointing to it.
+  3. Add a <definitionRef> in the relevant node XML files.
+  4. Wire the pill condition into sidebar-detail.js → sidebarDetailTpl().
+-->
+
+<definitions>
+
+  <!--
+    id         — matches the XML filename (without .xml) and the <definition id>
+    icon       — emoji prefix shown on the pill
+    label      — text shown on the pill (after icon)
+    colorClass — Tailwind classes for the pill button
+    file       — path to the full definition XML
+  -->
+
+  <definition
+    id="ApplicationCode"
+    icon="🧑‍💻"
+    label="Application Code"
+    colorClass="bg-emerald-50 text-emerald-800 border border-emerald-200"
+    file="soap/data/definitions/ApplicationCode.xml"
+  />
+
+  <definition
+    id="LibraryCode"
+    icon="📚"
+    label="Library Code"
+    colorClass="bg-indigo-50 text-indigo-800 border border-indigo-200"
+    file="soap/data/definitions/LibraryCode.xml"
+  />
+
+  <definition
+    id="Compute"
+    icon="💻"
+    label="Compute"
+    colorClass="bg-purple-50 text-purple-800 border border-purple-200"
+    file="soap/data/definitions/Compute.xml"
+  />
+
+  <definition
+    id="Network"
+    icon="☁️"
+    label="Network"
+    colorClass="bg-sky-50 text-sky-800 border border-sky-200"
+    file="soap/data/definitions/Network.xml"
+  />
+
+  <definition
+    id="Serialization"
+    icon="📄"
+    label="Serialization"
+    colorClass="bg-amber-50 text-amber-800 border border-amber-200"
+    file="soap/data/definitions/Serialization.xml"
+  />
+
+  <definition
+    id="OSHardwareCode"
+    icon="⚙️"
+    label="OS/Hardware Code"
+    colorClass="bg-slate-100 text-slate-800 border border-slate-300"
+    file="soap/data/definitions/OSHardwareCode.xml"
+  />
+
+</definitions>

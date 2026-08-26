@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LibraryCode.xml — Definition node for the "Library Code" concept
+  =========================================================================
+  Represents the 📚 Library Code tooltip pill displayed in the sidebar.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 68-69)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+-->
+
+<definition id="LibraryCode">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>📚</icon>
+  <label>Library Code</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>📚 Library Code</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <colorClass>bg-indigo-50 text-indigo-800 border border-indigo-200</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <body>
+    Third-party or framework code designed to facilitate operations at the boundaries of your application, like serialization, contract validation, or network proxies.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <assignedTo>
+    <nodeRef id="Proxy"/>
+    <nodeRef id="Serialize"/>
+    <nodeRef id="Deserialize"/>
+    <nodeRef id="Deserialize2"/>
+    <nodeRef id="Validate"/>
+    <nodeRef id="ServerTransport"/>
+    <nodeRef id="ClientTransport"/>
+    <nodeRef id="ReqEnvelope"/>
+    <nodeRef id="ReqHeader"/>
+    <nodeRef id="ReqBody"/>
+    <nodeRef id="RespEnvelope"/>
+    <nodeRef id="RespHeader"/>
+    <nodeRef id="RespBody"/>
+    <nodeRef id="RespFault"/>
+    <nodeRef id="EdgeGeneratesXML"/>
+    <nodeRef id="EdgeExtractsXML"/>
+    <nodeRef id="EdgeValidatesWSDL"/>
+    <nodeRef id="EdgeGeneratesResponseXML"/>
+    <nodeRef id="EdgeDeserializesResponseXML"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="68-69"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Compute.xml — Definition node for the "Compute" concept
+  =========================================================================
+  Represents the 💻 Compute tooltip pill displayed in the sidebar
+  for nodes that represent physical or virtual execution environments.
+
+  Source: soap/templates/fragments/sidebar-detail.js  (lines 55-56)
+  Rendered by: tooltipPillTpl() → window.showDefinitionModal()
+-->
+
+<definition id="Compute">
+
+  <!-- ── Display ──────────────────────────────────────────────────────── -->
+  <icon>💻</icon>
+  <label>Compute</label>
+
+  <!-- Modal title = icon + " " + label -->
+  <modalTitle>💻 Compute</modalTitle>
+
+  <!-- ── Styling ──────────────────────────────────────────────────────── -->
+  <!-- Tailwind classes applied to the pill button -->
+  <colorClass>bg-purple-50 text-purple-800 border border-purple-200</colorClass>
+
+  <!-- ── Definition body ──────────────────────────────────────────────── -->
+  <!-- Displayed as plain text inside the modal <p> element -->
+  <body>
+    Compute represents the physical or virtual machines where your application's actual work happens. It's the processor crunching numbers, memory holding data, and the operating system managing it all. In this context, it's where the code you write actually executes.
+  </body>
+
+  <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
+  <assignedTo>
+    <nodeRef id="Client"/>
+    <nodeRef id="Server"/>
+  </assignedTo>
+
+  <!-- ── Source file map ──────────────────────────────────────────────── -->
+  <sourceFiles>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="55-56"
+          contains="pill condition, tooltipPillTpl() call with all arguments"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="33-39"
+          contains="tooltipPillTpl() function signature and modal trigger"/>
+    <file path="soap/js/app.js"
+          lines="152-168"
+          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
+  </sourceFiles>
+
+</definition>

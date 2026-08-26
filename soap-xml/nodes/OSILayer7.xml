@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OSILayer7.xml — Source-of-truth data node for "OSI Layer 7: Application"
+  =========================================================================
+  Structure:
+    <node id="OSILayer7">          ← subgraph container (OSI Layer 7: Application)
+      <node id="TransportProtocol">← the diagram node being documented
+      <node id="SOAPMessage">      ← nested subgraph container (SOAP Request Message)
+        <node id="ReqEnvelope">    ← nested diagram node
+        <node id="ReqHeader">      ← nested diagram node
+        <node id="ReqBody">        ← nested diagram node
+-->
+
+<node id="OSILayer7"
+      label="☁️ OSI Layer 7: Application"
+      nodeType="Network"
+      nodeTypeIcon="☁️"
+      diagramClass="osiLayer">
+
+  <title>OSI Layer 7: Application</title>
+
+  <overview>
+    The topmost layer of the OSI model where software applications interact with network services. SOAP exclusively operates within this layer, sitting above protocols like HTTP or SMTP.
+  </overview>
+
+  <handledBy>
+    &lt;strong&gt;The SOAP Library &amp;amp; Transport Layer:&lt;/strong&gt; The libraries generate the SOAP format, and the web/transport layer handles HTTP transmission.
+  </handledBy>
+
+  <devImpact>
+    Troubleshooting at this layer involves inspecting HTTP requests (headers, verbs, body) rather than raw TCP packets.
+  </devImpact>
+
+  <interaction>
+    Receives data from the client, packages it into a SOAP Message, and pushes it down the network stack.
+  </interaction>
+
+  <considerations>
+    Developers should understand that although HTTP is traditionally a transport mechanism for the web, SOAP treats HTTP merely as a tunneling protocol.
+  </considerations>
+
+  <bigPicture>
+    <role>The Packager — Turning Intent into a Network Message</role>
+
+    <summary>
+      This is where the local method call gets translated into something that can physically travel across the internet. The Proxy serializes your objects into a strict XML structure (the SOAP Message), then wraps that XML inside an HTTP POST request with specific headers like &lt;code&gt;SOAPAction&lt;/code&gt; and &lt;code&gt;Content-Type: text/xml&lt;/code&gt;. HTTP is just a container here — SOAP doesn't care about web pages or REST semantics. It's tunneling the XML through HTTP purely because port 80/443 is almost always open through corporate firewalls.
+    </summary>
+
+    <whyItExists>
+      The network cannot send a Java object or a .NET class. It can only send bytes. This layer bridges that gap — it is the translation engine between the developer's high-level intent and the raw bytes that leave the machine.
+    </whyItExists>
+
+    <journeyStep>
+      Step 2 of 5: The intent is encoded. Native objects → XML → HTTP request. Ready for the wire.
+    </journeyStep>
+  </bigPicture>
+
+  <definitionPills>
+    <definitionRef
+      id="Network"
+      file="soap/data/definitions/Network.xml"
+    />
+  </definitionPills>
+
+  <sourceFiles>
+    <file path="soap/data/diagram.mmd"
+          lines="18-34"
+          contains="subgraph declaration and osiLayer class assignment"/>
+    <file path="soap/data/content.json"
+          lines="192-205"
+          contains="all OSILayer7 container sidebar fields and bigPicture"/>
+    <file path="soap/templates/fragments/sidebar-detail.js"
+          lines="58-60"
+          contains="Network tooltip pill assigned to OSILayer7 node"/>
+  </sourceFiles>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       CHILD: 4. Transport Protocol
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <node id="TransportProtocol"
+        nodeType="OSHardwareCode"
+        nodeTypeIcon="⚙️">
+
+    <diagram>
+      <nodeLabel>⚙️ 4. Transport Protocol</nodeLabel>
+      <nodeId>TransportProtocol</nodeId>
+
+      <classes>
+        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
+        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+      </classes>
+
+      <edges direction="out">
+        <edge
+          to="TCP"
+          label="⚙️ ☁️ Transmits via Port 80/443"
+          type="solid-arrow"
+          edgeKey="EdgeTransmits"
+        >
+      <sidebar>
+        <title>Action: Transmits via Port 80/443</title>
+        <overview>The operating system takes the HTTP request, breaks it into TCP packets, and routes it across the network to the server's IP address.</overview>
+        <handledBy>&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing, retries, and SSL/TLS encryption if using port 443.</handledBy>
+        <devImpact>Network latency is introduced here. Operations that take 1ms locally can take 50-500ms over the wire.</devImpact>
+        <considerations>Firewalls or network policies may block these ports. TLS handshakes can add latency.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>14</sequenceIndex>
+        <stepCounter>Step 15 of 41</stepCounter>
+        <prev>ReqBody</prev>
+        <next>OSILowerLayers_BigPicture</next>
+      </navigation>
+      </edge>
+        <edge
+          to="SOAPMessage"
+          label="Contains"
+          type="dotted-arrow"
+          edgeKey="EdgeContainsSOAPMessage"
+        />
+      </edges>
+
+      <edges direction="in">
+        <edge
+          from="Serialize"
+          label="⚙️ Wraps in HTTP/SMTP"
+          type="solid-arrow"
+          edgeKey="EdgeWrapsInHTTP"
+        >
+      <sidebar>
+        <title>Action: Wraps in HTTP/SMTP</title>
+        <overview>The raw XML string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.</overview>
+        <handledBy>&lt;strong&gt;The Transport Protocol (HTTP Client):&lt;/strong&gt; Prepares the message for the network stack.</handledBy>
+        <devImpact>The HTTP status codes (200 OK, 500 Internal Server Error) often dictate the initial success or failure of the transmission.</devImpact>
+        <considerations>Custom headers (like Authorization for Basic Auth) must be injected before this step is finalized.</considerations>
+      </sidebar>
+      <definitionPills>
+        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+      </definitionPills>
+      <navigation>
+        <sequenceIndex>7</sequenceIndex>
+        <stepCounter>Step 8 of 41</stepCounter>
+        <prev>OSILayer7</prev>
+        <next>TransportProtocol</next>
+      </navigation>
+      </edge>
+      </edges>
+
+      <clickHandler>call showDetails() "Details on Transport"</clickHandler>
+    </diagram>
+
+    <sidebar>
+      <title>4. Transport Protocol</title>
+
+      <overview>
+        The Layer 7 delivery mechanism used to transmit the SOAP message over the network. HTTP and HTTPS are the most common.
+      </overview>
+
+      <interaction>
+        Wraps the SOAP message in an HTTP Request (e.g., POST with a SOAPAction header) and hands it to the OS networking stack.
+      </interaction>
+
+      <branching>
+        If the network is unreachable, it throws a Timeout/Connection Exception back to the client application.
+      </branching>
+
+      <handledBy>
+        &lt;strong&gt;The Network Layer:&lt;/strong&gt; It's the network layer's responsibility to handle the transmission.
+      </handledBy>
+
+      <devImpact>
+        Devs configure endpoint URLs, timeouts, SSL/TLS certificates, and transport-level authentication.
+      </devImpact>
+
+      <considerations>
+        Developers must configure appropriate timeouts, manage connection pooling, and ensure correct SSL/TLS settings (like providing client certificates for mutual TLS).
+      </considerations>
+    </sidebar>
+
+    <languages>
+      <language id="java" label="Java">
+        <codeSnippet>
+Map&lt;String, Object&gt; reqCtx = bp.getRequestContext();
+reqCtx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "https://secure-api.com");
+reqCtx.put("javax.xml.ws.client.connectionTimeout", 5000);
+        </codeSnippet>
+      </language>
+
+      <language id="dotnet" label=".NET / C#">
+        <codeSnippet>
+var binding = new BasicHttpsBinding();
+binding.SendTimeout = TimeSpan.FromSeconds(5);
+proxy.Endpoint.Binding = binding;
+        </codeSnippet>
+      </language>
+
+      <language id="python" label="Python">
+        <codeSnippet>
+from zeep.transports import Transport
+import requests
+session = requests.Session()
+session.verify = False # Bypass TLS if needed
+transport = Transport(session=session, timeout=5)
+client = Client(wsdl, transport=transport)
+        </codeSnippet>
+      </language>
+    </languages>
+
+    <definitionPills>
+      <definitionRef
+        id="OSHardwareCode"
+        file="soap/data/definitions/OSHardwareCode.xml"
+      />
+    </definitionPills>
+
+    <navigation>
+      <sequenceIndex>8</sequenceIndex>
+      <stepCounter>Step 9 of 41</stepCounter>
+      <prev>EdgeWrapsInHTTP</prev>
+      <next>SOAPMessage_BigPicture</next>
+    </navigation>
+
+    <sourceFiles>
+      <file path="soap/data/diagram.mmd"
+            lines="19-21,32,40"
+            contains="mermaid node, classes, click handler, edges"/>
+      <file path="soap/data/content.json"
+            lines="75-83"
+            contains="title, overview, interaction, branching, handledBy, devImpact, considerations"/>
+      <file path="soap/data/language-data.json"
+            lines="45-49"
+            contains="codeSnippet (per-lang)"/>
+      <file path="soap/templates/fragments/sidebar-detail.js"
+            lines="71-73"
+            contains="OS/Hardware Code tooltip pill assignment"/>
+      <file path="soap/js/app.js"
+            lines="63-71"
+            contains="navigation sequence position (index 8)"/>
+    </sourceFiles>
+  </node><!-- /TransportProtocol -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       NESTED PARENT: SOAP Request Message
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <node id="SOAPMessage"
+        label="📄 SOAP Request Message"
+        nodeType="Serialization"
+        nodeTypeIcon="📄"
+        diagramClass="osiLayer">
+
+    <title>SOAP Message Structure</title>
+
+    <overview>
+      The standardized XML document format that encapsulates all SOAP communications. It strictly defines the envelope, optional headers, and the required body.
+    </overview>
+
+    <handledBy>
+      &lt;strong&gt;The SOAP Library:&lt;/strong&gt; The serialization engine guarantees the structure conforms to the W3C SOAP specifications.
+    </handledBy>
+
+    <devImpact>
+      This is the core payload. Any deviation from the XML schema here will result in immediate rejection by the recipient.
+    </devImpact>
+
+    <interaction>
+      Moves from the client, through the network layers, to the server where it is un-packaged.
+    </interaction>
+
+    <considerations>
+      Developers must ensure that message sizes are kept reasonable, as overly large messages consume significant bandwidth and parsing time.
+    </considerations>
+
+    <bigPicture>
+      <role>The Contract in Motion — The Shared Language of the RPC Call</role>
+      <summary>
+        The SOAP Message is the physical manifestation of the agreed contract (the WSDL). Both the client and server were built against the same WSDL definition, which means this XML structure is the one format both sides are guaranteed to understand. The Envelope is the outer wrapper that identifies the document as SOAP. The Header carries meta-information like security tokens. The Body carries the actual call — the method name and its parameters encoded as XML elements. This is what "crosses the wire."
+      </summary>
+      <whyItExists>
+        RPC between different systems, languages, and platforms requires a neutral, universally-readable format. XML was chosen because it is self-describing, platform-agnostic, and human-readable. The rigid structure enforced by the WSDL/XSD schema ensures there is zero ambiguity about what data is being exchanged.
+      </whyItExists>
+      <journeyStep>
+        Step 2b of 5: This is the payload itself — travelling inside the HTTP request through the network.
+      </journeyStep>
+    </bigPicture>
+
+    <definitionPills>
+      <definitionRef
+        id="Serialization"
+        file="soap/data/definitions/Serialization.xml"
+      />
+    </definitionPills>
+
+    <sourceFiles>
+      <file path="soap/data/diagram.mmd"
+            lines="23-31"
+            contains="subgraph declaration and osiLayer class assignment"/>
+      <file path="soap/data/content.json"
+            lines="206-219"
+            contains="all SOAPMessage container sidebar fields and bigPicture"/>
+      <file path="soap/templates/fragments/sidebar-detail.js"
+            lines="61-63"
+            contains="Serialization tooltip pill assigned to SOAPMessage node"/>
+    </sourceFiles>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         CHILD: SOAP Envelope (Request)
+         ═══════════════════════════════════════════════════════════════════ -->
+
+    <node id="ReqEnvelope"
+          nodeType="LibraryCode"
+          nodeTypeIcon="📚">
+
+      <diagram>
+        <nodeLabel>📚 SOAP Envelope</nodeLabel>
+        <nodeId>ReqEnvelope</nodeId>
+        <classes>
+          <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px"/>
+          <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        </classes>
+        <edges direction="out">
+          <edge to="ReqHeader" label="" type="solid-line" edgeKey="EdgeReqEnvelopeToReqHeader"/>
+          <edge to="ReqBody" label="" type="solid-line" edgeKey="EdgeReqEnvelopeToReqBody"/>
+        </edges>
+        <clickHandler>call showDetails() "Details on Request Envelope"</clickHandler>
+      </diagram>
+
+      <sidebar>
+        <title>SOAP Envelope (Request)</title>
+        <overview>The mandatory root element of the outbound SOAP request message. It encapsulates the entire payload, defining the XML document explicitly as a SOAP message.</overview>
+        <interaction>Contains exactly two child elements: an optional Header and a mandatory Body carrying the method call.</interaction>
+        <branching>If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.</branching>
+        <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; It's the library's responsibility to construct and serialize the envelope.</handledBy>
+        <devImpact>Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.</devImpact>
+        <considerations>Developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used.</considerations>
+        <codeSnippet>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;soapenv:Envelope 
+    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+    xmlns:pay="http://api.example.com/payment"&gt;
+  &lt;!-- Header and Body go here --&gt;
+&lt;/soapenv:Envelope&gt;
+        </codeSnippet>
+      </sidebar>
+
+      <definitionPills>
+        <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      </definitionPills>
+
+      <navigation>
+        <sequenceIndex>11</sequenceIndex>
+        <stepCounter>Step 12 of 41</stepCounter>
+        <prev>SOAPMessage</prev>
+        <next>ReqHeader</next>
+      </navigation>
+
+    </node><!-- /ReqEnvelope -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         CHILD: SOAP Header (Request)
+         ═══════════════════════════════════════════════════════════════════ -->
+
+    <node id="ReqHeader"
+          nodeType="LibraryCode"
+          nodeTypeIcon="📚">
+
+      <diagram>
+        <nodeLabel>📚 SOAP Header - Optional</nodeLabel>
+        <nodeId>ReqHeader</nodeId>
+        <classes>
+          <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px"/>
+          <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        </classes>
+        <edges direction="in">
+          <edge from="ReqEnvelope" label="" type="solid-line" edgeKey="EdgeReqEnvelopeToReqHeader"/>
+        </edges>
+        <clickHandler>call showDetails() "Details on Request Header"</clickHandler>
+      </diagram>
+
+      <sidebar>
+        <title>SOAP Header (Request)</title>
+        <overview>An optional XML block in the request used for cross-cutting metadata such as authentication tokens, transaction IDs, and routing directives (WS-Security, WS-Addressing).</overview>
+        <interaction>Read by server-side interceptors before the main Body is parsed or business logic is executed.</interaction>
+        <branching>Headers can have a mustUnderstand="1" attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.</branching>
+        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Developer:&lt;/strong&gt; The developer configures what goes in the header; the library handles injection and serialization.</handledBy>
+        <devImpact>This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.</devImpact>
+        <considerations>Developers configure the framework to inject WS-Security credentials, transaction IDs, or custom routing information before the message is sent.</considerations>
+        <codeSnippet>
+&lt;soapenv:Header&gt;
+  &lt;wsse:Security soapenv:mustUnderstand="1"&gt;
+    &lt;wsse:UsernameToken&gt;
+      &lt;wsse:Username&gt;admin&lt;/wsse:Username&gt;
+      &lt;wsse:Password&gt;secret123&lt;/wsse:Password&gt;
+    &lt;/wsse:UsernameToken&gt;
+  &lt;/wsse:Security&gt;
+&lt;/soapenv:Header&gt;
+        </codeSnippet>
+      </sidebar>
+
+      <definitionPills>
+        <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      </definitionPills>
+
+      <navigation>
+        <sequenceIndex>12</sequenceIndex>
+        <stepCounter>Step 13 of 41</stepCounter>
+        <prev>ReqEnvelope</prev>
+        <next>ReqBody</next>
+      </navigation>
+
+    </node><!-- /ReqHeader -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         CHILD: SOAP Body (Request)
+         ═══════════════════════════════════════════════════════════════════ -->
+
+    <node id="ReqBody"
+          nodeType="LibraryCode"
+          nodeTypeIcon="📚">
+
+      <diagram>
+        <nodeLabel>📚 SOAP Body - Required</nodeLabel>
+        <nodeId>ReqBody</nodeId>
+        <classes>
+          <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px"/>
+          <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        </classes>
+        <edges direction="in">
+          <edge from="ReqEnvelope" label="" type="solid-line" edgeKey="EdgeReqEnvelopeToReqBody"/>
+        </edges>
+        <clickHandler>call showDetails() "Details on Request Body"</clickHandler>
+      </diagram>
+
+      <sidebar>
+        <title>SOAP Body (Request)</title>
+        <overview>The required main payload of the request. It contains the XML data representing the specific remote method being called and all its parameters.</overview>
+        <interaction>Extracted by the server parser and handed directly to the business logic layer after schema validation.</interaction>
+        <branching>If schema validation fails, the server returns a SOAP Fault instead of executing any business logic.</branching>
+        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Developer:&lt;/strong&gt; The developer provides the data; the library serializes it into the correct XML structure.</handledBy>
+        <devImpact>This represents the core domain data of the call. The structure maps exactly to the request models defined in the WSDL.</devImpact>
+        <considerations>Providing data that violates the WSDL schema (missing required fields, wrong data types) causes immediate validation failures before business logic ever executes.</considerations>
+        <codeSnippet>
+&lt;soapenv:Body&gt;
+  &lt;pay:processCharge&gt;
+    &lt;cardNumber&gt;1234-5678&lt;/cardNumber&gt;
+    &lt;amount&gt;50.00&lt;/amount&gt;
+  &lt;/pay:processCharge&gt;
+&lt;/soapenv:Body&gt;
+        </codeSnippet>
+      </sidebar>
+
+      <definitionPills>
+        <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      </definitionPills>
+
+      <navigation>
+        <sequenceIndex>13</sequenceIndex>
+        <stepCounter>Step 14 of 41</stepCounter>
+        <prev>ReqHeader</prev>
+        <next>EdgeTransmits</next>
+      </navigation>
+
+    </node><!-- /ReqBody -->
+
+  </node><!-- /SOAPMessage -->
+
+</node><!-- /OSILayer7 -->
