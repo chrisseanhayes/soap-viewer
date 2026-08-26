@@ -1,11 +1,6 @@
 import { html, nothing } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { 
-    sidebarOverviewIcon, sidebarHandledByIcon, sidebarConsiderationsIcon, 
-    sidebarDevImpactIcon, sidebarInteractionIcon, sidebarBranchingIcon, 
-    sidebarCodeSnippetIcon, sidebarEmptyStateIcon,
-    bpHowItFitsIcon, bpWhyItExistsIcon, bpJourneyStepIcon
-} from './icons.js';
+import { iconSvg } from './icons.js';
 import { theme } from './theme.js';
 import { cls as sharedCls } from './classes.js';
 
@@ -41,8 +36,22 @@ const cls = {
     
     // Placeholder
     placeholderContainer: "h-full flex flex-col items-center justify-center text-center text-slate-400",
-    placeholderText: "text-sm"
+    placeholderText: "text-sm",
+    placeholderIcon: "w-12 h-12 mb-4 text-slate-300 animate-pulse"
 };
+
+// Specific Icon Wrappers
+const sidebarEmptyStateIcon = () => iconSvg('emptyState', cls.placeholderIcon);
+const sidebarOverviewIcon = () => iconSvg('info', `w-4 h-4 ${theme.colors.overview.icon}`);
+const sidebarHandledByIcon = () => iconSvg('briefcase', `w-4 h-4 ${theme.colors.handledBy.icon}`);
+const sidebarConsiderationsIcon = () => iconSvg('lightbulb', `w-4 h-4 ${theme.colors.considerations.icon}`);
+const sidebarDevImpactIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.devImpact.icon}`);
+const sidebarInteractionIcon = () => iconSvg('arrowRight', `w-4 h-4 ${theme.colors.interaction.icon}`);
+const sidebarBranchingIcon = () => iconSvg('arrows', `w-4 h-4 ${theme.colors.branching.icon}`);
+const sidebarCodeSnippetIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.code.icon}`);
+const bpHowItFitsIcon = () => iconSvg('puzzle', `w-4 h-4 ${theme.colors.bigPicture.icon}`);
+const bpWhyItExistsIcon = () => iconSvg('question', `w-4 h-4 ${theme.colors.bigPicture.iconAlt}`);
+const bpJourneyStepIcon = () => iconSvg('doubleRight', `w-4 h-4 ${theme.colors.bigPicture.iconAlt} mt-0.5 flex-shrink-0`);
 
 export function sidebarPlaceholderTpl(emptyState) {
     return html`

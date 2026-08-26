@@ -1,6 +1,4 @@
 import { render, html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
-import { langControlsTpl } from '../templates/fragments/lang-controls.js';
-import { errorStateTpl } from '../templates/fragments/error.js';
 import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
 import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
 import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
@@ -16,11 +14,12 @@ const tx = t.text;
 const ti = t.interactive;
 
 const cls = {
-    appContainer: "max-w-7xl mx-auto px-4 py-8 space-y-12 animate-fade-in",
-    appHeader: "text-center space-y-4",
-    appTitle: `text-4xl font-extrabold tracking-tight ${tx.h1}`,
-    appSubtitle: `text-lg max-w-2xl mx-auto leading-relaxed ${tx.muted}`,
-    appLangToggleContainer: "flex justify-center mt-6",
+    appContainer: "max-w-7xl mx-auto px-4 py-6 space-y-8 animate-fade-in",
+    appHeader: "flex items-center justify-between gap-6 pb-4 border-b border-slate-200",
+    appHeaderText: "min-w-0",
+    appTitle: `text-2xl font-extrabold tracking-tight ${tx.h1}`,
+    appSubtitle: `text-sm leading-snug mt-0.5 ${tx.muted}`,
+    appLangToggleContainer: "flex-shrink-0",
     appLangToggleInner: `inline-flex p-1 rounded-lg border ${t.langToggle.containerBg} ${t.langToggle.containerBorder}`,
     appRootLoading: `text-center py-20 ${tx.placeholder}`,
     modalOverlay: `fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${ts.overlay}`,
@@ -69,10 +68,10 @@ function renderApp() {
     const appTpl = html`
         <div class="${cls.appContainer}">
             <header class="${cls.appHeader}">
-                <h1 class="${cls.appTitle}">${content.meta?.pageTitle || 'Architecture Viewer'}</h1>
-                <p class="${cls.appSubtitle}">
-                    ${content.meta?.pageDescription || 'Explore the request-response lifecycle.'}
-                </p>
+                <div class="${cls.appHeaderText}">
+                    <h1 class="${cls.appTitle}">${content.meta?.pageTitle || 'Architecture Viewer'}</h1>
+                    <p class="${cls.appSubtitle}">${content.meta?.pageDescription || 'Explore the request-response lifecycle.'}</p>
+                </div>
                 <div class="${cls.appLangToggleContainer}">
                     <div class="${cls.appLangToggleInner}">
                         ${langButtonsTpl(langData.languages, currentLang, (lang) => {

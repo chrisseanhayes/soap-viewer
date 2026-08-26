@@ -1,5 +1,5 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
-import { diagramZoomInIcon, diagramZoomOutIcon, diagramZoomDropdownIcon, shellSidebarTitleIcon } from './icons.js';
+import { iconSvg } from './icons.js';
 import { cls as sharedCls } from './classes.js';
 
 const cls = {
@@ -30,6 +30,11 @@ const cls = {
     sidebarNavBtn: "text-sm px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
     sidebarNavCounter: "text-xs text-slate-500 font-medium whitespace-nowrap px-2"
 };
+
+const diagramZoomInIcon = () => iconSvg('zoomIn', 'w-4 h-4');
+const diagramZoomOutIcon = () => iconSvg('zoomOut', 'w-4 h-4');
+const diagramZoomDropdownIcon = () => iconSvg('chevronDown', 'w-3 h-3 ml-1');
+const shellSidebarTitleIcon = () => iconSvg('info', 'w-5 h-5 text-blue-600 flex-shrink-0');
 
 export function diagramAndSidebarTpl(sb) {
     return html`

@@ -1,9 +1,6 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { 
-    sectionDeveloperViewIcon, sectionHiddenComplexityIcon, sectionLeakyAbstractionIcon, 
-    sectionToolingHeadingIcon, sectionCicdCalloutIcon 
-} from './icons.js';
+import { iconSvg } from './icons.js';
 import { theme } from './theme.js';
 
 const t = theme.colors;
@@ -23,6 +20,12 @@ const cls = {
     calloutFlex: "mt-4 p-4 rounded-lg border flex items-start gap-3",
     calloutTitle: `block mb-1 ${tx.h1}`
 };
+
+const sectionDeveloperViewIcon = () => iconSvg('lightning', `w-5 h-5 ${theme.colors.developerView.icon}`);
+const sectionHiddenComplexityIcon = () => iconSvg('flask', `w-5 h-5 ${theme.colors.hiddenComplexity.icon}`);
+const sectionLeakyAbstractionIcon = () => iconSvg('warning', `w-6 h-6 ${theme.colors.leakyAbstraction.icon} flex-shrink-0 mt-0.5`);
+const sectionToolingHeadingIcon = () => iconSvg('terminal', 'w-6 h-6 text-slate-600');
+const sectionCicdCalloutIcon = () => iconSvg('cog', `w-5 h-5 ${theme.colors.cicdCallout.icon} flex-shrink-0 mt-0.5`);
 
 export function understandingLayersTpl(section) {
     return html`

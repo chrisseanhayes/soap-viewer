@@ -4,7 +4,7 @@ mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose
 
 // app.js dispatches 'app:rendered' after lit-html has written the diagram into the DOM.
 // Listening here instead of DOMContentLoaded ensures the .mermaid pre element exists.
-window.addEventListener('app:rendered', () => {
+window.addEventListener('mermaid-ready', () => {
     mermaid.run({
         querySelector: '.mermaid',
         postRenderCallback: (id) => {
