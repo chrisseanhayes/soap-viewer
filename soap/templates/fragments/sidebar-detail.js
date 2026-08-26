@@ -61,6 +61,16 @@ export function sidebarDetailTpl(node, nodeId, label) {
                 ${['SOAPMessage', 'SOAPResponse'].includes(nodeId) ? 
                     tooltipPillTpl('📄', 'Serialization', "Serialization is neither pure compute nor network—it's the translator between them. It is the process of converting live, in-memory objects from your application into a standardized text format (like XML or JSON) so they can be safely transmitted across the network and understood by a completely different machine on the other side.", 'bg-amber-50 text-amber-800 border border-amber-200') 
                 : nothing}
+
+                ${['AppClient', 'AppServer', 'EdgeInitiatesRequest', 'EdgeReturnsResult', 'EdgeInvokesLogic'].includes(nodeId) ? 
+                    tooltipPillTpl('🧑‍💻', 'Application Code', "This is the business logic and custom code written directly by the developer to solve a specific problem. It is the core reason the application exists.", 'bg-emerald-50 text-emerald-800 border border-emerald-200') 
+                : nothing}
+                ${['Proxy', 'Serialize', 'Deserialize', 'Deserialize2', 'Validate', 'ServerTransport', 'ClientTransport', 'ReqEnvelope', 'ReqHeader', 'ReqBody', 'RespEnvelope', 'RespHeader', 'RespBody', 'RespFault', 'EdgeGeneratesXML', 'EdgeExtractsXML', 'EdgeValidatesWSDL', 'EdgeGeneratesResponseXML', 'EdgeDeserializesResponseXML'].includes(nodeId) ? 
+                    tooltipPillTpl('📚', 'Library Code', "Third-party or framework code designed to facilitate operations at the boundaries of your application, like serialization, contract validation, or network proxies.", 'bg-indigo-50 text-indigo-800 border border-indigo-200') 
+                : nothing}
+                ${['TransportProtocol', 'TCP', 'EdgeWrapsInHTTP', 'EdgeTransmits', 'EdgeReceivesPayload', 'EdgeReturnsViaPort', 'EdgeDeliversResponse'].includes(nodeId) ? 
+                    tooltipPillTpl('⚙️', 'OS/Hardware Code', "Low-level code baked into the operating system and network hardware that handles the physical realities of routing bytes.", 'bg-slate-100 text-slate-800 border border-slate-300') 
+                : nothing}
             </div>
 
             ${node.overview ? sectionTpl('Overview', 'text-blue-500', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', node.overview) : nothing}
