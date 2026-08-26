@@ -26,16 +26,18 @@ export function diagramAndSidebarTpl(sb) {
                         </svg>
                     </button>
                     <div class="w-px bg-slate-200 mx-0.5 my-1"></div>
-                    <button class="custom-zoom-btn flex items-center justify-center w-8 h-8 rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-zoom="fit" title="Fit to Screen">
-                        <!-- Fit Magnifying Glass -->
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </button>
-                    <div class="w-px bg-slate-200 mx-0.5 my-1"></div>
-                    <button class="custom-zoom-btn flex items-center justify-center px-2 min-w-[2rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-zoom="1">100%</button>
-                    <button class="custom-zoom-btn flex items-center justify-center px-2 min-w-[2rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-zoom="1.5">150%</button>
-                    <button class="custom-zoom-btn flex items-center justify-center px-2 min-w-[2rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-zoom="2">200%</button>
+                    <div class="relative group flex items-center">
+                        <button class="flex items-center justify-center px-2 min-w-[3rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                            Zoom
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div class="absolute bottom-full right-0 mb-1 hidden group-hover:block w-24 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-50">
+                            <button class="custom-zoom-btn w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900" data-zoom="fit">Fit</button>
+                            <button class="custom-zoom-btn w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900" data-zoom="1">100%</button>
+                            <button class="custom-zoom-btn w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900" data-zoom="1.5">150%</button>
+                            <button class="custom-zoom-btn w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900" data-zoom="2">200%</button>
+                        </div>
+                    </div>
                     <div class="w-px bg-slate-200 mx-0.5 my-1"></div>
                     <label class="flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors ml-1 pr-2 cursor-pointer" title="Zoom to selection">
                         <input type="checkbox" id="zoom-on-select-toggle" class="mr-1.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="window.toggleZoomOnSelect()">
