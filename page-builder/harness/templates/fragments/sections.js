@@ -6,18 +6,22 @@ import {
 } from './icons.js';
 import { theme } from './theme.js';
 
+const t = theme.colors;
+const ts = t.surface;
+const tx = t.text;
+
 const cls = {
-    card: "bg-white p-6 rounded-lg shadow-sm border border-slate-200",
-    heading: "text-xl font-semibold mb-4 text-slate-800",
-    headingIcon: "text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2",
-    grid: "grid md:grid-cols-2 gap-6 text-sm text-slate-600",
-    subheading: "font-bold text-slate-800 mb-2 border-b pb-1",
-    textSpace: "text-sm text-slate-600 space-y-4",
+    card: `p-6 rounded-lg shadow-sm border ${ts.main} ${ts.border}`,
+    heading: `text-xl font-semibold mb-4 ${tx.h2}`,
+    headingIcon: `text-xl font-semibold mb-4 flex items-center gap-2 ${tx.h2}`,
+    grid: `grid md:grid-cols-2 gap-6 text-sm ${tx.muted}`,
+    subheading: `font-bold mb-2 border-b pb-1 ${tx.h2}`,
+    textSpace: `text-sm space-y-4 ${tx.muted}`,
     gridInner: "grid md:grid-cols-2 gap-6 mt-4",
     bulletList: "list-disc pl-5 space-y-1.5 text-sm",
     calloutBase: "p-3 rounded-lg border",
     calloutFlex: "mt-4 p-4 rounded-lg border flex items-start gap-3",
-    calloutTitle: "text-slate-900 block mb-1"
+    calloutTitle: `block mb-1 ${tx.h1}`
 };
 
 export function understandingLayersTpl(section) {
@@ -84,7 +88,7 @@ export function proxyPatternTpl(section, facades) {
 }
 
 export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
-    const t = theme.colors.cicdCallout;
+    const pt = theme.colors.cicdCallout;
 
     return html`
         <section class="${cls.card}">
@@ -95,7 +99,7 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
             <div class="${cls.textSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
                 ${toolingBlocks}
-                <div class="${cls.calloutFlex} ${t.bg} ${t.border}">
+                <div class="${cls.calloutFlex} ${pt.bg} ${pt.border}">
                     ${sectionCicdCalloutIcon()}
                     <div>
                         <strong id="cicd-title" class="${cls.calloutTitle}">${cicdDefault.title}</strong>

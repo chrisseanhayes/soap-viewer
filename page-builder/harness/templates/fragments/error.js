@@ -1,16 +1,15 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { theme } from './theme.js';
+
+const t = theme.colors;
 
 const cls = {
-    container: "text-center py-20 text-red-500",
+    container: `text-center py-20 ${t.text.error}`,
     title: "font-bold text-lg",
     message: "text-sm mt-2",
-    hint: "text-xs mt-1 text-slate-500"
+    hint: `text-xs mt-1 ${t.text.light}`
 };
 
-/**
- * Renders the full-page error state when data loading fails.
- * @param {Error} err
- */
 export function errorTpl(err) {
     return html`
         <div class="${cls.container}">

@@ -10,21 +10,26 @@ import { theme } from '../templates/fragments/theme.js';
 import { langButtonsTpl, facadeBlocksTpl, toolingBlocksTpl } from '../templates/fragments/lang-controls.js';
 import { errorTpl } from '../templates/fragments/error.js';
 
+const t = theme.colors;
+const ts = t.surface;
+const tx = t.text;
+const ti = t.interactive;
+
 const cls = {
     appContainer: "max-w-7xl mx-auto px-4 py-8 space-y-12 animate-fade-in",
     appHeader: "text-center space-y-4",
-    appTitle: "text-4xl font-extrabold text-slate-900 tracking-tight",
-    appSubtitle: "text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed",
+    appTitle: `text-4xl font-extrabold tracking-tight ${tx.h1}`,
+    appSubtitle: `text-lg max-w-2xl mx-auto leading-relaxed ${tx.muted}`,
     appLangToggleContainer: "flex justify-center mt-6",
-    appLangToggleInner: `inline-flex p-1 rounded-lg border ${theme.colors.langToggle.containerBg} ${theme.colors.langToggle.containerBorder}`,
-    appRootLoading: "text-center text-slate-400 py-20",
-    modalOverlay: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm",
-    modalContent: "bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative",
-    modalCloseBtn: "absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors",
-    modalTitle: "text-xl font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2",
-    modalBody: "text-slate-600 leading-relaxed text-sm",
+    appLangToggleInner: `inline-flex p-1 rounded-lg border ${t.langToggle.containerBg} ${t.langToggle.containerBorder}`,
+    appRootLoading: `text-center py-20 ${tx.placeholder}`,
+    modalOverlay: `fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${ts.overlay}`,
+    modalContent: `rounded-xl shadow-2xl max-w-md w-full p-6 relative ${ts.main}`,
+    modalCloseBtn: `absolute top-4 right-4 transition-colors ${tx.placeholder} ${ti.hoverTextLight}`,
+    modalTitle: `text-xl font-bold mb-3 border-b pb-2 ${tx.h2} ${ts.borderLight}`,
+    modalBody: `leading-relaxed text-sm ${tx.muted}`,
     modalFooter: "mt-6 flex justify-end",
-    modalActionBtn: "px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors"
+    modalActionBtn: `px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${ti.btnBg} ${ti.btnHover} ${tx.body}`
 };
 
 let content = null;
