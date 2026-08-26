@@ -101,9 +101,9 @@ window.prevStep = function() {
     if (idx > 0) {
         const prevId = navigationSequence[idx - 1];
         if (prevId.endsWith('_BigPicture')) {
-            window.showBigPicture(prevId.replace('_BigPicture', ''));
+            window.showBigPicture(prevId.replace('_BigPicture', ''), 'nav');
         } else {
-            window.showDetails(prevId);
+            window.showDetails(prevId, 'nav');
         }
     }
 };
@@ -114,16 +114,16 @@ window.nextStep = function() {
         idx = (idx + 1) % navigationSequence.length;
         const nextId = navigationSequence[idx];
         if (nextId.endsWith('_BigPicture')) {
-            window.showBigPicture(nextId.replace('_BigPicture', ''));
+            window.showBigPicture(nextId.replace('_BigPicture', ''), 'nav');
         } else {
-            window.showDetails(nextId);
+            window.showDetails(nextId, 'nav');
         }
     }
 };
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-window.showDetails = function showDetails(nodeId) {
+window.showDetails = function showDetails(nodeId, source = 'click') {
     currentActiveNode = nodeId;
     const node = mergeNode(nodeId);
     if (!node.title) return;
@@ -133,11 +133,11 @@ window.showDetails = function showDetails(nodeId) {
         document.getElementById('sidebar-content'),
     );
 
-    window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: nodeId, source } }));
     updateNavigationUI();
 };
 
-window.showBigPicture = function showBigPicture(nodeId) {
+window.showBigPicture = function showBigPicture(nodeId, source = 'click') {
     const node = content.nodes[nodeId];
     if (!node || !node.bigPicture) return;
     currentActiveNode = nodeId + '_BigPicture';
@@ -145,13 +145,18 @@ window.showBigPicture = function showBigPicture(nodeId) {
         sidebarBigPictureTpl(node.bigPicture, node.title),
         document.getElementById('sidebar-content'),
     );
-    window.dispatchEvent(new CustomEvent('node:selected', { detail: currentActiveNode }));
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source } }));
     updateNavigationUI();
 };
 
 window.toggleZoomOnSelect = function toggleZoomOnSelect() {
-    if (currentActiveNode) {
-        window.dispatchEvent(new CustomEvent('node:selected', { detail: currentActiveNode }));
+    const zoomToggle = document.getElementById('zoom-on-select-toggle');
+    if (zoomToggle && zoomToggle.checked) {
+        if (currentActiveNode) {
+            window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'toggle' } }));
+        }
+    } else {
+        window.dispatchEvent(new CustomEvent('zoom:fit'));
     }
 };
 

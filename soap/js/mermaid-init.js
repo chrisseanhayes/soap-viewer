@@ -205,69 +205,80 @@ window.addEventListener('app:rendered', () => {
                 }
             });
 
+            const animateTo = (targetRelativeZoom, targetPanX, targetPanY) => {
+                const originalRelativeZoom = panZoomInstance.getZoom();
+                const originalPan = panZoomInstance.getPan();
+                
+                const startTime = performance.now();
+                const duration = 400; // 400ms transition
+                const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                
+                if (panZoomInstance._animationId) {
+                    cancelAnimationFrame(panZoomInstance._animationId);
+                }
+                
+                const step = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    let progress = elapsed / duration;
+                    if (progress > 1) progress = 1;
+                    
+                    const ease = easeInOutCubic(progress);
+                    
+                    const currentZoom = originalRelativeZoom + (targetRelativeZoom - originalRelativeZoom) * ease;
+                    const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
+                    const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
+                    
+                    window._isProgrammaticZoom = true;
+                    panZoomInstance.zoom(currentZoom);
+                    panZoomInstance.pan({ x: currentPanX, y: currentPanY });
+                    window._isProgrammaticZoom = false;
+                    
+                    if (progress < 1) {
+                        panZoomInstance._animationId = requestAnimationFrame(step);
+                    } else {
+                        panZoomInstance._animationId = null;
+                    }
+                };
+                panZoomInstance._animationId = requestAnimationFrame(step);
+            };
+
+            window.addEventListener('zoom:fit', () => {
+                window._isProgrammaticZoom = true;
+                const originalRelativeZoom = panZoomInstance.getZoom();
+                const originalPan = panZoomInstance.getPan();
+                
+                panZoomInstance.fit();
+                panZoomInstance.center();
+                
+                const targetRelativeZoom = panZoomInstance.getZoom();
+                const targetPan = panZoomInstance.getPan();
+                
+                panZoomInstance.zoom(originalRelativeZoom);
+                panZoomInstance.pan(originalPan);
+                window._isProgrammaticZoom = false;
+                
+                animateTo(targetRelativeZoom, targetPan.x, targetPan.y);
+            });
+
             // Listen for selection events to highlight the active item
             window.addEventListener('node:selected', (e) => {
-                const selectedId = e.detail;
+                let selectedId, source;
+                if (typeof e.detail === 'string') {
+                    selectedId = e.detail;
+                    source = 'click';
+                } else {
+                    selectedId = e.detail.id;
+                    source = e.detail.source || 'click';
+                }
                 
                 // Zoom on select logic
                 const zoomToggle = document.getElementById('zoom-on-select-toggle');
+                const isZoomOn = zoomToggle && zoomToggle.checked;
                 
-                const animateTo = (targetRelativeZoom, targetPanX, targetPanY) => {
-                    const originalRelativeZoom = panZoomInstance.getZoom();
-                    const originalPan = panZoomInstance.getPan();
-                    
-                    const startTime = performance.now();
-                    const duration = 400; // 400ms transition
-                    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                    
-                    if (panZoomInstance._animationId) {
-                        cancelAnimationFrame(panZoomInstance._animationId);
-                    }
-                    
-                    const step = (currentTime) => {
-                        const elapsed = currentTime - startTime;
-                        let progress = elapsed / duration;
-                        if (progress > 1) progress = 1;
-                        
-                        const ease = easeInOutCubic(progress);
-                        
-                        const currentZoom = originalRelativeZoom + (targetRelativeZoom - originalRelativeZoom) * ease;
-                        const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
-                        const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
-                        
-                        window._isProgrammaticZoom = true;
-                        panZoomInstance.zoom(currentZoom);
-                        panZoomInstance.pan({ x: currentPanX, y: currentPanY });
-                        window._isProgrammaticZoom = false;
-                        
-                        if (progress < 1) {
-                            panZoomInstance._animationId = requestAnimationFrame(step);
-                        } else {
-                            panZoomInstance._animationId = null;
-                        }
-                    };
-                    panZoomInstance._animationId = requestAnimationFrame(step);
-                };
-
-                if (zoomToggle && !zoomToggle.checked) {
-                    window._isProgrammaticZoom = true;
-                    
-                    const originalRelativeZoom = panZoomInstance.getZoom();
-                    const originalPan = panZoomInstance.getPan();
-                    
-                    panZoomInstance.fit();
-                    panZoomInstance.center();
-                    
-                    const targetRelativeZoom = panZoomInstance.getZoom();
-                    const targetPan = panZoomInstance.getPan();
-                    
-                    panZoomInstance.zoom(originalRelativeZoom);
-                    panZoomInstance.pan(originalPan);
-                    
-                    window._isProgrammaticZoom = false;
-                    
-                    animateTo(targetRelativeZoom, targetPan.x, targetPan.y);
-                } else if (zoomToggle && zoomToggle.checked) {
+                // if it's ON (or triggered by turning the toggle ON), do full zoom.
+                // if it's OFF and triggered by prev/next ('nav'), just pan to it.
+                // if it's OFF and triggered by 'click', do nothing.
+                if (isZoomOn || (source === 'nav')) {
                     const getParentClusterId = (id) => {
                         if (id.endsWith('_BigPicture')) id = id.replace('_BigPicture', '');
                         const map = {
@@ -351,17 +362,22 @@ window.addEventListener('app:rendered', () => {
                         const ch = rectBox.height / currentZoom;
 
                         if (cw > 0 && ch > 0) {
-                            const zoomX = sizes.width / cw;
-                            const zoomY = sizes.height / ch;
+                            let targetRelativeZoom;
                             
-                            // Target clusters fit cleanly (0.95 margin), while edges/nodes cap out earlier to avoid getting too close
-                            let targetAbsoluteZoom = Math.min(zoomX, zoomY) * (targetIsCluster ? 0.95 : 0.8);
-                            const maxAllowedZoom = targetIsCluster ? 5 : 2;
-                            targetAbsoluteZoom = Math.min(targetAbsoluteZoom, maxAllowedZoom);
-                            
-                            const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
-                            let relativeZoom = targetAbsoluteZoom / initialZoom;
-                            relativeZoom = Math.max(0.5, Math.min(relativeZoom, 5));
+                            if (isZoomOn) {
+                                const zoomX = sizes.width / cw;
+                                const zoomY = sizes.height / ch;
+                                
+                                let targetAbsoluteZoom = Math.min(zoomX, zoomY) * (targetIsCluster ? 0.95 : 0.8);
+                                const maxAllowedZoom = targetIsCluster ? 5 : 2;
+                                targetAbsoluteZoom = Math.min(targetAbsoluteZoom, maxAllowedZoom);
+                                
+                                const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
+                                targetRelativeZoom = targetAbsoluteZoom / initialZoom;
+                                targetRelativeZoom = Math.max(0.5, Math.min(targetRelativeZoom, 5));
+                            } else {
+                                targetRelativeZoom = panZoomInstance.getZoom();
+                            }
                             
                             const currentScreenCenterX = screenLeft + rectBox.width / 2;
                             const currentScreenCenterY = screenTop + rectBox.height / 2;
@@ -374,7 +390,7 @@ window.addEventListener('app:rendered', () => {
                             const originalRelativeZoom = panZoomInstance.getZoom();
                             const originalPan = panZoomInstance.getPan();
                             
-                            panZoomInstance.zoom(relativeZoom);
+                            panZoomInstance.zoom(targetRelativeZoom);
                             
                             const targetRealZoom = panZoomInstance.getSizes().realZoom;
                             const targetPanX = (sizes.width / 2) - (svgCenterX * targetRealZoom);
@@ -385,7 +401,7 @@ window.addEventListener('app:rendered', () => {
                             
                             window._isProgrammaticZoom = false;
                             
-                            animateTo(relativeZoom, targetPanX, targetPanY);
+                            animateTo(targetRelativeZoom, targetPanX, targetPanY);
                         }
                     }
                 }
