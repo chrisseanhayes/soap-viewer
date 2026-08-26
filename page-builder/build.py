@@ -145,6 +145,7 @@ diagram_meta = {
     "nodeToLabelMap": {}
 }
 nav_nodes = []
+edges_list = []
 
 def extract_node_data(xml_node, parent_id=None):
     node_id = xml_node.get("id")
@@ -263,6 +264,21 @@ def extract_node_data(xml_node, parent_id=None):
                         diagram_meta["labelToNodeMap"][e_label] = edge_id
                         diagram_meta["nodeToLabelMap"][edge_id] = clean_e_label
 
+                    # Track edge endpoints to assign internal edges to subgraphs
+                    direction = edges_dir.get("direction")
+                    if direction == "out":
+                        edges_list.append({
+                            "id": edge_id,
+                            "from": node_id,
+                            "to": edge.get("to")
+                        })
+                    elif direction == "in":
+                        edges_list.append({
+                            "id": edge_id,
+                            "from": edge.get("from"),
+                            "to": node_id
+                        })
+
                     edge_sidebar = edge.find("sidebar")
                     if edge_sidebar is not None:
                         c_edge = {}
@@ -289,6 +305,13 @@ def extract_node_data(xml_node, parent_id=None):
 for f in glob.glob("../soap-xml/nodes/*.xml"):
     ntree = ET.parse(f)
     extract_node_data(ntree.getroot())
+
+# Compute internal edges
+for edge in edges_list:
+    from_sg = diagram_meta["nodeToSubgraphMap"].get(edge["from"])
+    to_sg = diagram_meta["nodeToSubgraphMap"].get(edge["to"])
+    if from_sg and to_sg and from_sg == to_sg:
+        diagram_meta["nodeToSubgraphMap"][edge["id"]] = from_sg
 
 unique_nav = {}
 for seq, node_id in nav_nodes:
