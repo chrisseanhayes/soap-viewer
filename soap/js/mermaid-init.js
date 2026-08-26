@@ -256,6 +256,9 @@ window.addEventListener('app:rendered', () => {
                     }
                 }
             });
+
+            // Signal that the diagram is fully rendered and interactive
+            window.dispatchEvent(new CustomEvent('diagram:rendered'));
         },
     });
 });

@@ -183,6 +183,11 @@ function renderPage() {
 
     // Notify mermaid-init that the DOM is ready for diagram rendering
     window.dispatchEvent(new CustomEvent('app:rendered'));
+
+    // Auto-select the first node (1. Client Application) once the diagram is rendered
+    window.addEventListener('diagram:rendered', () => {
+        window.showDetails('AppClient');
+    }, { once: true });
 }
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
