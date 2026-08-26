@@ -61,11 +61,11 @@ function mergeNode(nodeId) {
 }
 
 const navigationSequence = [
-    'Client', 'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
-    'OSILayer7', 'EdgeWrapsInHTTP', 'TransportProtocol', 'SOAPMessage', 'ReqEnvelope',
-    'ReqHeader', 'ReqBody', 'EdgeTransmits', 'OSILowerLayers', 'TCP', 'EdgeReceivesPayload',
-    'Server', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
-    'EdgeInvokesLogic', 'SOAPResponse', 'RespEnvelope', 'RespHeader', 'RespBody',
+    'Client_BigPicture', 'Client', 'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
+    'OSILayer7_BigPicture', 'OSILayer7', 'EdgeWrapsInHTTP', 'TransportProtocol', 'SOAPMessage_BigPicture', 'SOAPMessage', 'ReqEnvelope',
+    'ReqHeader', 'ReqBody', 'EdgeTransmits', 'OSILowerLayers_BigPicture', 'OSILowerLayers', 'TCP', 'EdgeReceivesPayload',
+    'Server_BigPicture', 'Server', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
+    'EdgeInvokesLogic', 'SOAPResponse_BigPicture', 'SOAPResponse', 'RespEnvelope', 'RespHeader', 'RespBody',
     'RespFault', 'EdgeReturnsViaPort', 'EdgeDeliversResponse', 'ClientTransport',
     'EdgeDeserializesResponseXML', 'Deserialize2', 'EdgeReturnsResult'
 ];
@@ -93,8 +93,8 @@ window.prevStep = function() {
     const idx = navigationSequence.indexOf(currentActiveNode);
     if (idx > 0) {
         const prevId = navigationSequence[idx - 1];
-        if (['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server', 'SOAPResponse'].includes(prevId)) {
-            window.showBigPicture(prevId);
+        if (prevId.endsWith('_BigPicture')) {
+            window.showBigPicture(prevId.replace('_BigPicture', ''));
         } else {
             window.showDetails(prevId);
         }
@@ -105,8 +105,8 @@ window.nextStep = function() {
     const idx = navigationSequence.indexOf(currentActiveNode);
     if (idx < navigationSequence.length - 1) {
         const nextId = navigationSequence[idx + 1];
-        if (['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server', 'SOAPResponse'].includes(nextId)) {
-            window.showBigPicture(nextId);
+        if (nextId.endsWith('_BigPicture')) {
+            window.showBigPicture(nextId.replace('_BigPicture', ''));
         } else {
             window.showDetails(nextId);
         }
@@ -132,7 +132,7 @@ window.showDetails = function showDetails(nodeId) {
 window.showBigPicture = function showBigPicture(nodeId) {
     const node = content.nodes[nodeId];
     if (!node || !node.bigPicture) return;
-    currentActiveNode = nodeId;
+    currentActiveNode = nodeId + '_BigPicture';
     render(
         sidebarBigPictureTpl(node.bigPicture, node.title),
         document.getElementById('sidebar-content'),
