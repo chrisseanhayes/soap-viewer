@@ -52,6 +52,11 @@ export function diagramAndSidebarTpl(sb) {
                     </h2>
                 </div>
                 <div id="sidebar-content" class="p-6 flex-grow overflow-y-auto"></div>
+                <div class="p-4 border-t border-slate-100 bg-slate-50 rounded-b-lg flex justify-between items-center">
+                    <button id="btn-prev-step" class="text-sm px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="window.prevStep()">&larr; Previous</button>
+                    <span id="step-counter" class="text-xs text-slate-500 font-medium whitespace-nowrap px-2"></span>
+                    <button id="btn-next-step" class="text-sm px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="window.nextStep()">Next &rarr;</button>
+                </div>
             </aside>
         </div>
     `;

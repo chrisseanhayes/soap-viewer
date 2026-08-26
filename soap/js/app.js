@@ -60,6 +60,59 @@ function mergeNode(nodeId) {
     };
 }
 
+const navigationSequence = [
+    'Client', 'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
+    'OSILayer7', 'EdgeWrapsInHTTP', 'TransportProtocol', 'SOAPMessage', 'ReqEnvelope',
+    'ReqHeader', 'ReqBody', 'EdgeTransmits', 'OSILowerLayers', 'TCP', 'EdgeReceivesPayload',
+    'Server', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
+    'EdgeInvokesLogic', 'SOAPResponse', 'RespEnvelope', 'RespHeader', 'RespBody',
+    'RespFault', 'EdgeReturnsViaPort', 'EdgeDeliversResponse', 'ClientTransport',
+    'EdgeDeserializesResponseXML', 'Deserialize2', 'EdgeReturnsResult'
+];
+
+function updateNavigationUI() {
+    const prevBtn = document.getElementById('btn-prev-step');
+    const nextBtn = document.getElementById('btn-next-step');
+    const counter = document.getElementById('step-counter');
+    if (!prevBtn || !nextBtn || !counter) return;
+
+    const idx = navigationSequence.indexOf(currentActiveNode);
+    if (idx === -1) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        counter.innerText = '';
+        return;
+    }
+
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === navigationSequence.length - 1;
+    counter.innerText = `Step ${idx + 1} of ${navigationSequence.length}`;
+}
+
+window.prevStep = function() {
+    const idx = navigationSequence.indexOf(currentActiveNode);
+    if (idx > 0) {
+        const prevId = navigationSequence[idx - 1];
+        if (['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server', 'SOAPResponse'].includes(prevId)) {
+            window.showBigPicture(prevId);
+        } else {
+            window.showDetails(prevId);
+        }
+    }
+};
+
+window.nextStep = function() {
+    const idx = navigationSequence.indexOf(currentActiveNode);
+    if (idx < navigationSequence.length - 1) {
+        const nextId = navigationSequence[idx + 1];
+        if (['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server', 'SOAPResponse'].includes(nextId)) {
+            window.showBigPicture(nextId);
+        } else {
+            window.showDetails(nextId);
+        }
+    }
+};
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 window.showDetails = function showDetails(nodeId) {
@@ -73,16 +126,19 @@ window.showDetails = function showDetails(nodeId) {
     );
 
     window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
+    updateNavigationUI();
 };
 
 window.showBigPicture = function showBigPicture(nodeId) {
     const node = content.nodes[nodeId];
     if (!node || !node.bigPicture) return;
-    currentActiveNode = null;
+    currentActiveNode = nodeId;
     render(
         sidebarBigPictureTpl(node.bigPicture, node.title),
         document.getElementById('sidebar-content'),
     );
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
+    updateNavigationUI();
 };
 
 // ─── Language Switching ───────────────────────────────────────────────────────
@@ -123,7 +179,13 @@ window.setGlobalLanguage = function setGlobalLanguage(lang) {
     }
 
     // 6. Refresh the sidebar if a node is currently open
-    if (currentActiveNode) window.showDetails(currentActiveNode);
+    if (currentActiveNode) {
+        if (['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server', 'SOAPResponse'].includes(currentActiveNode)) {
+            window.showBigPicture(currentActiveNode);
+        } else {
+            window.showDetails(currentActiveNode);
+        }
+    }
 };
 
 // ─── Page Renderer ────────────────────────────────────────────────────────────
