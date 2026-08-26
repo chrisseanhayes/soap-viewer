@@ -1,0 +1,66 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eff6ff', 'primaryTextColor': '#1e293b', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#fef2f2'}}}%%
+graph TD
+    classDef osiLayer fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5;
+    classDef process fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
+    classDef soapLayer fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef clickable cursor:pointer,transition:all 0.2s;
+
+    subgraph Client [Client Application Environment]
+        AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
+        Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
+        class AppClient,Proxy,Serialize process;
+        class AppClient,Proxy,Serialize clickable;
+    end
+
+    subgraph OSILayer7 [OSI Layer 7: Application]
+        Serialize -->|Wraps in HTTP/SMTP| TransportProtocol[4. Transport Protocol]
+        class TransportProtocol process;
+        class TransportProtocol clickable;
+
+        subgraph SOAPMessage [SOAP Message Structure]
+            Envelope[SOAP Envelope]
+            Header[SOAP Header - Optional]
+            Body[SOAP Body - Required]
+            Fault[SOAP Fault - Optional Error Info]
+            Envelope --- Header
+            Envelope --- Body
+            Body -.- Fault
+            class Envelope,Header,Body,Fault soapLayer;
+            class Envelope,Header,Body,Fault clickable;
+        end
+        TransportProtocol -.-> SOAPMessage
+    end
+
+    subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
+        TCP[TCP/IP Routing]
+        class TCP osiLayer;
+        class TCP clickable;
+    end
+    TransportProtocol -->|Transmits via Port 80/443| TCP
+
+    subgraph Server [Server Provider Environment]
+        TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
+        ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
+        Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
+        Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
+        class ServerTransport,Deserialize,Validate,AppServer process;
+        class ServerTransport,Deserialize,Validate,AppServer clickable;
+    end
+
+    AppServer -.->|Generates Response XML| ServerTransport
+    class Client,Server osiLayer;
+    class OSILayer7 osiLayer;
+
+ click AppClient call showDetails() "Details on Client"
+ click Proxy call showDetails() "Details on Proxy"
+ click Serialize call showDetails() "Details on Serialization"
+ click TransportProtocol call showDetails() "Details on Transport"
+ click Envelope call showDetails() "Details on Envelope"
+ click Header call showDetails() "Details on Header"
+ click Body call showDetails() "Details on Body"
+ click Fault call showDetails() "Details on Fault"
+ click TCP call showDetails() "Details on Networking"
+ click ServerTransport call showDetails() "Details on Web Server"
+ click Deserialize call showDetails() "Details on Parsing"
+ click Validate call showDetails() "Details on Validation"
+ click AppServer call showDetails() "Details on Logic"
