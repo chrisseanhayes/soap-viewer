@@ -197,6 +197,83 @@ window.addEventListener('app:rendered', () => {
             window.addEventListener('node:selected', (e) => {
                 const selectedId = e.detail;
                 
+                // Zoom on select logic
+                const zoomToggle = document.getElementById('zoom-on-select-toggle');
+                if (zoomToggle && zoomToggle.checked) {
+                    const getParentClusterId = (id) => {
+                        if (id.endsWith('_BigPicture')) id = id.replace('_BigPicture', '');
+                        const map = {
+                            'AppClient': 'Client', 'Proxy': 'Client', 'EdgeInitiatesRequest': 'Client', 'EdgeGeneratesXML': 'Client',
+                            'ClientTransport': 'Client', 'Deserialize2': 'Client', 'EdgeDeserializesResponseXML': 'Client', 'EdgeReturnsResult': 'Client',
+                            'Serialize': 'OSILayer7', 'EdgeWrapsInHTTP': 'OSILayer7', 'TransportProtocol': 'OSILayer7',
+                            'ReqEnvelope': 'SOAPMessage', 'ReqHeader': 'SOAPMessage', 'ReqBody': 'SOAPMessage',
+                            'EdgeTransmits': 'OSILowerLayers', 'TCP': 'OSILowerLayers', 'EdgeReturnsViaPort': 'OSILowerLayers', 'EdgeDeliversResponse': 'OSILowerLayers',
+                            'EdgeReceivesPayload': 'Server', 'ServerTransport': 'Server', 'EdgeExtractsXML': 'Server', 'Deserialize': 'Server',
+                            'EdgeValidatesWSDL': 'Server', 'Validate': 'Server', 'EdgeInvokesLogic': 'Server', 'AppServer': 'Server', 'EdgeGeneratesResponseXML': 'Server',
+                            'RespEnvelope': 'SOAPResponse', 'RespHeader': 'SOAPResponse', 'RespBody': 'SOAPResponse', 'RespFault': 'SOAPResponse'
+                        };
+                        const clusters = ['Client', 'OSILayer7', 'SOAPMessage', 'SOAPResponse', 'OSILowerLayers', 'Server'];
+                        if (clusters.includes(id)) return id;
+                        return map[id] || null;
+                    };
+
+                    const clusterId = getParentClusterId(selectedId);
+                    if (clusterId) {
+                        const clusterEl = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
+                            const idAttr = cluster.getAttribute('id') || '';
+                            if (idAttr === clusterId || idAttr.includes('-' + clusterId + '-')) return true;
+                            if (clusterId === 'Client' && cluster.textContent.includes('Client Application')) return true;
+                            if (clusterId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
+                            if (clusterId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
+                            if (clusterId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
+                            if (clusterId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
+                            if (clusterId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
+                            return false;
+                        });
+
+                        if (clusterEl) {
+                            const rect = clusterEl.querySelector('rect');
+                            if (rect) {
+                                const rectBox = rect.getBoundingClientRect();
+                                const svgBox = svgElement.getBoundingClientRect();
+                                
+                                const screenLeft = rectBox.left - svgBox.left;
+                                const screenTop = rectBox.top - svgBox.top;
+                                
+                                const sizes = panZoomInstance.getSizes();
+                                const currentZoom = sizes.realZoom;
+                                const currentPan = panZoomInstance.getPan();
+                                
+                                const cw = rectBox.width / currentZoom;
+                                const ch = rectBox.height / currentZoom;
+
+                                if (cw > 0 && ch > 0) {
+                                    const zoomX = sizes.width / cw;
+                                    const zoomY = sizes.height / ch;
+                                    const targetAbsoluteZoom = Math.min(zoomX, zoomY) * 0.95;
+                                    
+                                    const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
+                                    let relativeZoom = targetAbsoluteZoom / initialZoom;
+                                    relativeZoom = Math.max(0.5, Math.min(relativeZoom, 5));
+                                    
+                                    const currentScreenCenterX = screenLeft + rectBox.width / 2;
+                                    const currentScreenCenterY = screenTop + rectBox.height / 2;
+                                    
+                                    const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
+                                    const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
+                                    
+                                    panZoomInstance.zoom(relativeZoom);
+                                    
+                                    const newRealZoom = panZoomInstance.getSizes().realZoom;
+                                    const panX = (sizes.width / 2) - (svgCenterX * newRealZoom);
+                                    const panY = (sizes.height / 2) - (svgCenterY * newRealZoom);
+                                    panZoomInstance.pan({ x: panX, y: panY });
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 // Remove existing highlights
                 svgElement.querySelectorAll('.highlighted-svg-node').forEach(el => el.classList.remove('highlighted-svg-node'));
                 svgElement.querySelectorAll('.highlighted-svg-cluster').forEach(el => el.classList.remove('highlighted-svg-cluster'));
