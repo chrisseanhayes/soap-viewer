@@ -32,15 +32,9 @@ function sectionTpl(title, svgClass, svgPath, content, containerClass = '') {
 
 export function tooltipPillTpl(icon, text, definition, colorClass) {
     return html`
-        <div class="relative inline-flex group mt-2 ml-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold cursor-help ${colorClass}">
-                ${icon} ${text}
-            </span>
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none w-48 p-2 bg-slate-900 text-slate-100 text-xs rounded-lg shadow-xl z-50 text-center">
-                ${definition}
-                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-[6px] border-transparent border-t-slate-900"></div>
-            </div>
-        </div>
+        <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="inline-flex items-center mt-2 ml-2 px-2.5 py-0.5 rounded-md text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity ${colorClass}">
+            ${icon} ${text}
+        </button>
     `;
 }
 
@@ -59,13 +53,13 @@ export function sidebarDetailTpl(node, nodeId, label) {
                     ${label}: ${nodeId}
                 </span>
                 ${['Client', 'Server'].includes(nodeId) ? 
-                    tooltipPillTpl('💻', 'Compute', 'Execution happens directly on physical or virtual compute machines', 'bg-purple-50 text-purple-800 border border-purple-200') 
+                    tooltipPillTpl('💻', 'Compute', "Compute represents the physical or virtual machines where your application's actual work happens. It's the processor crunching numbers, memory holding data, and the operating system managing it all. In this context, it's where the code you write actually executes.", 'bg-purple-50 text-purple-800 border border-purple-200') 
                 : nothing}
                 ${['OSILayer7', 'OSILowerLayers', 'EdgeTransmits', 'EdgeReceivesPayload', 'EdgeReturnsViaPort', 'EdgeDeliversResponse'].includes(nodeId) ? 
-                    tooltipPillTpl('☁️', 'Network', 'Data is in transit across the network infrastructure', 'bg-sky-50 text-sky-800 border border-sky-200') 
+                    tooltipPillTpl('☁️', 'Network', "The Network is the unpredictable space between machines. It's the cables, routers, switches, and radio waves that carry data from one place to another. Unlike the predictable Compute environment, the network can drop data, experience latency, or lose connection entirely.", 'bg-sky-50 text-sky-800 border border-sky-200') 
                 : nothing}
                 ${['SOAPMessage', 'SOAPResponse'].includes(nodeId) ? 
-                    tooltipPillTpl('📄', 'Serialization', 'Data is structured as a standardized XML document', 'bg-amber-50 text-amber-800 border border-amber-200') 
+                    tooltipPillTpl('📄', 'Serialization', "Serialization is neither pure compute nor network—it's the translator between them. It is the process of converting live, in-memory objects from your application into a standardized text format (like XML or JSON) so they can be safely transmitted across the network and understood by a completely different machine on the other side.", 'bg-amber-50 text-amber-800 border border-amber-200') 
                 : nothing}
             </div>
 

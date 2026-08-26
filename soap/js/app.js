@@ -149,6 +149,28 @@ window.showBigPicture = function showBigPicture(nodeId, source = 'click') {
     updateNavigationUI();
 };
 
+window.showDefinitionModal = function(title, definition) {
+    const modalTpl = html`
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click="${window.closeDefinitionModal}">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative" @click="${e => e.stopPropagation()}">
+                <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors" @click="${window.closeDefinitionModal}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">${title}</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">${definition}</p>
+                <div class="mt-6 flex justify-end">
+                    <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors" @click="${window.closeDefinitionModal}">Got it</button>
+                </div>
+            </div>
+        </div>
+    `;
+    render(modalTpl, document.getElementById('modal-root'));
+};
+
+window.closeDefinitionModal = function() {
+    render(html``, document.getElementById('modal-root'));
+};
+
 window.toggleZoomOnSelect = function toggleZoomOnSelect() {
     const zoomToggle = document.getElementById('zoom-on-select-toggle');
     if (zoomToggle && zoomToggle.checked) {
@@ -244,6 +266,7 @@ function renderPage() {
             ${proxyPatternTpl(s.proxyPattern, facadeBlocksTpl(langData.facades))}
             ${toolingSectionTpl(s.tooling, toolingBlocksTpl(langData.tooling), cicdDefault)}
         </div>
+        <div id="modal-root"></div>
     `;
 
     // lit-html v3 does not pre-clear the container — explicitly remove the
