@@ -1,4 +1,5 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 
 /**
  * "Understanding the Layers" section.
@@ -11,11 +12,11 @@ export function understandingLayersTpl(section) {
             <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
                 <div>
                     <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">${section.osi7.heading}</h3>
-                    <p>${section.osi7.body}</p>
+                    <p>${unsafeHTML(section.osi7.body)}</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">${section.proxy.heading}</h3>
-                    <p>${section.proxy.body}</p>
+                    <p>${unsafeHTML(section.proxy.body)}</p>
                 </div>
             </div>
         </section>
@@ -32,7 +33,7 @@ export function proxyPatternTpl(section, facades) {
         <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h2 class="text-xl font-semibold mb-4 text-slate-800">${section.heading}</h2>
             <div class="text-sm text-slate-600 space-y-4">
-                <p>${section.intro}</p>
+                <p>${unsafeHTML(section.intro)}</p>
 
                 <div class="grid md:grid-cols-2 gap-6 mt-4">
                     <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
@@ -42,7 +43,7 @@ export function proxyPatternTpl(section, facades) {
                             </svg>
                             ${section.developerView.heading}
                         </h4>
-                        <p class="mb-4">${section.developerView.body}</p>
+                        <p class="mb-4">${unsafeHTML(section.developerView.body)}</p>
                         ${facades}
                     </div>
 
@@ -53,9 +54,9 @@ export function proxyPatternTpl(section, facades) {
                             </svg>
                             ${section.hiddenComplexity.heading}
                         </h4>
-                        <p class="mb-3">${section.hiddenComplexity.body}</p>
+                        <p class="mb-3">${unsafeHTML(section.hiddenComplexity.body)}</p>
                         <ul class="list-disc pl-5 space-y-1.5 text-sm">
-                            ${section.hiddenComplexity.bullets.map(b => html`<li>${b}</li>`)}
+                            ${section.hiddenComplexity.bullets.map(b => html`<li>${unsafeHTML(b)}</li>`)}
                         </ul>
                     </div>
                 </div>
@@ -66,7 +67,7 @@ export function proxyPatternTpl(section, facades) {
                     </svg>
                     <div>
                         <strong class="text-slate-900 block mb-1">${section.leakyAbstraction.heading}</strong>
-                        ${section.leakyAbstraction.body}
+                        ${unsafeHTML(section.leakyAbstraction.body)}
                     </div>
                 </div>
             </div>
@@ -90,7 +91,7 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
                 ${section.heading}
             </h2>
             <div class="text-sm text-slate-600 space-y-4">
-                <p>${section.intro}</p>
+                <p>${unsafeHTML(section.intro)}</p>
                 ${toolingBlocks}
                 <div class="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-200 text-slate-700 flex items-start gap-3">
                     <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +100,7 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
                     </svg>
                     <div>
                         <strong id="cicd-title" class="text-slate-900 block mb-1">${cicdDefault.title}</strong>
-                        <span id="cicd-text">${cicdDefault.body}</span>
+                        <span id="cicd-text">${unsafeHTML(cicdDefault.body)}</span>
                     </div>
                 </div>
             </div>

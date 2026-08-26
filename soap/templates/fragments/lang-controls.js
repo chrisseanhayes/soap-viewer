@@ -1,4 +1,5 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 
 /**
  * Renders the language switcher button group.
@@ -40,7 +41,7 @@ export function toolingBlocksTpl(tooling) {
                     <span class=${`w-2 h-2 ${t.dotColor} rounded-full`}></span>
                     ${t.heading}
                 </h4>
-                <p class="mb-3">${t.body}</p>
+                <p class="mb-3">${unsafeHTML(t.body)}</p>
                 <pre class="bg-slate-800 text-green-400 p-4 rounded-md text-xs overflow-x-auto font-mono shadow-inner"><code>${t.code}</code></pre>
             </div>
         </div>`

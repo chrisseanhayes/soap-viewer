@@ -1,4 +1,5 @@
 import { html, nothing } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 
 /**
  * Empty-state placeholder shown before any node is selected.
@@ -10,7 +11,7 @@ export function sidebarPlaceholderTpl(emptyState) {
             <svg class="w-12 h-12 mb-4 text-slate-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
             </svg>
-            <p class="text-sm">${emptyState.replace('\n', html`<br>`)}</p>
+            <p class="text-sm">${unsafeHTML(emptyState.replace('\n', '<br>'))}</p>
         </div>
     `;
 }
@@ -24,7 +25,7 @@ function sectionTpl(title, svgClass, svgPath, content, containerClass = '') {
                 </svg>
                 ${title}
             </h4>
-            <p class="text-slate-700 leading-relaxed text-sm">${content}</p>
+            <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(content)}</p>
         </div>
     `;
 }
