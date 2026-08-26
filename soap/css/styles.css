@@ -31,6 +31,16 @@ body {
 }
 
 /* Highlight styles for selected diagram elements */
+@keyframes subtleNodePulse {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); }
+    50% { filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9)); }
+}
+
+@keyframes subtleEdgePulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); transform: scale(1.15); }
+    50% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.8); transform: scale(1.17); }
+}
+
 .highlighted-svg-node rect,
 .highlighted-svg-node polygon,
 .highlighted-svg-node path,
@@ -38,7 +48,7 @@ body {
     stroke: #f59e0b !important; /* Amber 500 */
     stroke-width: 6px !important;
     stroke-dasharray: none !important; /* Ensure solid line even if it was dashed */
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8)) !important;
+    animation: subtleNodePulse 2.5s infinite ease-in-out;
 }
 
 .highlighted-svg-edge-label foreignObject {
@@ -50,9 +60,17 @@ body {
     background-color: #fef3c7 !important; /* Amber 100 */
     border-radius: 6px !important;
     border: 3px solid #f59e0b !important;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important;
     white-space: nowrap !important;
     display: inline-block !important;
-    transform: scale(1.15) !important;
     transform-origin: center center !important;
+    animation: subtleEdgePulse 2.5s infinite ease-in-out;
+}
+
+@keyframes subtleBtnPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(220, 38, 38, 0.6); transform: scale(1.15); }
+    50% { box-shadow: 0 0 10px rgba(220, 38, 38, 1); transform: scale(1.25); }
+}
+
+.highlighted-bigpicture-btn {
+    animation: subtleBtnPulse 2.5s infinite ease-in-out !important;
 }
