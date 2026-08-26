@@ -20,7 +20,7 @@ graph TD
         class TransportProtocol process;
         class TransportProtocol clickable;
 
-        subgraph SOAPMessage [SOAP Request Message]
+        subgraph SOAPMessage [📄 SOAP Request Message]
             ReqEnvelope[SOAP Envelope]
             ReqHeader[SOAP Header - Optional]
             ReqBody[SOAP Body - Required]
@@ -37,15 +37,15 @@ graph TD
         class TCP osiLayer;
         class TCP clickable;
     end
-    TransportProtocol -->|Transmits via Port 80/443| TCP
+    TransportProtocol -->|☁️ Transmits via Port 80/443| TCP
 
     subgraph Server [💻 Server Provider Environment]
-        TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
+        TCP -->|☁️ Receives Payload| ServerTransport[5. Web Server / Listener]
         ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
         Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
         Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
 
-        subgraph SOAPResponse [SOAP Response Message]
+        subgraph SOAPResponse [📄 SOAP Response Message]
             RespEnvelope[SOAP Envelope]
             RespHeader[SOAP Header - Optional]
             RespBody[SOAP Body - Required]
@@ -62,8 +62,8 @@ graph TD
         class ServerTransport,Deserialize,Validate,AppServer clickable;
     end
 
-    SOAPResponse -->|Returns via Port 80/443| TCP
-    TCP -->|Delivers Response| ClientTransport
+    SOAPResponse -->|☁️ Returns via Port 80/443| TCP
+    TCP -->|☁️ Delivers Response| ClientTransport
 
     class Client,Server osiLayer;
     class OSILayer7,SOAPMessage,SOAPResponse,OSILowerLayers osiLayer;
