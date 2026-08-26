@@ -90,7 +90,9 @@ def generate_mermaid_code():
     for c in click_handlers: mermaid_code += f"{c}\n"
 
     # Write standalone MMD just in case
-    with open("../dist/diagram.mmd", "w") as f:
+    import os
+    os.makedirs("../dist/data", exist_ok=True)
+    with open("../dist/data/diagram.mmd", "w") as f:
         f.write(mermaid_code)
 
     return mermaid_code
