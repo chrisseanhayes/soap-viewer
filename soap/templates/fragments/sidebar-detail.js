@@ -30,6 +30,20 @@ function sectionTpl(title, svgClass, svgPath, content, containerClass = '') {
     `;
 }
 
+export function tooltipPillTpl(icon, text, definition, colorClass) {
+    return html`
+        <div class="relative inline-flex group mt-2 ml-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold cursor-help ${colorClass}">
+                ${icon} ${text}
+            </span>
+            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none w-48 p-2 bg-slate-900 text-slate-100 text-xs rounded-lg shadow-xl z-50 text-center">
+                ${definition}
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-[6px] border-transparent border-t-slate-900"></div>
+            </div>
+        </div>
+    `;
+}
+
 /**
  * Renders the detail panel for a clicked diagram node.
  * @param {object} node    - Merged node data (title, overview, devImpact, interaction, branching, codeSnippet)
@@ -44,6 +58,15 @@ export function sidebarDetailTpl(node, nodeId, label) {
                 <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100">
                     ${label}: ${nodeId}
                 </span>
+                ${['Client', 'Server'].includes(nodeId) ? 
+                    tooltipPillTpl('💻', 'Compute', 'Execution happens directly on physical or virtual compute machines', 'bg-purple-50 text-purple-800 border border-purple-200') 
+                : nothing}
+                ${['OSILayer7', 'OSILowerLayers', 'EdgeTransmits', 'EdgeReceivesPayload', 'EdgeReturnsViaPort', 'EdgeDeliversResponse'].includes(nodeId) ? 
+                    tooltipPillTpl('☁️', 'Network', 'Data is in transit across the network infrastructure', 'bg-sky-50 text-sky-800 border border-sky-200') 
+                : nothing}
+                ${['SOAPMessage', 'SOAPResponse'].includes(nodeId) ? 
+                    tooltipPillTpl('📄', 'Serialization', 'Data is structured as a standardized XML document', 'bg-amber-50 text-amber-800 border border-amber-200') 
+                : nothing}
             </div>
 
             ${node.overview ? sectionTpl('Overview', 'text-blue-500', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', node.overview) : nothing}
