@@ -61,7 +61,7 @@ function mergeNode(nodeId) {
 }
 
 const navigationSequence = [
-    'Client_BigPicture', 'Client', 'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
+    'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
     'OSILayer7_BigPicture', 'OSILayer7', 'EdgeWrapsInHTTP', 'TransportProtocol', 'SOAPMessage_BigPicture', 'SOAPMessage', 'ReqEnvelope',
     'ReqHeader', 'ReqBody', 'EdgeTransmits', 'OSILowerLayers_BigPicture', 'OSILowerLayers', 'TCP', 'EdgeReceivesPayload',
     'Server_BigPicture', 'Server', 'ServerTransport', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
@@ -85,7 +85,14 @@ function updateNavigationUI() {
     }
 
     prevBtn.disabled = idx === 0;
-    nextBtn.disabled = idx === navigationSequence.length - 1;
+    
+    if (idx === navigationSequence.length - 1) {
+        nextBtn.innerHTML = 'Start Over &#8634;';
+    } else {
+        nextBtn.innerHTML = 'Next &rarr;';
+    }
+    nextBtn.disabled = false;
+    
     counter.innerText = `Step ${idx + 1} of ${navigationSequence.length}`;
 }
 
@@ -102,9 +109,10 @@ window.prevStep = function() {
 };
 
 window.nextStep = function() {
-    const idx = navigationSequence.indexOf(currentActiveNode);
-    if (idx < navigationSequence.length - 1) {
-        const nextId = navigationSequence[idx + 1];
+    let idx = navigationSequence.indexOf(currentActiveNode);
+    if (idx !== -1) {
+        idx = (idx + 1) % navigationSequence.length;
+        const nextId = navigationSequence[idx];
         if (nextId.endsWith('_BigPicture')) {
             window.showBigPicture(nextId.replace('_BigPicture', ''));
         } else {
