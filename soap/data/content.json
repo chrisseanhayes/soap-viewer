@@ -144,6 +144,47 @@
       "branching": "If data types are wrong, fields are missing, or extra unauthorized fields exist, it rejects it immediately and generates a validation Fault.",
       "devImpact": "Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape.",
       "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task."
+    },
+    "Client": {
+      "title": "Client Application Environment",
+      "overview": "The entire local execution environment where the client application resides. This boundary encloses everything that happens in memory before bytes are placed onto the network.",
+      "handledBy": "<strong>The Developer & Client OS:</strong> Developers manage the application and proxy, while the runtime/OS handles memory and threading.",
+      "considerations": "Developers should consider memory constraints, local dependency injection, and overall client configuration before engaging the SOAP service.",
+      "devImpact": "Errors inside this boundary are usually local exceptions (e.g. Type mismatch, NullReference), which are much faster and easier to debug than network-level faults.",
+      "interaction": "Coordinates local proxies to serialize data and pass it to the transport layer.",
+      "branching": "Local validation failures occur entirely within this zone, saving a round-trip to the server."
+    },
+    "OSILayer7": {
+      "title": "OSI Layer 7: Application",
+      "overview": "The topmost layer of the OSI model where software applications interact with network services. SOAP exclusively operates within this layer, sitting above protocols like HTTP or SMTP.",
+      "handledBy": "<strong>The SOAP Library & Transport Layer:</strong> The libraries generate the SOAP format, and the web/transport layer handles HTTP transmission.",
+      "considerations": "Developers should understand that although HTTP is traditionally a transport mechanism for the web, SOAP treats HTTP merely as a tunneling protocol.",
+      "devImpact": "Troubleshooting at this layer involves inspecting HTTP requests (headers, verbs, body) rather than raw TCP packets.",
+      "interaction": "Receives data from the client, packages it into a SOAP Message, and pushes it down the network stack."
+    },
+    "SOAPMessage": {
+      "title": "SOAP Message Structure",
+      "overview": "The standardized XML document format that encapsulates all SOAP communications. It strictly defines the envelope, optional headers, and the required body.",
+      "handledBy": "<strong>The SOAP Library:</strong> The serialization engine guarantees the structure conforms to the W3C SOAP specifications.",
+      "considerations": "Developers must ensure that message sizes are kept reasonable, as overly large messages consume significant bandwidth and parsing time.",
+      "devImpact": "This is the core payload. Any deviation from the XML schema here will result in immediate rejection by the recipient.",
+      "interaction": "Moves from the client, through the network layers, to the server where it is un-packaged."
+    },
+    "OSILowerLayers": {
+      "title": "OSI Layers 1-4: Transport/Network",
+      "overview": "The physical and transport infrastructure responsible for routing packets across the internet. This includes IP routing and TCP connection management.",
+      "handledBy": "<strong>The Network Infrastructure:</strong> Routers, switches, load balancers, and the OS TCP/IP stack.",
+      "considerations": "Network instability, dropped packets, and latency all occur here. Developers must build resiliency (e.g. retry mechanisms) in the application layer to account for this.",
+      "devImpact": "Failures here surface as timeouts, connection resets, or DNS resolution errors in the client application.",
+      "interaction": "Carries the serialized SOAP HTTP payload over the wire between the client and server."
+    },
+    "Server": {
+      "title": "Server Provider Environment",
+      "overview": "The remote environment hosting the SOAP web service. It receives network requests, unpackages the SOAP messages, validates them, and executes business logic.",
+      "handledBy": "<strong>The Backend Developer & Server OS:</strong> Backend devs implement the service logic and WSDL contracts, while the app server manages threads and HTTP connections.",
+      "considerations": "Scalability, security, and schema versioning are critical. Changes to the schema must be backward-compatible, or client proxies will break.",
+      "devImpact": "The backend dictates the WSDL contract. If the server updates its WSDL, clients must regenerate their proxy classes.",
+      "interaction": "Reads incoming SOAP messages, processes the data, and returns a SOAP response or a SOAP Fault."
     }
   }
 }

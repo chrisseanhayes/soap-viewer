@@ -49,7 +49,8 @@ graph TD
 
     AppServer -.->|Generates Response XML| ServerTransport
     class Client,Server osiLayer;
-    class OSILayer7 osiLayer;
+    class OSILayer7,SOAPMessage,OSILowerLayers osiLayer;
+    class Client,OSILayer7,SOAPMessage,OSILowerLayers,Server clickable;
 
  click AppClient call showDetails() "Details on Client"
  click Proxy call showDetails() "Details on Proxy"

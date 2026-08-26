@@ -52,6 +52,46 @@ window.addEventListener('app:rendered', () => {
                     }
                 });
             });
+
+            // Mermaid 10 doesn't reliably trigger 'click' directives on subgraphs (clusters).
+            // We manually attach click listeners to the cluster SVG groups.
+            const subgraphKeys = ['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server'];
+            svgElement.querySelectorAll('.cluster').forEach(cluster => {
+                const idAttr = cluster.getAttribute('id') || '';
+                let match = null;
+                
+                // Some versions use id="Client", others use id="flowchart-Client-123"
+                for (const key of subgraphKeys) {
+                    if (idAttr === key || idAttr.includes('-' + key + '-')) {
+                        match = key;
+                        break;
+                    }
+                }
+                
+                // Fallback: look at the text label if ID matching fails
+                if (!match) {
+                    const labelEl = cluster.querySelector('.cluster-label, .label');
+                    if (labelEl) {
+                        const text = labelEl.textContent;
+                        if (text.includes('Client Application')) match = 'Client';
+                        else if (text.includes('OSI Layer 7')) match = 'OSILayer7';
+                        else if (text.includes('SOAP Message Structure')) match = 'SOAPMessage';
+                        else if (text.includes('OSI Layers 1-4')) match = 'OSILowerLayers';
+                        else if (text.includes('Server Provider')) match = 'Server';
+                    }
+                }
+
+                if (match) {
+                    cluster.style.cursor = 'pointer';
+                    // We also want hover effect if possible, but cursor: pointer is enough for now.
+                    cluster.addEventListener('click', (e) => {
+                        // Prevent triggering if a child node was clicked (handled by mermaid's own click)
+                        if (e.target.closest('.node')) return;
+                        window.showDetails(match);
+                        e.stopPropagation();
+                    });
+                }
+            });
         },
     });
 });
