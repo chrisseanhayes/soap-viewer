@@ -360,6 +360,29 @@
       "handledBy": "<strong>The SOAP Library &amp; Developer:</strong> The library completes the call; the developer's code receives the return value or catches the exception.",
       "considerations": "This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.",
       "devImpact": "From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method."
+    },
+    "ServerTransport": {
+      "title": "5. Web Server / Listener",
+      "overview": "The web server (e.g., Tomcat, IIS, Kestrel) receives the raw HTTP request from the network and extracts the XML payload.",
+      "handledBy": "<strong>The Web Server:</strong> Manages thread pools, HTTP parsing, and forwards the payload to the application.",
+      "devImpact": "Developers configure server endpoints, routing, and HTTP limits.",
+      "interaction": "Passes the raw SOAP XML to the parsing engine.",
+      "branching": "If the request is too large or malformed at the HTTP level, the server rejects it with a 4xx or 5xx status."
+    },
+    "AppServer": {
+      "title": "8. Service Business Logic",
+      "overview": "The core application code where the remote method's actual business rules are executed after the SOAP payload has been validated and deserialized.",
+      "handledBy": "<strong>The Backend Developer:</strong> Implements the specific business requirements.",
+      "devImpact": "This is where the actual domain logic resides (e.g., updating a database, processing a payment).",
+      "interaction": "Returns the result of the operation to the SOAP framework to be serialized.",
+      "branching": "Business rule violations trigger exceptions, which the framework translates into SOAP Faults."
+    },
+    "EdgeGeneratesResponseXML": {
+      "title": "Action: Generates Response XML",
+      "overview": "The server-side SOAP framework intercepts the return value (or exception) from the business logic and serializes it into a formal SOAP Response Envelope.",
+      "handledBy": "<strong>The SOAP Framework:</strong> Automatically performs the object-to-XML mapping for the response.",
+      "devImpact": "Transparent to the backend developer, saving them from manual string concatenation.",
+      "considerations": "Exceptions must be properly typed so the framework can map them to standard SOAP Faults."
     }
   }
 }

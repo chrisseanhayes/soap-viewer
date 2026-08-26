@@ -64,8 +64,8 @@ const navigationSequence = [
     'Client_BigPicture', 'Client', 'AppClient', 'EdgeInitiatesRequest', 'Proxy', 'EdgeGeneratesXML', 'Serialize',
     'OSILayer7_BigPicture', 'OSILayer7', 'EdgeWrapsInHTTP', 'TransportProtocol', 'SOAPMessage_BigPicture', 'SOAPMessage', 'ReqEnvelope',
     'ReqHeader', 'ReqBody', 'EdgeTransmits', 'OSILowerLayers_BigPicture', 'OSILowerLayers', 'TCP', 'EdgeReceivesPayload',
-    'Server_BigPicture', 'Server', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
-    'EdgeInvokesLogic', 'SOAPResponse_BigPicture', 'SOAPResponse', 'RespEnvelope', 'RespHeader', 'RespBody',
+    'Server_BigPicture', 'Server', 'ServerTransport', 'EdgeExtractsXML', 'Deserialize', 'EdgeValidatesWSDL', 'Validate',
+    'EdgeInvokesLogic', 'AppServer', 'EdgeGeneratesResponseXML', 'SOAPResponse_BigPicture', 'SOAPResponse', 'RespEnvelope', 'RespHeader', 'RespBody',
     'RespFault', 'EdgeReturnsViaPort', 'EdgeDeliversResponse', 'ClientTransport',
     'EdgeDeserializesResponseXML', 'Deserialize2', 'EdgeReturnsResult'
 ];
