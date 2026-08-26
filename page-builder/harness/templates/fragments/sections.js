@@ -1,11 +1,15 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { 
-    sectionDeveloperViewIcon, sectionHiddenComplexityIcon, sectionLeakyAbstractionIcon, 
-    sectionToolingHeadingIcon, sectionCicdCalloutIcon 
-} from './icons.js';
+import { iconSvg } from './icons.js';
 import { cls } from './classes.js';
 import { theme } from './theme.js';
+
+// Specific Icon Wrappers
+const developerViewIcon = () => iconSvg('lightning', `w-5 h-5 ${theme.colors.developerView.icon}`);
+const hiddenComplexityIcon = () => iconSvg('flask', `w-5 h-5 ${theme.colors.hiddenComplexity.icon}`);
+const leakyAbstractionIcon = () => iconSvg('warning', `w-6 h-6 ${theme.colors.leakyAbstraction.icon} flex-shrink-0 mt-0.5`);
+const toolingHeadingIcon = () => iconSvg('terminal', 'w-6 h-6 text-slate-600');
+const cicdCalloutIcon = () => iconSvg('cog', `w-5 h-5 ${theme.colors.cicdCallout.icon} flex-shrink-0 mt-0.5`);
 
 export function understandingLayersTpl(section) {
     return html`
@@ -39,7 +43,7 @@ export function proxyPatternTpl(section, facades) {
                 <div class="${cls.sectionGridInner}">
                     <div class="${cls.calloutBase} p-5 ${tDev.bg} ${tDev.border}">
                         <h4 class="${cls.sectionHeadingIcon}">
-                            ${sectionDeveloperViewIcon()}
+                            ${developerViewIcon()}
                             ${section.developerView.heading}
                         </h4>
                         <p class="mb-4">${unsafeHTML(section.developerView.body)}</p>
@@ -48,7 +52,7 @@ export function proxyPatternTpl(section, facades) {
 
                     <div class="${cls.calloutBase} p-5 ${tHidden.bg} ${tHidden.border}">
                         <h4 class="${cls.sectionHeadingIcon}">
-                            ${sectionHiddenComplexityIcon()}
+                            ${hiddenComplexityIcon()}
                             ${section.hiddenComplexity.heading}
                         </h4>
                         <p class="mb-3">${unsafeHTML(section.hiddenComplexity.body)}</p>
@@ -59,7 +63,7 @@ export function proxyPatternTpl(section, facades) {
                 </div>
 
                 <div class="${cls.calloutFlex} ${tLeaky.bg} ${tLeaky.border}">
-                    ${sectionLeakyAbstractionIcon()}
+                    ${leakyAbstractionIcon()}
                     <div>
                         <strong class="${cls.calloutTitle}">${section.leakyAbstraction.heading}</strong>
                         ${unsafeHTML(section.leakyAbstraction.body)}
@@ -76,14 +80,14 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
     return html`
         <section class="${cls.sectionCard}">
             <h2 class="${cls.sectionHeadingIcon}">
-                ${sectionToolingHeadingIcon()}
+                ${toolingHeadingIcon()}
                 ${section.heading}
             </h2>
             <div class="${cls.sectionTextSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
                 ${toolingBlocks}
                 <div class="${cls.calloutFlex} ${t.bg} ${t.border}">
-                    ${sectionCicdCalloutIcon()}
+                    ${cicdCalloutIcon()}
                     <div>
                         <strong id="cicd-title" class="${cls.calloutTitle}">${cicdDefault.title}</strong>
                         <span id="cicd-text">${unsafeHTML(cicdDefault.body)}</span>

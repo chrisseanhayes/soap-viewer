@@ -4,7 +4,7 @@ import { errorStateTpl } from '../templates/fragments/error.js';
 import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
 import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
 import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
-import { modalCloseIcon } from '../templates/fragments/icons.js';
+import { iconSvg } from '../templates/fragments/icons.js';
 import { cls } from '../templates/fragments/classes.js';
 import { langButtonsTpl, facadeBlocksTpl, toolingBlocksTpl } from '../templates/fragments/lang-controls.js';
 import { errorTpl } from '../templates/fragments/error.js';
@@ -159,6 +159,8 @@ window.addEventListener('mermaid-node-clicked', (e) => {
     currentActiveNode = e.detail.nodeId;
     updateSidebar();
 });
+
+const modalCloseIcon = () => iconSvg('close', 'w-6 h-6');
 
 window.showDefinitionModal = function(title, definition) {
     const modalTpl = html`

@@ -1,6 +1,4 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
-import { cls } from './classes.js';
-import { theme } from './theme.js';
 
 const paths = {
     info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -24,45 +22,14 @@ const paths = {
     emptyState: 'M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122'
 };
 
-const _svg = (name, className) => html`
+/**
+ * Base SVG component builder.
+ * @param {string} name - Name of the path key
+ * @param {string} className - Applied classes
+ */
+export const iconSvg = (name, className = "w-4 h-4") => html`
     <svg class="${className}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${paths[name] || ''}"/>
         ${name === 'cog' ? html`<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${paths.cogInner}"/>` : ''}
     </svg>
 `;
-
-// ============================================================================
-// DOMAIN SPECIFIC ICON FUNCTIONS (Zero arguments needed)
-// ============================================================================
-
-// --- Sidebar Detail Sections ---
-export const sidebarEmptyStateIcon = () => _svg('emptyState', cls.placeholderIcon);
-export const sidebarOverviewIcon = () => _svg('info', `w-4 h-4 ${theme.colors.overview.icon}`);
-export const sidebarHandledByIcon = () => _svg('briefcase', `w-4 h-4 ${theme.colors.handledBy.icon}`);
-export const sidebarConsiderationsIcon = () => _svg('lightbulb', `w-4 h-4 ${theme.colors.considerations.icon}`);
-export const sidebarDevImpactIcon = () => _svg('lightning', `w-4 h-4 ${theme.colors.devImpact.icon}`);
-export const sidebarInteractionIcon = () => _svg('arrowRight', `w-4 h-4 ${theme.colors.interaction.icon}`);
-export const sidebarBranchingIcon = () => _svg('arrows', `w-4 h-4 ${theme.colors.branching.icon}`);
-export const sidebarCodeSnippetIcon = () => _svg('lightning', `w-4 h-4 ${theme.colors.code.icon}`);
-
-// --- Sidebar Big Picture ---
-export const bpHowItFitsIcon = () => _svg('puzzle', `w-4 h-4 ${theme.colors.bigPicture.icon}`);
-export const bpWhyItExistsIcon = () => _svg('question', `w-4 h-4 ${theme.colors.bigPicture.iconAlt}`);
-export const bpJourneyStepIcon = () => _svg('doubleRight', `w-4 h-4 ${theme.colors.bigPicture.iconAlt} mt-0.5 flex-shrink-0`);
-
-// --- Diagram & Shell ---
-export const shellSidebarTitleIcon = () => _svg('info', cls.sidebarTitleIcon);
-export const diagramZoomInIcon = () => _svg('zoomIn', 'w-4 h-4');
-export const diagramZoomOutIcon = () => _svg('zoomOut', 'w-4 h-4');
-export const diagramZoomDropdownIcon = () => _svg('chevronDown', cls.zoomDropdownIcon);
-
-// --- Explanation Sections ---
-export const sectionDeveloperViewIcon = () => _svg('lightning', `w-5 h-5 ${theme.colors.developerView.icon}`);
-export const sectionHiddenComplexityIcon = () => _svg('flask', `w-5 h-5 ${theme.colors.hiddenComplexity.icon}`);
-export const sectionLeakyAbstractionIcon = () => _svg('warning', `w-6 h-6 ${theme.colors.leakyAbstraction.icon} flex-shrink-0 mt-0.5`);
-export const sectionToolingHeadingIcon = () => _svg('terminal', 'w-6 h-6 text-slate-600');
-export const sectionCicdCalloutIcon = () => _svg('cog', `w-5 h-5 ${theme.colors.cicdCallout.icon} flex-shrink-0 mt-0.5`);
-
-// --- Modals ---
-export const modalCloseIcon = () => _svg('close', 'w-6 h-6');
-

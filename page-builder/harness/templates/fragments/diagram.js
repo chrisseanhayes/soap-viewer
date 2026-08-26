@@ -1,6 +1,12 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
-import { diagramZoomInIcon, diagramZoomOutIcon, diagramZoomDropdownIcon, shellSidebarTitleIcon } from './icons.js';
+import { iconSvg } from './icons.js';
 import { cls } from './classes.js';
+
+// Specific Icon Wrappers
+const zoomInIcon = () => iconSvg('zoomIn', 'w-4 h-4');
+const zoomOutIcon = () => iconSvg('zoomOut', 'w-4 h-4');
+const zoomDropdownIcon = () => iconSvg('chevronDown', cls.zoomDropdownIcon);
+const sidebarTitleIcon = () => iconSvg('info', cls.sidebarTitleIcon);
 
 export function diagramAndSidebarTpl(sb) {
     return html`
@@ -9,16 +15,16 @@ export function diagramAndSidebarTpl(sb) {
             <main class="${cls.diagramMain}">
                 <div class="${cls.zoomControlContainer}">
                     <button class="${cls.zoomBtn}" data-zoom="in" title="Zoom In">
-                        ${diagramZoomInIcon()}
+                        ${zoomInIcon()}
                     </button>
                     <button class="${cls.zoomBtn}" data-zoom="out" title="Zoom Out">
-                        ${diagramZoomOutIcon()}
+                        ${zoomOutIcon()}
                     </button>
                     <div class="${cls.zoomDivider}"></div>
                     <div class="${cls.zoomDropdownGroup}">
                         <button class="${cls.zoomDropdownToggle}">
                             Zoom
-                            ${diagramZoomDropdownIcon()}
+                            ${zoomDropdownIcon()}
                         </button>
                         <div class="${cls.zoomDropdownMenu}">
                             <div class="${cls.zoomDropdownMenuInner}">
@@ -42,7 +48,7 @@ export function diagramAndSidebarTpl(sb) {
             <aside class="${cls.diagramSidebar}">
                 <div class="${cls.sidebarHeader}">
                     <h2 class="${cls.sidebarTitle}">
-                        ${shellSidebarTitleIcon()}
+                        ${sidebarTitleIcon()}
                         <span class="${cls.sidebarTitleText}">${sb.heading}</span>
                         <span id="sidebar-lang-badge" class="${cls.sidebarLangBadge}">Java</span>
                     </h2>

@@ -1,18 +1,26 @@
 import { html, nothing } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { 
-    sidebarOverviewIcon, sidebarHandledByIcon, sidebarConsiderationsIcon, 
-    sidebarDevImpactIcon, sidebarInteractionIcon, sidebarBranchingIcon, 
-    sidebarCodeSnippetIcon, sidebarEmptyStateIcon,
-    bpHowItFitsIcon, bpWhyItExistsIcon, bpJourneyStepIcon
-} from './icons.js';
+import { iconSvg } from './icons.js';
 import { cls } from './classes.js';
 import { theme } from './theme.js';
+
+// Specific Icon Wrappers
+const emptyStateIcon = () => iconSvg('emptyState', cls.placeholderIcon);
+const overviewIcon = () => iconSvg('info', `w-4 h-4 ${theme.colors.overview.icon}`);
+const handledByIcon = () => iconSvg('briefcase', `w-4 h-4 ${theme.colors.handledBy.icon}`);
+const considerationsIcon = () => iconSvg('lightbulb', `w-4 h-4 ${theme.colors.considerations.icon}`);
+const devImpactIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.devImpact.icon}`);
+const interactionIcon = () => iconSvg('arrowRight', `w-4 h-4 ${theme.colors.interaction.icon}`);
+const branchingIcon = () => iconSvg('arrows', `w-4 h-4 ${theme.colors.branching.icon}`);
+const codeSnippetIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.code.icon}`);
+const bpHowItFitsIcon = () => iconSvg('puzzle', `w-4 h-4 ${theme.colors.bigPicture.icon}`);
+const bpWhyItExistsIcon = () => iconSvg('question', `w-4 h-4 ${theme.colors.bigPicture.iconAlt}`);
+const bpJourneyStepIcon = () => iconSvg('doubleRight', `w-4 h-4 ${theme.colors.bigPicture.iconAlt} mt-0.5 flex-shrink-0`);
 
 export function sidebarPlaceholderTpl(emptyState) {
     return html`
         <div class="${cls.placeholderContainer}">
-            ${sidebarEmptyStateIcon()}
+            ${emptyStateIcon()}
             <p class="${cls.placeholderText}">${unsafeHTML(emptyState.replace('\n', '<br>'))}</p>
         </div>
     `;
@@ -35,12 +43,12 @@ function baseSectionTpl(title, themeObj, iconFn, content, extraClasses = '') {
 }
 
 // Custom wrapper functions for semantic sections
-const overviewSectionTpl = (content) => baseSectionTpl('Overview', theme.colors.overview, sidebarOverviewIcon, content);
-const handledBySectionTpl = (content) => baseSectionTpl('Handled By', theme.colors.handledBy, sidebarHandledByIcon, content);
-const considerationsSectionTpl = (content) => baseSectionTpl('Developer Considerations', theme.colors.considerations, sidebarConsiderationsIcon, content, 'p-3 rounded-lg border');
-const devImpactSectionTpl = (content) => baseSectionTpl('Developer Impact', theme.colors.devImpact, sidebarDevImpactIcon, content, 'p-3 rounded-lg border');
-const interactionSectionTpl = (content) => baseSectionTpl('Next Steps', theme.colors.interaction, sidebarInteractionIcon, content);
-const branchingSectionTpl = (content) => baseSectionTpl('Branching & Flow', theme.colors.branching, sidebarBranchingIcon, content, 'p-3 rounded-lg border');
+const overviewSectionTpl = (content) => baseSectionTpl('Overview', theme.colors.overview, overviewIcon, content);
+const handledBySectionTpl = (content) => baseSectionTpl('Handled By', theme.colors.handledBy, handledByIcon, content);
+const considerationsSectionTpl = (content) => baseSectionTpl('Developer Considerations', theme.colors.considerations, considerationsIcon, content, 'p-3 rounded-lg border');
+const devImpactSectionTpl = (content) => baseSectionTpl('Developer Impact', theme.colors.devImpact, devImpactIcon, content, 'p-3 rounded-lg border');
+const interactionSectionTpl = (content) => baseSectionTpl('Next Steps', theme.colors.interaction, interactionIcon, content);
+const branchingSectionTpl = (content) => baseSectionTpl('Branching & Flow', theme.colors.branching, branchingIcon, content, 'p-3 rounded-lg border');
 
 export function tooltipPillTpl(icon, text, definition, colorClass) {
     return html`
@@ -75,7 +83,7 @@ export function sidebarDetailTpl(node, nodeId, label, definitions) {
             ${node.codeSnippet ? html`
                 <div class="${cls.codeSnippetContainer}">
                     <h4 class="${cls.codeSnippetTitle}">
-                        ${sidebarCodeSnippetIcon()}
+                        ${codeSnippetIcon()}
                         Code &amp; Payload Context
                     </h4>
                     <pre class="${cls.codeSnippetText} ${theme.colors.code.text}"><code>${node.codeSnippet}</code></pre>
