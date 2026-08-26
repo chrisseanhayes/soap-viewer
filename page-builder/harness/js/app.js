@@ -1,163 +1,176 @@
-import { html, render } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { render, html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { langControlsTpl } from '../templates/fragments/lang-controls.js';
+import { errorStateTpl } from '../templates/fragments/error.js';
+import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
+import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
+import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
+import { modalCloseIcon } from '../templates/fragments/icons.js';
+import { cls } from '../templates/fragments/classes.js';
+import { langButtonsTpl, facadeBlocksTpl, toolingBlocksTpl } from '../templates/fragments/lang-controls.js';
+import { errorTpl } from '../templates/fragments/error.js';
 
-import { sidebarDetailTpl, sidebarPlaceholderTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
-import { diagramAndSidebarTpl }                      from '../templates/fragments/diagram.js';
-import { understandingLayersTpl, proxyPatternTpl,
-         toolingSectionTpl }                         from '../templates/fragments/sections.js';
-import { iconSvg }                                   from '../templates/fragments/icons.js';
-import { langButtonsTpl, facadeBlocksTpl,
-         toolingBlocksTpl }                          from '../templates/fragments/lang-controls.js';
-import { errorTpl }                                  from '../templates/fragments/error.js';
-
-// ─── State ────────────────────────────────────────────────────────────────────
-
-let currentLang       = null;
+let content = null;
+let langData = null;
+let currentLang = 'java';
 let currentActiveNode = null;
-let content           = null;   // content.json
-let langData          = null;   // language-data.json
-let diagramDef        = null;   // diagram.mmd
-let navigationSequence = [];
-
-// ─── Data Loading ─────────────────────────────────────────────────────────────
+let svgPanZoomInstance = null;
 
 async function loadData() {
-    const [c, l, d] = await Promise.all([
-        fetch('./data/content.json').then(r => r.json()),
-        fetch('./data/language-data.json').then(r => r.json()),
-        fetch('./data/diagram.mmd').then(r => r.text()),
-    ]);
-    content     = c;
-    langData    = l;
-    diagramDef  = d;
-    
-    currentLang = content.meta.defaultLanguage || 'java';
-    navigationSequence = content.navigationSequence || [];
-    currentActiveNode = content.meta.initialNodeId;
-    document.title = content.meta.pageTitle;
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Resolve a field that may be a plain string or a language-keyed object.
- * Falls back to the default language if the current language key is missing.
- */
-function resolveText(field) {
-    if (!field) return '';
-    if (typeof field === 'string') return field;
-    return field[currentLang] || field[content.meta.defaultLanguage] || '';
-}
-
-/**
- * Merge the static content.json node with any language-data.json overrides
- * for the given nodeId, resolving all language-variant fields.
- */
-function mergeNode(nodeId) {
-    const base = content.nodes[nodeId]  || {};
-    const lang = langData.nodes[nodeId] || {};
-    return {
-        ...base, // Preserve dynamic metadata like definitionPills
-        title:       lang.title       || base.title       || '',
-        overview:    resolveText(lang.overview    || base.overview),
-        interaction: resolveText(lang.interaction || base.interaction),
-        branching:   resolveText(lang.branching   || base.branching),
-        devImpact:   resolveText(lang.devImpact   || base.devImpact),
-        codeSnippet: resolveText(lang.codeSnippet || base.codeSnippet),
-        handledBy:   resolveText(lang.handledBy   || base.handledBy),
-        considerations: resolveText(lang.considerations || base.considerations),
-    };
-}
-
-function updateNavigationUI() {
-    const prevBtn = document.getElementById('btn-prev-step');
-    const nextBtn = document.getElementById('btn-next-step');
-    const counter = document.getElementById('step-counter');
-    if (!prevBtn || !nextBtn || !counter) return;
-
-    const idx = navigationSequence.indexOf(currentActiveNode);
-    if (idx === -1) {
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        counter.innerText = '';
-        return;
+    try {
+        const [contentRes, langRes] = await Promise.all([
+            fetch('./data/content.json'),
+            fetch('./data/language-data.json')
+        ]);
+        content = await contentRes.json();
+        langData = await langRes.json();
+        
+        window.__diagramMeta = content.diagramMeta || {};
+        currentLang = content.meta?.defaultLanguage || 'java';
+        currentActiveNode = content.meta?.initialNodeId || 'AppClient';
+        
+        document.title = content.meta?.pageTitle || 'Architecture Viewer';
+        
+        renderApp();
+        initMermaidDiagram();
+    } catch (err) {
+        console.error("Failed to load data", err);
+        render(errorTpl(err), document.getElementById('app-root'));
     }
+}
 
-    prevBtn.disabled = idx === 0;
-    
-    if (idx === navigationSequence.length - 1) {
-        nextBtn.innerHTML = 'Start Over &#8634;';
-    } else {
-        nextBtn.innerHTML = 'Next &rarr;';
+function renderApp() {
+    const cicdDefault = langData.cicd && langData.cicd[currentLang] 
+        ? langData.cicd[currentLang] 
+        : { title: "CI/CD Deployment", body: "Deployment pipelines typically package the built artifact and deploy it to a container registry or application server." };
+
+    const appTpl = html`
+        <div class="${cls.appContainer}">
+            <header class="${cls.appHeader}">
+                <h1 class="${cls.appTitle}">${content.meta?.pageTitle || 'Architecture Viewer'}</h1>
+                <p class="${cls.appSubtitle}">
+                    ${content.meta?.pageDescription || 'Explore the request-response lifecycle.'}
+                </p>
+                <div class="${cls.appLangToggleContainer}">
+                    <div class="${cls.appLangToggleInner}">
+                        ${langButtonsTpl(langData.languages, currentLang, (lang) => {
+                            currentLang = lang;
+                            renderApp();
+                        })}
+                    </div>
+                </div>
+            </header>
+
+            ${diagramAndSidebarTpl(content.sidebar)}
+
+            ${understandingLayersTpl(content.sections.understandingLayers)}
+            
+            ${proxyPatternTpl(content.sections.proxyPattern, facadeBlocksTpl(langData.facades, currentLang))}
+            
+            ${toolingSectionTpl(content.sections.tooling, toolingBlocksTpl(langData.tooling, currentLang), cicdDefault)}
+        </div>
+        <div id="modal-root"></div>
+    `;
+
+    const appRoot = document.querySelector('#app-root');
+    if (appRoot) {
+        if (appRoot.firstElementChild?.textContent === 'Loading content...') {
+            appRoot.innerHTML = ''; 
+        }
+        render(appTpl, appRoot);
     }
-    nextBtn.disabled = false;
     
-    counter.innerText = `Step ${idx + 1} of ${navigationSequence.length}`;
+    updateSidebar();
+}
+
+async function initMermaidDiagram() {
+    const mermaidRes = await fetch('./data/diagram.mmd');
+    const mermaidCode = await mermaidRes.text();
+    const mermaidEl = document.querySelector('.mermaid');
+    if (mermaidEl) {
+        mermaidEl.textContent = mermaidCode;
+        window.dispatchEvent(new Event('mermaid-ready'));
+    }
 }
 
 window.prevStep = function() {
-    const idx = navigationSequence.indexOf(currentActiveNode);
-    if (idx > 0) {
-        const prevId = navigationSequence[idx - 1];
-        if (prevId.endsWith('_BigPicture')) {
-            window.showBigPicture(prevId.replace('_BigPicture', ''), 'nav');
-        } else {
-            window.showDetails(prevId, 'nav');
-        }
+    if (!content?.navigationSequence) return;
+    const currentIndex = content.navigationSequence.indexOf(currentActiveNode);
+    if (currentIndex > 0) {
+        currentActiveNode = content.navigationSequence[currentIndex - 1];
+        updateSidebar();
+        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
     }
 };
 
 window.nextStep = function() {
-    let idx = navigationSequence.indexOf(currentActiveNode);
-    if (idx !== -1) {
-        idx = (idx + 1) % navigationSequence.length;
-        const nextId = navigationSequence[idx];
-        if (nextId.endsWith('_BigPicture')) {
-            window.showBigPicture(nextId.replace('_BigPicture', ''), 'nav');
-        } else {
-            window.showDetails(nextId, 'nav');
-        }
+    if (!content?.navigationSequence) return;
+    const currentIndex = content.navigationSequence.indexOf(currentActiveNode);
+    if (currentIndex < content.navigationSequence.length - 1) {
+        currentActiveNode = content.navigationSequence[currentIndex + 1];
+        updateSidebar();
+        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
     }
 };
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+function updateSidebar() {
+    if (!content) return;
+    
+    const sidebarEl = document.getElementById('sidebar-content');
+    if (!sidebarEl) return;
+    
+    const btnPrev = document.getElementById('btn-prev-step');
+    const btnNext = document.getElementById('btn-next-step');
+    const stepCounter = document.getElementById('step-counter');
+    const langBadge = document.getElementById('sidebar-lang-badge');
+    
+    if (langBadge && langData?.languages?.[currentLang]) {
+        langBadge.textContent = langData.languages[currentLang].label;
+    }
+    
+    if (!currentActiveNode) {
+        render(sidebarPlaceholderTpl(content.sidebar.emptyState), sidebarEl);
+        if (btnPrev) btnPrev.disabled = true;
+        if (btnNext) btnNext.disabled = true;
+        if (stepCounter) stepCounter.textContent = '';
+        return;
+    }
+    
+    const isBigPicture = content.nodes[currentActiveNode]?.isBigPicture || currentActiveNode.endsWith('_BigPicture');
+    let template;
+    
+    if (isBigPicture) {
+        const baseNodeId = currentActiveNode.replace('_BigPicture', '');
+        const node = content.nodes[baseNodeId];
+        template = sidebarBigPictureTpl(node.bigPicture, node.title);
+    } else {
+        const node = content.nodes[currentActiveNode];
+        template = sidebarDetailTpl(node, currentActiveNode, content.sidebar.labelIdentifier, content.definitions);
+    }
+    
+    render(template, sidebarEl);
+    
+    const currentIndex = content.navigationSequence.indexOf(currentActiveNode);
+    if (btnPrev) btnPrev.disabled = currentIndex <= 0;
+    if (btnNext) btnNext.disabled = currentIndex >= content.navigationSequence.length - 1;
+    if (stepCounter) stepCounter.textContent = `Step ${currentIndex + 1} of ${content.navigationSequence.length}`;
+}
 
-window.showDetails = function showDetails(nodeId, source = 'click') {
-    currentActiveNode = nodeId;
-    const node = mergeNode(nodeId);
-    if (!node.title) return;
-
-    render(
-        sidebarDetailTpl(node, nodeId, content.sidebar.labelIdentifier, content.definitions),
-        document.getElementById('sidebar-content'),
-    );
-
-    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: nodeId, source } }));
-    updateNavigationUI();
-};
-
-window.showBigPicture = function showBigPicture(nodeId, source = 'click') {
-    const node = content.nodes[nodeId];
-    if (!node || !node.bigPicture) return;
-    currentActiveNode = nodeId + '_BigPicture';
-    render(
-        sidebarBigPictureTpl(node.bigPicture, node.title),
-        document.getElementById('sidebar-content'),
-    );
-    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source } }));
-    updateNavigationUI();
-};
+window.addEventListener('mermaid-node-clicked', (e) => {
+    currentActiveNode = e.detail.nodeId;
+    updateSidebar();
+});
 
 window.showDefinitionModal = function(title, definition) {
     const modalTpl = html`
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click="${window.closeDefinitionModal}">
-            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative" @click="${e => e.stopPropagation()}">
-                <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors" @click="${window.closeDefinitionModal}">
-                    ${iconSvg('close', 'w-6 h-6')}
+        <div class="${cls.modalOverlay}" @click="${window.closeDefinitionModal}">
+            <div class="${cls.modalContent}" @click="${e => e.stopPropagation()}">
+                <button class="${cls.modalCloseBtn}" @click="${window.closeDefinitionModal}">
+                    ${modalCloseIcon()}
                 </button>
-                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">${title}</h3>
-                <p class="text-slate-600 leading-relaxed text-sm">${definition}</p>
-                <div class="mt-6 flex justify-end">
-                    <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors" @click="${window.closeDefinitionModal}">Got it</button>
+                <h3 class="${cls.modalTitle}">${title}</h3>
+                <p class="${cls.modalBody}">${definition}</p>
+                <div class="${cls.modalFooter}">
+                    <button class="${cls.modalActionBtn}" @click="${window.closeDefinitionModal}">Got it</button>
                 </div>
             </div>
         </div>
@@ -172,142 +185,8 @@ window.closeDefinitionModal = function() {
 window.toggleZoomOnSelect = function toggleZoomOnSelect() {
     const zoomToggle = document.getElementById('zoom-on-select-toggle');
     if (zoomToggle && zoomToggle.checked) {
-        if (currentActiveNode) {
-            window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'toggle' } }));
-        }
-    } else {
-        window.dispatchEvent(new CustomEvent('zoom:fit'));
+        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
     }
-};
-
-
-// ─── Language Switching ───────────────────────────────────────────────────────
-
-window.setGlobalLanguage = function setGlobalLanguage(lang) {
-    currentLang = lang;
-
-    // 1. Update button styles
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-700');
-        btn.classList.add('text-slate-600');
-    });
-    const activeBtn = document.getElementById('lang-' + lang);
-    if (activeBtn) {
-        activeBtn.classList.remove('text-slate-600');
-        activeBtn.classList.add('bg-white', 'shadow-sm', 'text-blue-700');
-    }
-
-    // 2. Update sidebar badge
-    const badge = document.getElementById('sidebar-lang-badge');
-    if (badge) badge.innerText = langData.languages[lang]?.label || lang;
-
-    // 3. Toggle facade code block
-    document.querySelectorAll('.facade-code').forEach(el => {
-        el.classList.toggle('hidden', el.id !== 'facade-' + lang);
-    });
-
-    // 4. Toggle tooling section
-    document.querySelectorAll('.tooling-content').forEach(el => {
-        el.classList.toggle('hidden', el.id !== 'tooling-' + lang);
-    });
-
-    // 5. Update CI/CD callout text
-    const cicd = langData.cicd[lang];
-    if (cicd) {
-        const titleEl = document.getElementById('cicd-title');
-        const textEl  = document.getElementById('cicd-text');
-        if (titleEl) titleEl.innerText = cicd.title;
-        if (textEl)  textEl.innerHTML  = cicd.body;
-    }
-
-    // 6. Refresh the sidebar if a node is currently open
-    if (currentActiveNode) {
-        if (content.nodes[currentActiveNode]?.isBigPicture || currentActiveNode.endsWith('_BigPicture')) {
-            const baseId = currentActiveNode.replace('_BigPicture', '');
-            window.showBigPicture(baseId);
-        } else {
-            window.showDetails(currentActiveNode);
-        }
-    }
-};
-
-// ─── Page Renderer ────────────────────────────────────────────────────────────
-
-function renderPage() {
-    const { meta: m, sidebar: sb, sections: s } = content;
-    const cicdDefault = langData.cicd[m.defaultLanguage];
-
-    const pageTpl = html`
-        <div class="w-full bg-white border-b border-slate-200 py-3 px-4 md:px-6 shadow-sm">
-            <header class="max-w-[96rem] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="text-center md:text-left">
-                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-1">${m.pageTitle}</h1>
-                    <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-                        <p class="text-sm text-slate-600">${m.pageSubtitle}</p>
-                        <span class="hidden md:inline text-slate-300">|</span>
-                        <p class="text-xs text-blue-600 font-medium">${m.diagramHint}</p>
-                    </div>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="inline-flex bg-slate-200 rounded-lg p-1 shadow-inner">
-                        ${langButtonsTpl(langData.languages, currentLang, window.setGlobalLanguage)}
-                    </div>
-                </div>
-            </header>
-        </div>
-
-        <div class="w-full bg-slate-50 border-b border-slate-200">
-            <div class="w-full p-2 md:p-6">
-                ${diagramAndSidebarTpl(sb)}
-            </div>
-        </div>
-
-        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-8">
-            ${understandingLayersTpl(s.understandingLayers)}
-            ${proxyPatternTpl(s.proxyPattern, facadeBlocksTpl(langData.facades, currentLang))}
-            ${toolingSectionTpl(s.tooling, toolingBlocksTpl(langData.tooling, currentLang), cicdDefault)}
-        </div>
-        <div id="modal-root"></div>
-    `;
-
-    // lit-html v3 does not pre-clear the container — explicitly remove the
-    // "Loading content..." placeholder before rendering the page template in.
-    const appRoot = document.querySelector('#app-root');
-    appRoot.replaceChildren();
-    render(pageTpl, appRoot);
-
-    // Establish lit-html's ownership of #sidebar-content by rendering the placeholder
-    // through the same render() path that showDetails() uses. Without this, the
-    // placeholder lives inside the parent template's managed DOM and showDetails()'s
-    // render() call conflicts with the parent part, leaving the placeholder visible.
-    const sidebarEl = document.getElementById('sidebar-content');
-    render(sidebarPlaceholderTpl(sb.emptyState), sidebarEl);
-
-    // Set the mermaid source directly — bypasses lit-html's comment binding markers
-    // which would otherwise appear inside the <pre> and break mermaid's parser.
-    document.querySelector('pre.mermaid').textContent = diagramDef;
-    
-    // Inject diagramMeta as a global for mermaid-init to use, since mermaid-init is not
-    // currently designed to wait for loadData inside app.js directly (it runs as a separate script).
-    window.__diagramMeta = content.diagramMeta;
-
-    // Notify mermaid-init that the DOM is ready for diagram rendering
-    window.dispatchEvent(new CustomEvent('app:rendered'));
-
-    // Auto-select the first node once the diagram is rendered
-    window.addEventListener('diagram:rendered', () => {
-        if (m.initialNodeId) {
-            window.showDetails(m.initialNodeId);
-        }
-    }, { once: true });
 }
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
-
-loadData()
-    .then(renderPage)
-    .catch(err => {
-        const appRoot = document.querySelector('#app-root');
-        appRoot.replaceChildren();
-        render(errorTpl(err), appRoot);
-    });
+document.addEventListener('DOMContentLoaded', loadData);

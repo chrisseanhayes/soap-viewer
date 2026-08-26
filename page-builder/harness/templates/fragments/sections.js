@@ -1,22 +1,23 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { iconSvg } from './icons.js';
+import { 
+    sectionDeveloperViewIcon, sectionHiddenComplexityIcon, sectionLeakyAbstractionIcon, 
+    sectionToolingHeadingIcon, sectionCicdCalloutIcon 
+} from './icons.js';
+import { cls } from './classes.js';
+import { theme } from './theme.js';
 
-/**
- * "Understanding the Layers" section.
- * @param {object} section - content.sections.understandingLayers
- */
 export function understandingLayersTpl(section) {
     return html`
-        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h2 class="text-xl font-semibold mb-4 text-slate-800">${section.heading}</h2>
-            <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
+        <section class="${cls.sectionCard}">
+            <h2 class="${cls.sectionHeading}">${section.heading}</h2>
+            <div class="${cls.sectionGrid}">
                 <div>
-                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">${section.osi7.heading}</h3>
+                    <h3 class="${cls.sectionSubheading}">${section.osi7.heading}</h3>
                     <p>${unsafeHTML(section.osi7.body)}</p>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">${section.proxy.heading}</h3>
+                    <h3 class="${cls.sectionSubheading}">${section.proxy.heading}</h3>
                     <p>${unsafeHTML(section.proxy.body)}</p>
                 </div>
             </div>
@@ -24,44 +25,43 @@ export function understandingLayersTpl(section) {
     `;
 }
 
-/**
- * "Proxy & Facade Pattern" section, including per-language facade code blocks.
- * @param {object} section  - content.sections.proxyPattern
- * @param {Array}  facades  - Rendered facade block templates from facadeBlocksTpl()
- */
 export function proxyPatternTpl(section, facades) {
+    const tDev = theme.colors.developerView;
+    const tHidden = theme.colors.hiddenComplexity;
+    const tLeaky = theme.colors.leakyAbstraction;
+
     return html`
-        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h2 class="text-xl font-semibold mb-4 text-slate-800">${section.heading}</h2>
-            <div class="text-sm text-slate-600 space-y-4">
+        <section class="${cls.sectionCard}">
+            <h2 class="${cls.sectionHeading}">${section.heading}</h2>
+            <div class="${cls.sectionTextSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
 
-                <div class="grid md:grid-cols-2 gap-6 mt-4">
-                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
-                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                            ${iconSvg('lightning', 'w-5 h-5 text-indigo-500')}
+                <div class="${cls.sectionGridInner}">
+                    <div class="${cls.calloutBase} p-5 ${tDev.bg} ${tDev.border}">
+                        <h4 class="${cls.sectionHeadingIcon}">
+                            ${sectionDeveloperViewIcon()}
                             ${section.developerView.heading}
                         </h4>
                         <p class="mb-4">${unsafeHTML(section.developerView.body)}</p>
                         ${facades}
                     </div>
 
-                    <div class="bg-blue-50 p-5 rounded-lg border border-blue-100">
-                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                            ${iconSvg('flask', 'w-5 h-5 text-blue-600')}
+                    <div class="${cls.calloutBase} p-5 ${tHidden.bg} ${tHidden.border}">
+                        <h4 class="${cls.sectionHeadingIcon}">
+                            ${sectionHiddenComplexityIcon()}
                             ${section.hiddenComplexity.heading}
                         </h4>
                         <p class="mb-3">${unsafeHTML(section.hiddenComplexity.body)}</p>
-                        <ul class="list-disc pl-5 space-y-1.5 text-sm">
+                        <ul class="${cls.sectionBulletList}">
                             ${section.hiddenComplexity.bullets.map(b => html`<li>${unsafeHTML(b)}</li>`)}
                         </ul>
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200 flex items-start gap-3">
-                    ${iconSvg('warning', 'w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5')}
+                <div class="${cls.calloutFlex} ${tLeaky.bg} ${tLeaky.border}">
+                    ${sectionLeakyAbstractionIcon()}
                     <div>
-                        <strong class="text-slate-900 block mb-1">${section.leakyAbstraction.heading}</strong>
+                        <strong class="${cls.calloutTitle}">${section.leakyAbstraction.heading}</strong>
                         ${unsafeHTML(section.leakyAbstraction.body)}
                     </div>
                 </div>
@@ -70,26 +70,22 @@ export function proxyPatternTpl(section, facades) {
     `;
 }
 
-/**
- * "Tooling" section, including per-language tooling blocks and the CI/CD callout.
- * @param {object} section      - content.sections.tooling
- * @param {Array}  toolingBlocks - Rendered tooling block templates from toolingBlocksTpl()
- * @param {object} cicdDefault  - langData.cicd['java']
- */
 export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
+    const t = theme.colors.cicdCallout;
+
     return html`
-        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h2 class="text-xl font-semibold mb-4 text-slate-800 flex items-center gap-2">
-                ${iconSvg('terminal', 'w-6 h-6 text-slate-600')}
+        <section class="${cls.sectionCard}">
+            <h2 class="${cls.sectionHeadingIcon}">
+                ${sectionToolingHeadingIcon()}
                 ${section.heading}
             </h2>
-            <div class="text-sm text-slate-600 space-y-4">
+            <div class="${cls.sectionTextSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
                 ${toolingBlocks}
-                <div class="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-200 text-slate-700 flex items-start gap-3">
-                    ${iconSvg('cog', 'w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5')}
+                <div class="${cls.calloutFlex} ${t.bg} ${t.border}">
+                    ${sectionCicdCalloutIcon()}
                     <div>
-                        <strong id="cicd-title" class="text-slate-900 block mb-1">${cicdDefault.title}</strong>
+                        <strong id="cicd-title" class="${cls.calloutTitle}">${cicdDefault.title}</strong>
                         <span id="cicd-text">${unsafeHTML(cicdDefault.body)}</span>
                     </div>
                 </div>

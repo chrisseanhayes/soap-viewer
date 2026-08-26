@@ -1,53 +1,61 @@
 import { html, nothing } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
-import { iconSvg } from './icons.js';
+import { 
+    sidebarOverviewIcon, sidebarHandledByIcon, sidebarConsiderationsIcon, 
+    sidebarDevImpactIcon, sidebarInteractionIcon, sidebarBranchingIcon, 
+    sidebarCodeSnippetIcon, sidebarEmptyStateIcon,
+    bpHowItFitsIcon, bpWhyItExistsIcon, bpJourneyStepIcon
+} from './icons.js';
+import { cls } from './classes.js';
+import { theme } from './theme.js';
 
-/**
- * Empty-state placeholder shown before any node is selected.
- * @param {string} emptyState - content.sidebar.emptyState text
- */
 export function sidebarPlaceholderTpl(emptyState) {
     return html`
-        <div class="h-full flex flex-col items-center justify-center text-center text-slate-400">
-            ${iconSvg('emptyState', 'w-12 h-12 mb-4 text-slate-300 animate-pulse')}
-            <p class="text-sm">${unsafeHTML(emptyState.replace('\n', '<br>'))}</p>
+        <div class="${cls.placeholderContainer}">
+            ${sidebarEmptyStateIcon()}
+            <p class="${cls.placeholderText}">${unsafeHTML(emptyState.replace('\n', '<br>'))}</p>
         </div>
     `;
 }
 
-function sectionTpl(title, svgClass, iconName, content, containerClass = '') {
+function baseSectionTpl(title, themeObj, iconFn, content, extraClasses = '') {
+    const containerClasses = extraClasses 
+        ? `${cls.detailSection} ${extraClasses} ${themeObj.bg || ''} ${themeObj.border || ''}`.trim()
+        : cls.detailSection;
+
     return html`
-        <div class="${containerClass}">
-            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                ${iconSvg(iconName, `w-4 h-4 ${svgClass}`)}
+        <div class="${containerClasses}">
+            <h4 class="${cls.sectionTitleBase}">
+                ${iconFn()}
                 ${title}
             </h4>
-            <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(content)}</p>
+            <p class="${cls.sectionBodyBase}">${unsafeHTML(content)}</p>
         </div>
     `;
 }
+
+// Custom wrapper functions for semantic sections
+const overviewSectionTpl = (content) => baseSectionTpl('Overview', theme.colors.overview, sidebarOverviewIcon, content);
+const handledBySectionTpl = (content) => baseSectionTpl('Handled By', theme.colors.handledBy, sidebarHandledByIcon, content);
+const considerationsSectionTpl = (content) => baseSectionTpl('Developer Considerations', theme.colors.considerations, sidebarConsiderationsIcon, content, 'p-3 rounded-lg border');
+const devImpactSectionTpl = (content) => baseSectionTpl('Developer Impact', theme.colors.devImpact, sidebarDevImpactIcon, content, 'p-3 rounded-lg border');
+const interactionSectionTpl = (content) => baseSectionTpl('Next Steps', theme.colors.interaction, sidebarInteractionIcon, content);
+const branchingSectionTpl = (content) => baseSectionTpl('Branching & Flow', theme.colors.branching, sidebarBranchingIcon, content, 'p-3 rounded-lg border');
 
 export function tooltipPillTpl(icon, text, definition, colorClass) {
     return html`
-        <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="inline-flex items-center mt-2 ml-2 px-2.5 py-0.5 rounded-md text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity ${colorClass}">
+        <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="${cls.pill} ml-2 ${colorClass}">
             ${icon} ${text}
         </button>
     `;
 }
 
-/**
- * Renders the detail panel for a clicked diagram node.
- * @param {object} node        - Merged node data (title, overview, devImpact, interaction, branching, codeSnippet, definitionPills)
- * @param {string} nodeId      - The node's identifier key
- * @param {string} label       - Label prefix from content.sidebar.labelIdentifier
- * @param {object} definitions - Dictionary of definition metadata from content.definitions
- */
 export function sidebarDetailTpl(node, nodeId, label, definitions) {
     return html`
-        <div class="animate-fade-in space-y-4">
-            <div class="border-b border-slate-200 pb-3">
-                <h3 class="text-2xl font-bold text-blue-700">${node.title}</h3>
-                <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100">
+        <div class="${cls.detailContainer}">
+            <div class="${cls.detailHeader}">
+                <h3 class="${cls.detailTitle}">${node.title}</h3>
+                <span class="${cls.detailIdBadge}">
                     ${label}: ${nodeId}
                 </span>
                 ${(node.definitionPills || []).map(pill => {
@@ -57,60 +65,56 @@ export function sidebarDetailTpl(node, nodeId, label, definitions) {
                 })}
             </div>
 
-            ${node.overview ? sectionTpl('Overview', 'text-blue-500', 'info', node.overview) : nothing}
-            ${node.handledBy ? sectionTpl('Handled By', 'text-indigo-500', 'briefcase', node.handledBy) : nothing}
-            ${node.considerations ? sectionTpl('Developer Considerations', 'text-teal-500', 'lightbulb', node.considerations, 'bg-teal-50 p-3 rounded-lg border border-teal-100') : nothing}
-            ${node.devImpact ? sectionTpl('Developer Impact', 'text-purple-500', 'lightning', node.devImpact, 'bg-slate-50 p-3 rounded-lg border border-slate-100') : nothing}
-            ${node.interaction ? sectionTpl('Next Steps', 'text-green-500', 'arrowRight', node.interaction) : nothing}
-            ${node.branching ? sectionTpl('Branching & Flow', 'text-orange-500', 'arrows', node.branching, 'bg-orange-50 p-3 rounded-lg border border-orange-100') : nothing}
+            ${node.overview ? overviewSectionTpl(node.overview) : nothing}
+            ${node.handledBy ? handledBySectionTpl(node.handledBy) : nothing}
+            ${node.considerations ? considerationsSectionTpl(node.considerations) : nothing}
+            ${node.devImpact ? devImpactSectionTpl(node.devImpact) : nothing}
+            ${node.interaction ? interactionSectionTpl(node.interaction) : nothing}
+            ${node.branching ? branchingSectionTpl(node.branching) : nothing}
 
             ${node.codeSnippet ? html`
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 mt-5 shadow-inner">
-                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        ${iconSvg('lightning', 'w-4 h-4 text-emerald-400')}
+                <div class="${cls.codeSnippetContainer}">
+                    <h4 class="${cls.codeSnippetTitle}">
+                        ${sidebarCodeSnippetIcon()}
                         Code &amp; Payload Context
                     </h4>
-                    <pre class="text-emerald-400 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all"><code>${node.codeSnippet}</code></pre>
+                    <pre class="${cls.codeSnippetText} ${theme.colors.code.text}"><code>${node.codeSnippet}</code></pre>
                 </div>` : nothing}
         </div>
     `;
 }
 
-/**
- * Renders the "big picture" panel for a container's role in the RPC journey.
- * @param {object} bp - The bigPicture object { role, summary, whyItExists, journeyStep }
- * @param {string} title - Container title
- */
 export function sidebarBigPictureTpl(bp, title) {
+    const t = theme.colors.bigPicture;
     return html`
-        <div class="animate-fade-in space-y-4">
-            <div class="border-b border-indigo-100 pb-3">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wide">Big Picture</span>
+        <div class="${cls.bpContainer}">
+            <div class="${cls.bpHeader}">
+                <div class="${cls.bpBadgeContainer}">
+                    <span class="${cls.bpBadge} ${t.badgeBg} ${t.badgeText}">Big Picture</span>
                 </div>
-                <h3 class="text-lg font-bold text-indigo-700">${title}</h3>
-                <p class="text-sm font-semibold text-slate-600 mt-1">${bp.role}</p>
+                <h3 class="${cls.bpTitle} ${t.text}">${title}</h3>
+                <p class="${cls.bpRole}">${bp.role}</p>
             </div>
 
             <div>
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    ${iconSvg('puzzle', 'w-4 h-4 text-indigo-500')}
+                <h4 class="${cls.bpSectionTitle}">
+                    ${bpHowItFitsIcon()}
                     How It Fits
                 </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(bp.summary)}</p>
+                <p class="${cls.bpSectionBody}">${unsafeHTML(bp.summary)}</p>
             </div>
 
-            <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
-                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    ${iconSvg('question', 'w-4 h-4 text-indigo-400')}
+            <div class="${cls.calloutBase} ${t.bg} ${t.border} p-3">
+                <h4 class="${cls.bpSectionTitle}">
+                    ${bpWhyItExistsIcon()}
                     Why It Exists
                 </h4>
-                <p class="text-slate-700 leading-relaxed text-sm">${unsafeHTML(bp.whyItExists)}</p>
+                <p class="${cls.bpSectionBody}">${unsafeHTML(bp.whyItExists)}</p>
             </div>
 
-            <div class="bg-slate-800 px-4 py-3 rounded-lg flex items-start gap-3">
-                ${iconSvg('doubleRight', 'w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0')}
-                <p class="text-indigo-300 text-xs font-mono leading-relaxed">${bp.journeyStep}</p>
+            <div class="${cls.journeyStepCard}">
+                ${bpJourneyStepIcon()}
+                <p class="${cls.journeyStepText} ${t.stepText}">${bp.journeyStep}</p>
             </div>
         </div>
     `;
