@@ -119,16 +119,21 @@ function renderPage() {
     const cicdDefault = langData.cicd['java'];
 
     const pageTpl = html`
-        <div class="w-full bg-white border-b border-slate-200 pt-6 pb-4 px-4 shadow-sm">
-            <header class="text-center max-w-7xl mx-auto">
-                <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">${m.pageTitle}</h1>
-                <p class="text-slate-600 mb-4">${m.pageSubtitle}</p>
-                <div class="flex justify-center mb-3">
+        <div class="w-full bg-white border-b border-slate-200 py-3 px-4 md:px-6 shadow-sm">
+            <header class="max-w-[96rem] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-center md:text-left">
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-1">${m.pageTitle}</h1>
+                    <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+                        <p class="text-sm text-slate-600">${m.pageSubtitle}</p>
+                        <span class="hidden md:inline text-slate-300">|</span>
+                        <p class="text-xs text-blue-600 font-medium">${m.diagramHint}</p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
                     <div class="inline-flex bg-slate-200 rounded-lg p-1 shadow-inner">
                         ${langButtonsTpl(langData.languages, currentLang, window.setGlobalLanguage)}
                     </div>
                 </div>
-                <p class="text-sm text-blue-600 font-medium">${m.diagramHint}</p>
             </header>
         </div>
 
