@@ -149,6 +149,13 @@ window.showBigPicture = function showBigPicture(nodeId) {
     updateNavigationUI();
 };
 
+window.toggleZoomOnSelect = function toggleZoomOnSelect() {
+    if (currentActiveNode) {
+        window.dispatchEvent(new CustomEvent('node:selected', { detail: currentActiveNode }));
+    }
+};
+
+
 // ─── Language Switching ───────────────────────────────────────────────────────
 
 window.setGlobalLanguage = function setGlobalLanguage(lang) {

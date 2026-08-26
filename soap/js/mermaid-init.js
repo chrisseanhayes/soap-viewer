@@ -199,7 +199,57 @@ window.addEventListener('app:rendered', () => {
                 
                 // Zoom on select logic
                 const zoomToggle = document.getElementById('zoom-on-select-toggle');
-                if (zoomToggle && zoomToggle.checked) {
+                
+                const animateTo = (targetRelativeZoom, targetPanX, targetPanY) => {
+                    const originalRelativeZoom = panZoomInstance.getZoom();
+                    const originalPan = panZoomInstance.getPan();
+                    
+                    const startTime = performance.now();
+                    const duration = 400; // 400ms transition
+                    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                    
+                    if (panZoomInstance._animationId) {
+                        cancelAnimationFrame(panZoomInstance._animationId);
+                    }
+                    
+                    const step = (currentTime) => {
+                        const elapsed = currentTime - startTime;
+                        let progress = elapsed / duration;
+                        if (progress > 1) progress = 1;
+                        
+                        const ease = easeInOutCubic(progress);
+                        
+                        const currentZoom = originalRelativeZoom + (targetRelativeZoom - originalRelativeZoom) * ease;
+                        const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
+                        const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
+                        
+                        panZoomInstance.zoom(currentZoom);
+                        panZoomInstance.pan({ x: currentPanX, y: currentPanY });
+                        
+                        if (progress < 1) {
+                            panZoomInstance._animationId = requestAnimationFrame(step);
+                        } else {
+                            panZoomInstance._animationId = null;
+                        }
+                    };
+                    panZoomInstance._animationId = requestAnimationFrame(step);
+                };
+
+                if (zoomToggle && !zoomToggle.checked) {
+                    const originalRelativeZoom = panZoomInstance.getZoom();
+                    const originalPan = panZoomInstance.getPan();
+                    
+                    panZoomInstance.fit();
+                    panZoomInstance.center();
+                    
+                    const targetRelativeZoom = panZoomInstance.getZoom();
+                    const targetPan = panZoomInstance.getPan();
+                    
+                    panZoomInstance.zoom(originalRelativeZoom);
+                    panZoomInstance.pan(originalPan);
+                    
+                    animateTo(targetRelativeZoom, targetPan.x, targetPan.y);
+                } else if (zoomToggle && zoomToggle.checked) {
                     const getParentClusterId = (id) => {
                         if (id.endsWith('_BigPicture')) id = id.replace('_BigPicture', '');
                         const map = {
@@ -313,35 +363,7 @@ window.addEventListener('app:rendered', () => {
                             panZoomInstance.zoom(originalRelativeZoom);
                             panZoomInstance.pan(originalPan);
                             
-                            const startTime = performance.now();
-                            const duration = 400; // 400ms transition
-                            const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                            
-                            if (panZoomInstance._animationId) {
-                                cancelAnimationFrame(panZoomInstance._animationId);
-                            }
-                            
-                            const step = (currentTime) => {
-                                const elapsed = currentTime - startTime;
-                                let progress = elapsed / duration;
-                                if (progress > 1) progress = 1;
-                                
-                                const ease = easeInOutCubic(progress);
-                                
-                                const currentZoom = originalRelativeZoom + (relativeZoom - originalRelativeZoom) * ease;
-                                const currentPanX = originalPan.x + (targetPanX - originalPan.x) * ease;
-                                const currentPanY = originalPan.y + (targetPanY - originalPan.y) * ease;
-                                
-                                panZoomInstance.zoom(currentZoom);
-                                panZoomInstance.pan({ x: currentPanX, y: currentPanY });
-                                
-                                if (progress < 1) {
-                                    panZoomInstance._animationId = requestAnimationFrame(step);
-                                } else {
-                                    panZoomInstance._animationId = null;
-                                }
-                            };
-                            panZoomInstance._animationId = requestAnimationFrame(step);
+                            animateTo(relativeZoom, targetPanX, targetPanY);
                         }
                     }
                 }

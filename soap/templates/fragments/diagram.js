@@ -38,7 +38,7 @@ export function diagramAndSidebarTpl(sb) {
                     <button class="custom-zoom-btn flex items-center justify-center px-2 min-w-[2rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-zoom="2">200%</button>
                     <div class="w-px bg-slate-200 mx-0.5 my-1"></div>
                     <label class="flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors ml-1 pr-2 cursor-pointer" title="Zoom to selection">
-                        <input type="checkbox" id="zoom-on-select-toggle" class="mr-1.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" id="zoom-on-select-toggle" class="mr-1.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="window.toggleZoomOnSelect()">
                         Zoom on Select
                     </label>
                 </div>
