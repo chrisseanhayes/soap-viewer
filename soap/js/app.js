@@ -71,6 +71,8 @@ window.showDetails = function showDetails(nodeId) {
         sidebarDetailTpl(node, nodeId, content.sidebar.labelIdentifier),
         document.getElementById('sidebar-content'),
     );
+
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: nodeId }));
 };
 
 // ─── Language Switching ───────────────────────────────────────────────────────

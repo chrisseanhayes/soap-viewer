@@ -29,3 +29,30 @@ body {
 .animate-fade-in {
     animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* Highlight styles for selected diagram elements */
+.highlighted-svg-node rect,
+.highlighted-svg-node polygon,
+.highlighted-svg-node path,
+.highlighted-svg-cluster rect {
+    stroke: #f59e0b !important; /* Amber 500 */
+    stroke-width: 6px !important;
+    stroke-dasharray: none !important; /* Ensure solid line even if it was dashed */
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8)) !important;
+}
+
+.highlighted-svg-edge-label foreignObject {
+    overflow: visible !important;
+}
+
+.highlighted-svg-edge-label div {
+    color: #78350f !important; /* Amber 900 */
+    background-color: #fef3c7 !important; /* Amber 100 */
+    border-radius: 6px !important;
+    border: 3px solid #f59e0b !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+    transform: scale(1.15) !important;
+    transform-origin: center center !important;
+}

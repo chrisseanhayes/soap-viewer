@@ -132,6 +132,68 @@ window.addEventListener('app:rendered', () => {
                     });
                 }
             });
+
+            // Listen for selection events to highlight the active item
+            window.addEventListener('node:selected', (e) => {
+                const selectedId = e.detail;
+                
+                // Remove existing highlights
+                svgElement.querySelectorAll('.highlighted-svg-node').forEach(el => el.classList.remove('highlighted-svg-node'));
+                svgElement.querySelectorAll('.highlighted-svg-cluster').forEach(el => el.classList.remove('highlighted-svg-cluster'));
+                svgElement.querySelectorAll('.highlighted-svg-edge-label').forEach(el => el.classList.remove('highlighted-svg-edge-label'));
+
+                // 1. Check Nodes
+                let targetNode = Array.from(svgElement.querySelectorAll('.node')).find(node => {
+                    const idAttr = node.getAttribute('id') || '';
+                    return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
+                });
+                
+                if (targetNode) {
+                    targetNode.classList.add('highlighted-svg-node');
+                    return;
+                }
+
+                // 2. Check Clusters (Outer Layers)
+                let targetCluster = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
+                    const idAttr = cluster.getAttribute('id') || '';
+                    if (idAttr === selectedId || idAttr.includes('-' + selectedId + '-')) return true;
+                    // Fallback to label check
+                    if (selectedId === 'Client' && cluster.textContent.includes('Client Application')) return true;
+                    if (selectedId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
+                    if (selectedId === 'SOAPMessage' && cluster.textContent.includes('SOAP Message Structure')) return true;
+                    if (selectedId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
+                    if (selectedId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
+                    return false;
+                });
+
+                if (targetCluster) {
+                    targetCluster.classList.add('highlighted-svg-cluster');
+                    return;
+                }
+
+                // 3. Check Edges
+                const reverseEdgeMappings = {
+                    'EdgeInitiatesRequest': 'Initiates Request',
+                    'EdgeGeneratesXML': 'Generates XML',
+                    'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP',
+                    'EdgeTransmits': 'Transmits via Port 80/443',
+                    'EdgeReceivesPayload': 'Receives Payload',
+                    'EdgeExtractsXML': 'Extracts XML',
+                    'EdgeValidatesWSDL': 'Validates vs WSDL',
+                    'EdgeInvokesLogic': 'Invokes Logic',
+                    'EdgeGeneratesResponseXML': 'Generates Response XML'
+                };
+                
+                const edgeText = reverseEdgeMappings[selectedId];
+                if (edgeText) {
+                    let targetEdge = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => {
+                        return label.textContent.includes(edgeText);
+                    });
+                    if (targetEdge) {
+                        targetEdge.classList.add('highlighted-svg-edge-label');
+                    }
+                }
+            });
         },
     });
 });
