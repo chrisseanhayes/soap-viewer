@@ -203,13 +203,21 @@ window.addEventListener('app:rendered', () => {
                     const getParentClusterId = (id) => {
                         if (id.endsWith('_BigPicture')) id = id.replace('_BigPicture', '');
                         const map = {
-                            'AppClient': 'Client', 'Proxy': 'Client', 'EdgeInitiatesRequest': 'Client', 'EdgeGeneratesXML': 'Client',
+                            'AppClient': 'Client', 'Proxy': 'Client', 'EdgeInitiatesRequest': 'Client',
+                            'Serialize': 'Client', 'EdgeGeneratesXML': 'Client',
                             'ClientTransport': 'Client', 'Deserialize2': 'Client', 'EdgeDeserializesResponseXML': 'Client', 'EdgeReturnsResult': 'Client',
-                            'Serialize': 'OSILayer7', 'EdgeWrapsInHTTP': 'OSILayer7', 'TransportProtocol': 'OSILayer7',
+                            
+                            'TransportProtocol': 'OSILayer7',
+                            
                             'ReqEnvelope': 'SOAPMessage', 'ReqHeader': 'SOAPMessage', 'ReqBody': 'SOAPMessage',
-                            'EdgeTransmits': 'OSILowerLayers', 'TCP': 'OSILowerLayers', 'EdgeReturnsViaPort': 'OSILowerLayers', 'EdgeDeliversResponse': 'OSILowerLayers',
-                            'EdgeReceivesPayload': 'Server', 'ServerTransport': 'Server', 'EdgeExtractsXML': 'Server', 'Deserialize': 'Server',
-                            'EdgeValidatesWSDL': 'Server', 'Validate': 'Server', 'EdgeInvokesLogic': 'Server', 'AppServer': 'Server', 'EdgeGeneratesResponseXML': 'Server',
+                            
+                            'TCP': 'OSILowerLayers',
+                            
+                            'ServerTransport': 'Server', 'Deserialize': 'Server',
+                            'Validate': 'Server', 'AppServer': 'Server',
+                            'EdgeExtractsXML': 'Server', 'EdgeValidatesWSDL': 'Server', 
+                            'EdgeInvokesLogic': 'Server', 'EdgeGeneratesResponseXML': 'Server',
+                            
                             'RespEnvelope': 'SOAPResponse', 'RespHeader': 'SOAPResponse', 'RespBody': 'SOAPResponse', 'RespFault': 'SOAPResponse'
                         };
                         const clusters = ['Client', 'OSILayer7', 'SOAPMessage', 'SOAPResponse', 'OSILowerLayers', 'Server'];
@@ -218,8 +226,11 @@ window.addEventListener('app:rendered', () => {
                     };
 
                     const clusterId = getParentClusterId(selectedId);
+                    let targetEl = null;
+                    let targetIsCluster = false;
+
                     if (clusterId) {
-                        const clusterEl = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
+                        targetEl = Array.from(svgElement.querySelectorAll('.cluster')).find(cluster => {
                             const idAttr = cluster.getAttribute('id') || '';
                             if (idAttr === clusterId || idAttr.includes('-' + clusterId + '-')) return true;
                             if (clusterId === 'Client' && cluster.textContent.includes('Client Application')) return true;
@@ -230,46 +241,72 @@ window.addEventListener('app:rendered', () => {
                             if (clusterId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
                             return false;
                         });
+                        if (targetEl) targetIsCluster = true;
+                    }
 
-                        if (clusterEl) {
-                            const rect = clusterEl.querySelector('rect');
-                            if (rect) {
-                                const rectBox = rect.getBoundingClientRect();
-                                const svgBox = svgElement.getBoundingClientRect();
-                                
-                                const screenLeft = rectBox.left - svgBox.left;
-                                const screenTop = rectBox.top - svgBox.top;
-                                
-                                const sizes = panZoomInstance.getSizes();
-                                const currentZoom = sizes.realZoom;
-                                const currentPan = panZoomInstance.getPan();
-                                
-                                const cw = rectBox.width / currentZoom;
-                                const ch = rectBox.height / currentZoom;
-
-                                if (cw > 0 && ch > 0) {
-                                    const zoomX = sizes.width / cw;
-                                    const zoomY = sizes.height / ch;
-                                    const targetAbsoluteZoom = Math.min(zoomX, zoomY) * 0.95;
-                                    
-                                    const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
-                                    let relativeZoom = targetAbsoluteZoom / initialZoom;
-                                    relativeZoom = Math.max(0.5, Math.min(relativeZoom, 5));
-                                    
-                                    const currentScreenCenterX = screenLeft + rectBox.width / 2;
-                                    const currentScreenCenterY = screenTop + rectBox.height / 2;
-                                    
-                                    const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
-                                    const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
-                                    
-                                    panZoomInstance.zoom(relativeZoom);
-                                    
-                                    const newRealZoom = panZoomInstance.getSizes().realZoom;
-                                    const panX = (sizes.width / 2) - (svgCenterX * newRealZoom);
-                                    const panY = (sizes.height / 2) - (svgCenterY * newRealZoom);
-                                    panZoomInstance.pan({ x: panX, y: panY });
-                                }
+                    if (!targetEl) {
+                        targetEl = Array.from(svgElement.querySelectorAll('.node')).find(node => {
+                            const idAttr = node.getAttribute('id') || '';
+                            return idAttr === selectedId || idAttr.includes('-' + selectedId + '-');
+                        });
+                        
+                        if (!targetEl) {
+                            const reverseEdgeMappings = {
+                                'EdgeInitiatesRequest': 'Initiates Request', 'EdgeGeneratesXML': 'Generates XML',
+                                'EdgeWrapsInHTTP': 'Wraps in HTTP/SMTP', 'EdgeTransmits': 'Transmits via Port 80/443',
+                                'EdgeReceivesPayload': 'Receives Payload', 'EdgeExtractsXML': 'Extracts XML',
+                                'EdgeValidatesWSDL': 'Validates vs WSDL', 'EdgeInvokesLogic': 'Invokes Logic',
+                                'EdgeGeneratesResponseXML': 'Generates Response XML', 'EdgeReturnsViaPort': 'Returns via Port 80/443',
+                                'EdgeDeliversResponse': 'Delivers Response', 'EdgeDeserializesResponseXML': 'Deserializes Response XML',
+                                'EdgeReturnsResult': 'Returns Result / Throws Fault'
+                            };
+                            const edgeText = reverseEdgeMappings[selectedId];
+                            if (edgeText) {
+                                targetEl = Array.from(svgElement.querySelectorAll('.edgeLabel')).find(label => label.textContent.includes(edgeText));
                             }
+                        }
+                    }
+
+                    if (targetEl) {
+                        const rectForBounds = targetIsCluster ? (targetEl.querySelector('rect') || targetEl) : targetEl;
+                        const rectBox = rectForBounds.getBoundingClientRect();
+                        const svgBox = svgElement.getBoundingClientRect();
+                        
+                        const screenLeft = rectBox.left - svgBox.left;
+                        const screenTop = rectBox.top - svgBox.top;
+                        
+                        const sizes = panZoomInstance.getSizes();
+                        const currentZoom = sizes.realZoom;
+                        const currentPan = panZoomInstance.getPan();
+                        
+                        const cw = rectBox.width / currentZoom;
+                        const ch = rectBox.height / currentZoom;
+
+                        if (cw > 0 && ch > 0) {
+                            const zoomX = sizes.width / cw;
+                            const zoomY = sizes.height / ch;
+                            
+                            // Target clusters fit cleanly (0.95 margin), while edges/nodes cap out earlier to avoid getting too close
+                            let targetAbsoluteZoom = Math.min(zoomX, zoomY) * (targetIsCluster ? 0.95 : 0.8);
+                            const maxAllowedZoom = targetIsCluster ? 5 : 2;
+                            targetAbsoluteZoom = Math.min(targetAbsoluteZoom, maxAllowedZoom);
+                            
+                            const initialZoom = sizes.realZoom / panZoomInstance.getZoom();
+                            let relativeZoom = targetAbsoluteZoom / initialZoom;
+                            relativeZoom = Math.max(0.5, Math.min(relativeZoom, 5));
+                            
+                            const currentScreenCenterX = screenLeft + rectBox.width / 2;
+                            const currentScreenCenterY = screenTop + rectBox.height / 2;
+                            
+                            const svgCenterX = (currentScreenCenterX - currentPan.x) / currentZoom;
+                            const svgCenterY = (currentScreenCenterY - currentPan.y) / currentZoom;
+                            
+                            panZoomInstance.zoom(relativeZoom);
+                            
+                            const newRealZoom = panZoomInstance.getSizes().realZoom;
+                            const panX = (sizes.width / 2) - (svgCenterX * newRealZoom);
+                            const panY = (sizes.height / 2) - (svgCenterY * newRealZoom);
+                            panZoomInstance.pan({ x: panX, y: panY });
                         }
                     }
                 }
