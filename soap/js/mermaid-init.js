@@ -55,7 +55,7 @@ window.addEventListener('app:rendered', () => {
 
             // Mermaid 10 doesn't reliably trigger 'click' directives on subgraphs (clusters).
             // We manually attach click listeners to the cluster SVG groups.
-            const subgraphKeys = ['Client', 'OSILayer7', 'SOAPMessage', 'OSILowerLayers', 'Server'];
+            const subgraphKeys = ['Client', 'OSILayer7', 'SOAPMessage', 'SOAPResponse', 'OSILowerLayers', 'Server'];
             svgElement.querySelectorAll('.cluster').forEach(cluster => {
                 const idAttr = cluster.getAttribute('id') || '';
                 let match = null;
@@ -75,7 +75,8 @@ window.addEventListener('app:rendered', () => {
                         const text = labelEl.textContent;
                         if (text.includes('Client Application')) match = 'Client';
                         else if (text.includes('OSI Layer 7')) match = 'OSILayer7';
-                        else if (text.includes('SOAP Message Structure')) match = 'SOAPMessage';
+                        else if (text.includes('SOAP Request Message')) match = 'SOAPMessage';
+                        else if (text.includes('SOAP Response Message')) match = 'SOAPResponse';
                         else if (text.includes('OSI Layers 1-4')) match = 'OSILowerLayers';
                         else if (text.includes('Server Provider')) match = 'Server';
                     }
@@ -155,7 +156,11 @@ window.addEventListener('app:rendered', () => {
                 'Extracts XML': 'EdgeExtractsXML',
                 'Validates vs WSDL': 'EdgeValidatesWSDL',
                 'Invokes Logic': 'EdgeInvokesLogic',
-                'Generates Response XML': 'EdgeGeneratesResponseXML'
+                'Generates Response XML': 'EdgeGeneratesResponseXML',
+                'Returns via Port 80/443': 'EdgeReturnsViaPort',
+                'Delivers Response': 'EdgeDeliversResponse',
+                'Deserializes Response XML': 'EdgeDeserializesResponseXML',
+                'Returns Result / Throws Fault': 'EdgeReturnsResult'
             };
 
             svgElement.querySelectorAll('.edgeLabel').forEach(label => {
@@ -212,7 +217,8 @@ window.addEventListener('app:rendered', () => {
                     // Fallback to label check
                     if (selectedId === 'Client' && cluster.textContent.includes('Client Application')) return true;
                     if (selectedId === 'OSILayer7' && cluster.textContent.includes('OSI Layer 7')) return true;
-                    if (selectedId === 'SOAPMessage' && cluster.textContent.includes('SOAP Message Structure')) return true;
+                    if (selectedId === 'SOAPMessage' && cluster.textContent.includes('SOAP Request Message')) return true;
+                    if (selectedId === 'SOAPResponse' && cluster.textContent.includes('SOAP Response Message')) return true;
                     if (selectedId === 'OSILowerLayers' && cluster.textContent.includes('OSI Layers 1-4')) return true;
                     if (selectedId === 'Server' && cluster.textContent.includes('Server Provider')) return true;
                     return false;
@@ -233,7 +239,11 @@ window.addEventListener('app:rendered', () => {
                     'EdgeExtractsXML': 'Extracts XML',
                     'EdgeValidatesWSDL': 'Validates vs WSDL',
                     'EdgeInvokesLogic': 'Invokes Logic',
-                    'EdgeGeneratesResponseXML': 'Generates Response XML'
+                    'EdgeGeneratesResponseXML': 'Generates Response XML',
+                    'EdgeReturnsViaPort': 'Returns via Port 80/443',
+                    'EdgeDeliversResponse': 'Delivers Response',
+                    'EdgeDeserializesResponseXML': 'Deserializes Response XML',
+                    'EdgeReturnsResult': 'Returns Result / Throws Fault'
                 };
                 
                 const edgeText = reverseEdgeMappings[selectedId];

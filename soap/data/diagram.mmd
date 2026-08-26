@@ -3,13 +3,16 @@ graph TD
     classDef osiLayer fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5;
     classDef process fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
     classDef soapLayer fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef soapResponse fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
     classDef clickable cursor:pointer,transition:all 0.2s;
 
     subgraph Client [Client Application Environment]
         AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
         Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
-        class AppClient,Proxy,Serialize process;
-        class AppClient,Proxy,Serialize clickable;
+        ClientTransport[9. Client Transport Receives] -->|Deserializes Response XML| Deserialize2[10. Deserialize Response]
+        Deserialize2 -->|Returns Result / Throws Fault| AppClient
+        class AppClient,Proxy,Serialize,ClientTransport,Deserialize2 process;
+        class AppClient,Proxy,Serialize,ClientTransport,Deserialize2 clickable;
     end
 
     subgraph OSILayer7 [OSI Layer 7: Application]
@@ -17,18 +20,16 @@ graph TD
         class TransportProtocol process;
         class TransportProtocol clickable;
 
-        subgraph SOAPMessage [SOAP Message Structure]
-            Envelope[SOAP Envelope]
-            Header[SOAP Header - Optional]
-            Body[SOAP Body - Required]
-            Fault[SOAP Fault - Optional Error Info]
-            Envelope --- Header
-            Envelope --- Body
-            Body -.- Fault
-            class Envelope,Header,Body,Fault soapLayer;
-            class Envelope,Header,Body,Fault clickable;
+        subgraph SOAPMessage [SOAP Request Message]
+            ReqEnvelope[SOAP Envelope]
+            ReqHeader[SOAP Header - Optional]
+            ReqBody[SOAP Body - Required]
+            ReqEnvelope --- ReqHeader
+            ReqEnvelope --- ReqBody
+            class ReqEnvelope,ReqHeader,ReqBody soapLayer;
+            class ReqEnvelope,ReqHeader,ReqBody clickable;
         end
-        TransportProtocol -.-> SOAPMessage
+        TransportProtocol -.->|Contains| SOAPMessage
     end
 
     subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
@@ -43,25 +44,46 @@ graph TD
         ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
         Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
         Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
+
+        subgraph SOAPResponse [SOAP Response Message]
+            RespEnvelope[SOAP Envelope]
+            RespHeader[SOAP Header - Optional]
+            RespBody[SOAP Body - Required]
+            RespFault[SOAP Fault - On Error]
+            RespEnvelope --- RespHeader
+            RespEnvelope --- RespBody
+            RespBody -.- RespFault
+            class RespEnvelope,RespHeader,RespBody,RespFault soapResponse;
+            class RespEnvelope,RespHeader,RespBody,RespFault clickable;
+        end
+
+        AppServer -->|Generates Response XML| SOAPResponse
         class ServerTransport,Deserialize,Validate,AppServer process;
         class ServerTransport,Deserialize,Validate,AppServer clickable;
     end
 
-    AppServer -.->|Generates Response XML| ServerTransport
+    SOAPResponse -->|Returns via Port 80/443| TCP
+    TCP -->|Delivers Response| ClientTransport
+
     class Client,Server osiLayer;
-    class OSILayer7,SOAPMessage,OSILowerLayers osiLayer;
-    class Client,OSILayer7,SOAPMessage,OSILowerLayers,Server clickable;
+    class OSILayer7,SOAPMessage,SOAPResponse,OSILowerLayers osiLayer;
+    class Client,OSILayer7,SOAPMessage,SOAPResponse,OSILowerLayers,Server clickable;
 
  click AppClient call showDetails() "Details on Client"
  click Proxy call showDetails() "Details on Proxy"
  click Serialize call showDetails() "Details on Serialization"
  click TransportProtocol call showDetails() "Details on Transport"
- click Envelope call showDetails() "Details on Envelope"
- click Header call showDetails() "Details on Header"
- click Body call showDetails() "Details on Body"
- click Fault call showDetails() "Details on Fault"
+ click ReqEnvelope call showDetails() "Details on Request Envelope"
+ click ReqHeader call showDetails() "Details on Request Header"
+ click ReqBody call showDetails() "Details on Request Body"
  click TCP call showDetails() "Details on Networking"
  click ServerTransport call showDetails() "Details on Web Server"
  click Deserialize call showDetails() "Details on Parsing"
  click Validate call showDetails() "Details on Validation"
  click AppServer call showDetails() "Details on Logic"
+ click RespEnvelope call showDetails() "Details on Response Envelope"
+ click RespHeader call showDetails() "Details on Response Header"
+ click RespBody call showDetails() "Details on Response Body"
+ click RespFault call showDetails() "Details on Fault"
+ click ClientTransport call showDetails() "Details on Client Transport"
+ click Deserialize2 call showDetails() "Details on Client Deserialization"

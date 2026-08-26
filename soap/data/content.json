@@ -81,44 +81,73 @@
       "handledBy": "<strong>The Network Layer:</strong> It's the network layer's responsibility to handle the transmission.",
       "considerations": "Developers must configure appropriate timeouts, manage connection pooling, and ensure correct SSL/TLS settings (like providing client certificates for mutual TLS)."
     },
-    "Envelope": {
-      "title": "SOAP Envelope",
-      "overview": "The mandatory root element of a SOAP message. It encapsulates the entire payload, defining the XML document explicitly as a SOAP message.",
-      "interaction": "Contains exactly two child elements: an optional Header and a mandatory Body.",
+    "ReqEnvelope": {
+      "title": "SOAP Envelope (Request)",
+      "overview": "The mandatory root element of the outbound SOAP request message. It encapsulates the entire payload, defining the XML document explicitly as a SOAP message.",
+      "interaction": "Contains exactly two child elements: an optional Header and a mandatory Body carrying the method call.",
       "branching": "If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.",
       "devImpact": "Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.",
       "codeSnippet": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soapenv:Envelope \n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" \n    xmlns:pay=\"http://api.example.com/payment\">\n  <!-- Header and Body go here -->\n</soapenv:Envelope>",
-      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to transform/perform the task.",
-      "considerations": "While the framework constructs the envelope, developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used."
+      "handledBy": "<strong>The SOAP Library:</strong> It's the library's responsibility to construct and serialize the envelope.",
+      "considerations": "Developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used."
     },
-    "Header": {
-      "title": "SOAP Header",
-      "overview": "An optional XML block used for routing and meta-information. It is famous for housing WS-* specifications, such as WS-Security.",
+    "ReqHeader": {
+      "title": "SOAP Header (Request)",
+      "overview": "An optional XML block in the request used for cross-cutting metadata such as authentication tokens, transaction IDs, and routing directives (WS-Security, WS-Addressing).",
       "interaction": "Read by server-side interceptors before the main Body is parsed or business logic is executed.",
       "branching": "Headers can have a mustUnderstand=\"1\" attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.",
       "devImpact": "This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.",
       "codeSnippet": "<soapenv:Header>\n  <wsse:Security soapenv:mustUnderstand=\"1\">\n    <wsse:UsernameToken>\n      <wsse:Username>admin</wsse:Username>\n      <wsse:Password>secret123</wsse:Password>\n    </wsse:UsernameToken>\n  </wsse:Security>\n</soapenv:Header>",
-      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to configure this, and the library's responsibility to perform the task.",
-      "considerations": "This is a powerful extension point. Developers can configure the framework to manipulate headers for injecting WS-Security credentials, transaction IDs, or custom routing information."
+      "handledBy": "<strong>The SOAP Library &amp; The Developer:</strong> The developer configures what goes in the header; the library handles injection and serialization.",
+      "considerations": "Developers configure the framework to inject WS-Security credentials, transaction IDs, or custom routing information before the message is sent."
     },
-    "Body": {
-      "title": "SOAP Body",
-      "overview": "The required main payload. It contains the XML data representing the specific method being called and its parameters.",
-      "interaction": "Extracted by the server parser and handed directly to the business logic layer.",
-      "branching": "If processing is successful, it returns a standard response Body. If an error occurs, it returns a Body containing a standard soap:Fault element.",
-      "devImpact": "This represents the core domain data. The structure here maps exactly to the request/response models the developer works with in their application code.",
+    "ReqBody": {
+      "title": "SOAP Body (Request)",
+      "overview": "The required main payload of the request. It contains the XML data representing the specific remote method being called and all its parameters.",
+      "interaction": "Extracted by the server parser and handed directly to the business logic layer after schema validation.",
+      "branching": "If schema validation fails, the server returns a SOAP Fault instead of executing any business logic.",
+      "devImpact": "This represents the core domain data of the call. The structure maps exactly to the request models defined in the WSDL.",
       "codeSnippet": "<soapenv:Body>\n  <pay:processCharge>\n    <cardNumber>1234-5678</cardNumber>\n    <amount>50.00</amount>\n  </pay:processCharge>\n</soapenv:Body>",
-      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the developer's responsibility to supply data for this, and the library's responsibility to transform/perform the task.",
-      "considerations": "Developers must be aware of the WSDL's strict schema rules. Providing data that violates the schema (e.g., missing required fields, wrong data types) will cause immediate validation failures before business logic executes."
+      "handledBy": "<strong>The SOAP Library &amp; The Developer:</strong> The developer provides the data; the library serializes it into the correct XML structure.",
+      "considerations": "Providing data that violates the WSDL schema (missing required fields, wrong data types) causes immediate validation failures before business logic ever executes."
     },
-    "Fault": {
+    "RespEnvelope": {
+      "title": "SOAP Envelope (Response)",
+      "overview": "The mandatory root element of the server's outbound SOAP response message. Structurally identical to the request envelope, but carries the result of the operation (or a fault).",
+      "interaction": "Wraps the response Header and Body. The client's SOAP library unwraps it after the HTTP response is received.",
+      "branching": "If the client cannot parse this envelope (wrong namespace, malformed XML), it throws a deserialization exception.",
+      "devImpact": "Transparent to developers — the framework handles construction on the server side and parsing on the client side.",
+      "codeSnippet": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soapenv:Envelope\n    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n    xmlns:pay=\"http://api.example.com/payment\">\n  <!-- Response Header and Body go here -->\n</soapenv:Envelope>",
+      "handledBy": "<strong>The SOAP Library:</strong> The server-side framework serializes the response; the client-side library deserializes it.",
+      "considerations": "The response envelope must use the same SOAP version as the request. Version mismatches cause parse failures."
+    },
+    "RespHeader": {
+      "title": "SOAP Header (Response)",
+      "overview": "An optional element in the server's response for returning metadata such as correlation IDs, session tokens, or WS-Addressing reply-to information.",
+      "interaction": "Processed by client-side interceptors before the response Body is deserialized into application objects.",
+      "branching": "Rarely causes failures, but a client configured to require a specific header (mustUnderstand) will throw if the server omits it.",
+      "devImpact": "Developers may inspect response headers to extract trace IDs or refresh authentication tokens returned by the server.",
+      "handledBy": "<strong>The SOAP Library &amp; The Backend Developer:</strong> The server framework injects standard headers; developers add custom ones.",
+      "considerations": "Response headers are a useful place for servers to return correlation data without polluting the business payload in the Body."
+    },
+    "RespBody": {
+      "title": "SOAP Body (Response)",
+      "overview": "The required payload of the server's response. On success it contains the serialized return value of the remote method. On failure it contains a soap:Fault element.",
+      "interaction": "Deserialized by the client SOAP library into native objects and returned to the calling application (or a Fault is translated into a thrown exception).",
+      "branching": "Success → return value deserialized into native object. Failure → soap:Fault present; client library translates it into a language-native exception.",
+      "devImpact": "This is what the developer's original method call ultimately receives as its return value. The round-trip is complete when this is deserialized.",
+      "codeSnippet": "<soapenv:Body>\n  <pay:processChargeResponse>\n    <transactionId>TXN-9921</transactionId>\n    <status>APPROVED</status>\n  </pay:processChargeResponse>\n</soapenv:Body>",
+      "handledBy": "<strong>The SOAP Library:</strong> Serializes the response on the server; deserializes it on the client.",
+      "considerations": "Large response payloads slow down the return transmission and can spike client-side memory during deserialization."
+    },
+    "RespFault": {
       "title": "SOAP Fault",
-      "overview": "A standardized error block nested inside the Body. It provides structured error reporting containing a fault code, a human-readable fault string, and technical details.",
-      "interaction": "Returns backwards through the network to inform the Client Application of the failure.",
-      "branching": "A Fault dictates that normal execution failed. It immediately branches the client application into its error-handling flow.",
+      "overview": "A standardized error element nested inside the response Body — only present when the operation failed. It contains a machine-readable fault code, a human-readable fault string, and optional detail elements.",
+      "interaction": "Transmitted back to the client inside the HTTP response body. The client SOAP library detects it and translates it into a native language exception.",
+      "branching": "A Fault replaces the normal response Body. The client application is branched into its error-handling flow rather than receiving a result.",
       "codeSnippet": "<soapenv:Body>\n  <soapenv:Fault>\n    <faultcode>soapenv:Server</faultcode>\n    <faultstring>Account not found</faultstring>\n    <detail><errorCode>404</errorCode></detail>\n  </soapenv:Fault>\n</soapenv:Body>",
-      "handledBy": "<strong>The SOAP Library & The Developer:</strong> It's the library's responsibility to transform/perform the task (parse the fault), and the developer's responsibility to handle the resulting exception.",
-      "considerations": "Developers should consider how faults are mapped to native exceptions in their language. They must gracefully catch these exceptions and extract the embedded fault codes to determine if the error is recoverable."
+      "handledBy": "<strong>The SOAP Library &amp; The Developer:</strong> The library parses the fault and throws an exception; the developer must catch it and decide how to recover.",
+      "considerations": "Faults only ever appear in server responses, never in client requests. Developers should map fault codes to recoverable vs. unrecoverable error categories in their error-handling logic."
     },
     "TCP": {
       "title": "OSI Layers 1-4",
@@ -272,12 +301,65 @@
       "considerations": "The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic SOAP Faults if necessary.",
       "devImpact": "This is where the actual business value is generated (e.g., saving a user, processing a payment)."
     },
-    "EdgeGeneratesResponseXML": {
-      "title": "Action: Generates Response XML",
-      "overview": "The business logic returns a result (or throws an exception). The SOAP framework serializes this result into a SOAP Response Envelope (or SOAP Fault Envelope) and sends it back down the stack.",
-      "handledBy": "<strong>The SOAP Framework:</strong> Serializes the return values into XML.",
-      "considerations": "If returning large datasets, the response XML can grow massive and slow down the return transmission.",
-      "devImpact": "The client waits in a blocked state until this response traverses back across the network and is deserialized on the client."
+    "SOAPResponse": {
+      "title": "SOAP Response Message",
+      "overview": "The standardized XML document the server constructs and returns after processing a request. It follows the same Envelope structure as the request but carries the result — either a populated Body with the return value, or a Body containing a SOAP Fault if the operation failed.",
+      "handledBy": "<strong>The SOAP Library:</strong> The server-side framework serializes the result (or fault) into the response envelope automatically.",
+      "considerations": "Developers must ensure their service methods return the correct types defined in the WSDL, or throw exceptions the framework will correctly map to SOAP Faults.",
+      "devImpact": "Errors not caught and mapped to Faults by the developer will often result in generic HTTP 500 responses that are much harder for clients to parse meaningfully.",
+      "interaction": "Travels back from the server through TCP/IP to the waiting client, where it is unpacked and deserialized.",
+      "bigPicture": {
+        "role": "The Return Journey — Completing the Round Trip",
+        "summary": "The SOAP Response Message is the mirror of the request. Once the server's business logic finishes, the SOAP framework serializes the result (or wraps an exception in a SOAP Fault) into a new XML envelope. This envelope travels back through the same TCP/IP stack, is received by the client's transport layer, unwrapped from HTTP, and deserialized into native objects. The developer's original blocking method call then unblocks and returns — completing the full round trip.",
+        "whyItExists": "A request without a response is a fire-and-forget message. SOAP's RPC model fundamentally requires a synchronous round trip — the client blocks until it receives confirmation, a result, or a fault. The response message is what makes it a true Remote Procedure Call.",
+        "journeyStep": "Step 4b–5 of 5: The server's answer. It travels back through TCP, is received by the client, and deserialized."
+      }
+    },
+    "ClientTransport": {
+      "title": "9. Client Transport Receives",
+      "overview": "The client-side HTTP client layer receives the HTTP response from the network stack. It checks the HTTP status code and passes the response body (the XML) to the SOAP deserialization layer.",
+      "interaction": "Receives the reassembled HTTP response from the OS networking stack and passes the XML body to the client SOAP library for parsing.",
+      "branching": "If the HTTP status is a transport-level error (e.g., 503 Service Unavailable, timeout), the SOAP library throws a transport exception before attempting to parse any XML.",
+      "devImpact": "Generally handled by the SOAP framework, but developers must configure timeouts to avoid threads blocking indefinitely waiting for a response that will never arrive.",
+      "handledBy": "<strong>The SOAP Library &amp; Network Layer:</strong> The OS handles packet reassembly; the SOAP framework handles the HTTP layer.",
+      "considerations": "Developers should configure both connection and read timeouts. An unreachable server that silently drops packets will cause an indefinitely blocked thread without a read timeout."
+    },
+    "Deserialize2": {
+      "title": "10. Deserialize Response",
+      "overview": "The client SOAP library parses the response XML. On success, it maps the XML elements back into native language objects and returns them. On failure (SOAP Fault present), it parses the fault codes and throws a language-native exception.",
+      "interaction": "Returns the deserialized result object to the calling application, completing the round trip. On fault, throws an exception that propagates up to the application code.",
+      "branching": "Success path → native return object handed back to the developer's code. Fault path → SOAP Fault parsed and thrown as a native exception (e.g., WebServiceException in Java, SoapException in .NET).",
+      "devImpact": "This is the last step in the SOAP call. The developer's original blocking method call finally unblocks and receives either a return value or an exception.",
+      "handledBy": "<strong>The SOAP Library:</strong> Automatically deserializes the XML response; the developer only interacts with the resulting native object or exception.",
+      "considerations": "Developers must implement try/catch around proxy calls to handle SOAP Faults. Uncaught exceptions from this step will crash the calling thread."
+    },
+    "EdgeReturnsViaPort": {
+      "title": "Action: Returns via Port 80/443",
+      "overview": "The server sends the SOAP Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for SOAP Faults — the HTTP layer succeeds; the SOAP layer contains the error).",
+      "handledBy": "<strong>The Network Layer:</strong> Handles packet routing and SSL/TLS encryption on the return path.",
+      "considerations": "Note that SOAP Faults are returned with an HTTP 200 status in SOAP 1.1. In SOAP 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.",
+      "devImpact": "The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return."
+    },
+    "EdgeDeliversResponse": {
+      "title": "Action: Delivers Response",
+      "overview": "The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the SOAP library.",
+      "handledBy": "<strong>The OS Network Stack:</strong> Handles packet ordering, retransmission, and final delivery.",
+      "considerations": "If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.",
+      "devImpact": "Transparent to developers, but contributes to the total round-trip time the application experiences."
+    },
+    "EdgeDeserializesResponseXML": {
+      "title": "Action: Deserializes Response XML",
+      "overview": "The client SOAP library extracts the XML from the HTTP response body and converts it back into native language objects (or throws a fault exception).",
+      "handledBy": "<strong>The SOAP Library:</strong> Automatically handles XML parsing and object mapping.",
+      "considerations": "Very large response bodies cause proportionally large memory allocations during deserialization. Streaming parsers can mitigate this for list-type responses.",
+      "devImpact": "The developer receives the result as a native object — completely unaware of the XML that was transmitted."
+    },
+    "EdgeReturnsResult": {
+      "title": "Action: Returns Result / Throws Fault",
+      "overview": "The final step of the round trip. The SOAP framework hands the deserialized result back to the application, completing the remote method call. If a SOAP Fault was in the response, a native exception is thrown instead.",
+      "handledBy": "<strong>The SOAP Library &amp; Developer:</strong> The library completes the call; the developer's code receives the return value or catches the exception.",
+      "considerations": "This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.",
+      "devImpact": "From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method."
     }
   }
 }
