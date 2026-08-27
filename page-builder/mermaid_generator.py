@@ -6,6 +6,15 @@ def generate_mermaid_code(project_name="soap"):
     edges_out = []
     click_handlers = []
 
+
+    def get_full_text(element):
+        if element is None: return ""
+        text = element.text or ""
+        for child in element:
+            text += get_full_text(child)
+            text += child.tail or ""
+        return text.strip()
+
     def escape_label_edge(label):
         if not label: return ""
         return f"{label}"
@@ -25,8 +34,8 @@ def generate_mermaid_code(project_name="soap"):
         
         if diagram is not None:
             # LEAF NODE
-            leaf_label = diagram.findtext("nodeLabel") or ""
-            leaf_id = diagram.findtext("nodeId") or node_id
+            leaf_label = get_full_text(diagram.find("nodeLabel")) or ""
+            leaf_id = get_full_text(diagram.find("nodeId")) or node_id
             
             classes_tags = diagram.findall("classes/class")
             for c in classes_tags:
@@ -39,7 +48,7 @@ def generate_mermaid_code(project_name="soap"):
                 
             out += f"{indent}{leaf_id}[{escape_label_node(leaf_label)}]\n"
             
-            click_handler = diagram.findtext("clickHandler")
+            click_handler = get_full_text(diagram.find("clickHandler"))
             if click_handler:
                 click_handlers.append(f"click {leaf_id} {click_handler}")
                 

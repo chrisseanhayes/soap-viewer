@@ -2,30 +2,30 @@
 <node id="OSILayer7" label="☁️ OSI Layer 7: Application" nodeType="Network" nodeTypeIcon="☁️" diagramClass="osiLayer">
   <title>OSI Layer 7: Application</title>
   <overview>
-    The topmost layer of the OSI model where software applications interact with network services. SOAP exclusively operates within this layer, sitting above protocols like HTTP or SMTP.
+    The topmost layer of the OSI model where software applications interact with network services. <def id="SOAP">SOAP</def> exclusively operates within this layer, sitting above protocols like HTTP or SMTP.
   </overview>
   <handledBy>
-    &lt;strong&gt;The SOAP Library &amp;amp; Transport Layer:&lt;/strong&gt; The libraries generate the SOAP format, and the web/transport layer handles HTTP transmission.
+    &lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Transport Layer:&lt;/strong&gt; The libraries generate the <def id="SOAP">SOAP</def> format, and the web/transport layer handles HTTP transmission.
   </handledBy>
   <devImpact>
     Troubleshooting at this layer involves inspecting HTTP requests (headers, verbs, body) rather than raw TCP packets.
   </devImpact>
   <interaction>
-    Receives data from the client, packages it into a SOAP Message, and pushes it down the network stack.
+    Receives data from the client, packages it into a <def id="SOAP">SOAP</def> Message, and pushes it down the network stack.
   </interaction>
   <considerations>
-    Developers should understand that although HTTP is traditionally a transport mechanism for the web, SOAP treats HTTP merely as a tunneling protocol.
+    Developers should understand that although HTTP is traditionally a transport mechanism for the web, <def id="SOAP">SOAP</def> treats HTTP merely as a tunneling protocol.
   </considerations>
   <bigPicture>
     <role>The Packager — Turning Intent into a Network Message</role>
     <summary>
-      This is where the local method call gets translated into something that can physically travel across the internet. The Proxy serializes your objects into a strict XML structure (the SOAP Message), then wraps that XML inside an HTTP POST request with specific headers like &lt;code&gt;SOAPAction&lt;/code&gt; and &lt;code&gt;Content-Type: text/xml&lt;/code&gt;. HTTP is just a container here — SOAP doesn't care about web pages or REST semantics. It's tunneling the XML through HTTP purely because port 80/443 is almost always open through corporate firewalls.
+      This is where the local method call gets translated into something that can physically travel across the internet. The <def id="Proxy">Proxy</def> serializes your objects into a strict <def id="XML">XML</def> structure (the <def id="SOAP">SOAP</def> Message), then wraps that <def id="XML">XML</def> inside an HTTP POST request with specific headers like &lt;code&gt;SOAPAction&lt;/code&gt; and &lt;code&gt;Content-Type: text/xml&lt;/code&gt;. HTTP is just a container here — <def id="SOAP">SOAP</def> doesn't care about web pages or REST semantics. It's tunneling the <def id="XML">XML</def> through HTTP purely because port 80/443 is almost always open through corporate firewalls.
     </summary>
     <whyItExists>
       The network cannot send a Java object or a .NET class. It can only send bytes. This layer bridges that gap — it is the translation engine between the developer's high-level intent and the raw bytes that leave the machine.
     </whyItExists>
     <journeyStep>
-      Step 2 of 5: The intent is encoded. Native objects → XML → HTTP request. Ready for the wire.
+      Step 2 of 5: The intent is encoded. Native objects → <def id="XML">XML</def> → HTTP request. Ready for the wire.
     </journeyStep>
   </bigPicture>
   <definitionPills>
@@ -73,7 +73,7 @@
         <edge from="Serialize" label="⚙️ Wraps in HTTP/SMTP" type="solid-arrow" edgeKey="EdgeWrapsInHTTP">
           <sidebar>
             <title>Action: Wraps in HTTP/SMTP</title>
-            <overview>The raw XML string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.</overview>
+            <overview>The raw <def id="XML">XML</def> string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.</overview>
             <handledBy>&lt;strong&gt;The Transport Protocol (HTTP Client):&lt;/strong&gt; Prepares the message for the network stack.</handledBy>
             <devImpact>The HTTP status codes (200 OK, 500 Internal Server Error) often dictate the initial success or failure of the transmission.</devImpact>
             <considerations>Custom headers (like Authorization for Basic Auth) must be injected before this step is finalized.</considerations>
@@ -94,10 +94,10 @@
     <sidebar>
       <title>4. Transport Protocol</title>
       <overview>
-        The Layer 7 delivery mechanism used to transmit the SOAP message over the network. HTTP and HTTPS are the most common.
+        The Layer 7 delivery mechanism used to transmit the <def id="SOAP">SOAP</def> message over the network. HTTP and HTTPS are the most common.
       </overview>
       <interaction>
-        Wraps the SOAP message in an HTTP Request (e.g., POST with a SOAPAction header) and hands it to the OS networking stack.
+        Wraps the <def id="SOAP">SOAP</def> message in an HTTP Request (e.g., POST with a SOAPAction header) and hands it to the OS networking stack.
       </interaction>
       <branching>
         If the network is unreachable, it throws a Timeout/Connection Exception back to the client application.
@@ -156,15 +156,15 @@ client = Client(wsdl, transport=transport)
     </sourceFiles>
   </node>
   <node id="SOAPMessage" label="📄 SOAP Request Message" nodeType="Serialization" nodeTypeIcon="📄" diagramClass="osiLayer">
-    <title>SOAP Message Structure</title>
+    <title><def id="SOAP">SOAP</def> Message Structure</title>
     <overview>
-      The standardized XML document format that encapsulates all SOAP communications. It strictly defines the envelope, optional headers, and the required body.
+      The standardized <def id="XML">XML</def> document format that encapsulates all <def id="SOAP">SOAP</def> communications. It strictly defines the envelope, optional headers, and the required body.
     </overview>
     <handledBy>
-      &lt;strong&gt;The SOAP Library:&lt;/strong&gt; The serialization engine guarantees the structure conforms to the W3C SOAP specifications.
+      &lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; The serialization engine guarantees the structure conforms to the W3C <def id="SOAP">SOAP</def> specifications.
     </handledBy>
     <devImpact>
-      This is the core payload. Any deviation from the XML schema here will result in immediate rejection by the recipient.
+      This is the core payload. Any deviation from the <def id="XML">XML</def> schema here will result in immediate rejection by the recipient.
     </devImpact>
     <interaction>
       Moves from the client, through the network layers, to the server where it is un-packaged.
@@ -173,12 +173,12 @@ client = Client(wsdl, transport=transport)
       Developers must ensure that message sizes are kept reasonable, as overly large messages consume significant bandwidth and parsing time.
     </considerations>
     <bigPicture>
-      <role>The Contract in Motion — The Shared Language of the RPC Call</role>
+      <role>The Contract in Motion — The Shared Language of the <def id="RPC">RPC</def> Call</role>
       <summary>
-        The SOAP Message is the physical manifestation of the agreed contract (the WSDL). Both the client and server were built against the same WSDL definition, which means this XML structure is the one format both sides are guaranteed to understand. The Envelope is the outer wrapper that identifies the document as SOAP. The Header carries meta-information like security tokens. The Body carries the actual call — the method name and its parameters encoded as XML elements. This is what "crosses the wire."
+        The <def id="SOAP">SOAP</def> Message is the physical manifestation of the agreed contract (the <def id="WSDL">WSDL</def>). Both the client and server were built against the same <def id="WSDL">WSDL</def> definition, which means this <def id="XML">XML</def> structure is the one format both sides are guaranteed to understand. The Envelope is the outer wrapper that identifies the document as <def id="SOAP">SOAP</def>. The Header carries meta-information like security tokens. The Body carries the actual call — the method name and its parameters encoded as <def id="XML">XML</def> elements. This is what "crosses the wire."
       </summary>
       <whyItExists>
-        RPC between different systems, languages, and platforms requires a neutral, universally-readable format. XML was chosen because it is self-describing, platform-agnostic, and human-readable. The rigid structure enforced by the WSDL/XSD schema ensures there is zero ambiguity about what data is being exchanged.
+        <def id="RPC">RPC</def> between different systems, languages, and platforms requires a neutral, universally-readable format. <def id="XML">XML</def> was chosen because it is self-describing, platform-agnostic, and human-readable. The rigid structure enforced by the <def id="WSDL">WSDL</def>/XSD schema ensures there is zero ambiguity about what data is being exchanged.
       </whyItExists>
       <journeyStep>
         Step 2b of 5: This is the payload itself — travelling inside the HTTP request through the network.
@@ -197,7 +197,7 @@ client = Client(wsdl, transport=transport)
     </navigation>
     <node id="ReqEnvelope" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Envelope</nodeLabel>
+        <nodeLabel>📚 <def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def></nodeLabel>
         <nodeId>ReqEnvelope</nodeId>
         <classes>
           <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px" />
@@ -210,13 +210,13 @@ client = Client(wsdl, transport=transport)
         <clickHandler>call showDetails() "Details on Request Envelope"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Envelope (Request)</title>
-        <overview>The mandatory root element of the outbound SOAP request message. It encapsulates the entire payload, defining the XML document explicitly as a SOAP message.</overview>
+        <title><def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def> (Request)</title>
+        <overview>The mandatory root element of the outbound <def id="SOAP">SOAP</def> request message. It encapsulates the entire payload, defining the <def id="XML">XML</def> document explicitly as a <def id="SOAP">SOAP</def> message.</overview>
         <interaction>Contains exactly two child elements: an optional Header and a mandatory Body carrying the method call.</interaction>
         <branching>If the Envelope namespace is unrecognized, the server immediately rejects the request without processing it further.</branching>
-        <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; It's the library's responsibility to construct and serialize the envelope.</handledBy>
-        <devImpact>Devs rarely construct this manually. It defines the SOAP version (1.1 vs 1.2), which dictates specific namespaces and content types.</devImpact>
-        <considerations>Developers must be aware of the required SOAP version (1.1 vs 1.2), as it strictly dictates the XML namespaces and HTTP Content-Type headers used.</considerations>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to construct and serialize the envelope.</handledBy>
+        <devImpact>Devs rarely construct this manually. It defines the <def id="SOAP">SOAP</def> version (1.1 vs 1.2), which dictates specific namespaces and content types.</devImpact>
+        <considerations>Developers must be aware of the required <def id="SOAP">SOAP</def> version (1.1 vs 1.2), as it strictly dictates the <def id="XML">XML</def> namespaces and HTTP Content-Type headers used.</considerations>
         <codeSnippet>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;soapenv:Envelope 
@@ -238,7 +238,7 @@ client = Client(wsdl, transport=transport)
     </node>
     <node id="ReqHeader" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Header - Optional</nodeLabel>
+        <nodeLabel>📚 <def id="SOAP">SOAP</def> Header - Optional</nodeLabel>
         <nodeId>ReqHeader</nodeId>
         <classes>
           <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px" />
@@ -250,13 +250,13 @@ client = Client(wsdl, transport=transport)
         <clickHandler>call showDetails() "Details on Request Header"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Header (Request)</title>
-        <overview>An optional XML block in the request used for cross-cutting metadata such as authentication tokens, transaction IDs, and routing directives (WS-Security, WS-Addressing).</overview>
+        <title><def id="SOAP">SOAP</def> Header (Request)</title>
+        <overview>An optional <def id="XML">XML</def> block in the request used for cross-cutting metadata such as authentication tokens, transaction IDs, and routing directives (<def id="WSSecurity">WS-Security</def>, <def id="WSAddressing">WS-Addressing</def>).</overview>
         <interaction>Read by server-side interceptors before the main Body is parsed or business logic is executed.</interaction>
-        <branching>Headers can have a mustUnderstand="1" attribute. If the server does not know how to process it, it aborts and returns a SOAP Fault.</branching>
-        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Developer:&lt;/strong&gt; The developer configures what goes in the header; the library handles injection and serialization.</handledBy>
-        <devImpact>This is where SOAP complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.</devImpact>
-        <considerations>Developers configure the framework to inject WS-Security credentials, transaction IDs, or custom routing information before the message is sent.</considerations>
+        <branching>Headers can have a mustUnderstand="1" attribute. If the server does not know how to process it, it aborts and returns a <def id="SOAP">SOAP</def> Fault.</branching>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; The Developer:&lt;/strong&gt; The developer configures what goes in the header; the library handles injection and serialization.</handledBy>
+        <devImpact>This is where <def id="SOAP">SOAP</def> complexity peaks. Devs write middleware to inject security tokens, transaction IDs, or custom tracing IDs into the header before transmission.</devImpact>
+        <considerations>Developers configure the framework to inject <def id="WSSecurity">WS-Security</def> credentials, transaction IDs, or custom routing information before the message is sent.</considerations>
         <codeSnippet>
 &lt;soapenv:Header&gt;
   &lt;wsse:Security soapenv:mustUnderstand="1"&gt;
@@ -280,7 +280,7 @@ client = Client(wsdl, transport=transport)
     </node>
     <node id="ReqBody" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Body - Required</nodeLabel>
+        <nodeLabel>📚 <def id="SOAP">SOAP</def> Body - Required</nodeLabel>
         <nodeId>ReqBody</nodeId>
         <classes>
           <class name="soapLayer" style="fill:#fef3c7;stroke:#d97706;stroke-width:2px" />
@@ -292,13 +292,13 @@ client = Client(wsdl, transport=transport)
         <clickHandler>call showDetails() "Details on Request Body"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Body (Request)</title>
-        <overview>The required main payload of the request. It contains the XML data representing the specific remote method being called and all its parameters.</overview>
+        <title><def id="SOAP">SOAP</def> Body (Request)</title>
+        <overview>The required main payload of the request. It contains the <def id="XML">XML</def> data representing the specific remote method being called and all its parameters.</overview>
         <interaction>Extracted by the server parser and handed directly to the business logic layer after schema validation.</interaction>
-        <branching>If schema validation fails, the server returns a SOAP Fault instead of executing any business logic.</branching>
-        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Developer:&lt;/strong&gt; The developer provides the data; the library serializes it into the correct XML structure.</handledBy>
-        <devImpact>This represents the core domain data of the call. The structure maps exactly to the request models defined in the WSDL.</devImpact>
-        <considerations>Providing data that violates the WSDL schema (missing required fields, wrong data types) causes immediate validation failures before business logic ever executes.</considerations>
+        <branching>If schema validation fails, the server returns a <def id="SOAP">SOAP</def> Fault instead of executing any business logic.</branching>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; The Developer:&lt;/strong&gt; The developer provides the data; the library serializes it into the correct <def id="XML">XML</def> structure.</handledBy>
+        <devImpact>This represents the core domain data of the call. The structure maps exactly to the request models defined in the <def id="WSDL">WSDL</def>.</devImpact>
+        <considerations>Providing data that violates the <def id="WSDL">WSDL</def> schema (missing required fields, wrong data types) causes immediate validation failures before business logic ever executes.</considerations>
         <codeSnippet>
 &lt;soapenv:Body&gt;
   &lt;pay:processCharge&gt;

@@ -30,14 +30,14 @@ const sectionCicdCalloutIcon = () => iconSvg('cog', `w-5 h-5 ${theme.colors.cicd
 export function understandingLayersTpl(section) {
     return html`
         <section class="${cls.card}">
-            <h2 class="${cls.heading}">${section.heading}</h2>
+            <h2 class="${cls.heading}">${unsafeHTML(section.heading)}</h2>
             <div class="${cls.grid}">
                 <div>
-                    <h3 class="${cls.subheading}">${section.osi7.heading}</h3>
+                    <h3 class="${cls.subheading}">${unsafeHTML(section.osi7.heading)}</h3>
                     <p>${unsafeHTML(section.osi7.body)}</p>
                 </div>
                 <div>
-                    <h3 class="${cls.subheading}">${section.proxy.heading}</h3>
+                    <h3 class="${cls.subheading}">${unsafeHTML(section.proxy.heading)}</h3>
                     <p>${unsafeHTML(section.proxy.body)}</p>
                 </div>
             </div>
@@ -52,7 +52,7 @@ export function proxyPatternTpl(section, facades) {
 
     return html`
         <section class="${cls.card}">
-            <h2 class="${cls.heading}">${section.heading}</h2>
+            <h2 class="${cls.heading}">${unsafeHTML(section.heading)}</h2>
             <div class="${cls.textSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
 
@@ -60,7 +60,7 @@ export function proxyPatternTpl(section, facades) {
                     <div class="${cls.calloutBase} p-5 ${tDev.bg} ${tDev.border}">
                         <h4 class="${cls.headingIcon}">
                             ${sectionDeveloperViewIcon()}
-                            ${section.developerView.heading}
+                            ${unsafeHTML(section.developerView.heading)}
                         </h4>
                         <p class="mb-4">${unsafeHTML(section.developerView.body)}</p>
                         ${facades}
@@ -69,7 +69,7 @@ export function proxyPatternTpl(section, facades) {
                     <div class="${cls.calloutBase} p-5 ${tHidden.bg} ${tHidden.border}">
                         <h4 class="${cls.headingIcon}">
                             ${sectionHiddenComplexityIcon()}
-                            ${section.hiddenComplexity.heading}
+                            ${unsafeHTML(section.hiddenComplexity.heading)}
                         </h4>
                         <p class="mb-3">${unsafeHTML(section.hiddenComplexity.body)}</p>
                         <ul class="${cls.bulletList}">
@@ -81,7 +81,7 @@ export function proxyPatternTpl(section, facades) {
                 <div class="${cls.calloutFlex} ${tLeaky.bg} ${tLeaky.border}">
                     ${sectionLeakyAbstractionIcon()}
                     <div>
-                        <strong class="${cls.calloutTitle}">${section.leakyAbstraction.heading}</strong>
+                        <strong class="${cls.calloutTitle}">${unsafeHTML(section.leakyAbstraction.heading)}</strong>
                         ${unsafeHTML(section.leakyAbstraction.body)}
                     </div>
                 </div>
@@ -97,7 +97,7 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
         <section class="${cls.card}">
             <h2 class="${cls.headingIcon}">
                 ${sectionToolingHeadingIcon()}
-                ${section.heading}
+                ${unsafeHTML(section.heading)}
             </h2>
             <div class="${cls.textSpace}">
                 <p>${unsafeHTML(section.intro)}</p>
@@ -105,7 +105,7 @@ export function toolingSectionTpl(section, toolingBlocks, cicdDefault) {
                 <div class="${cls.calloutFlex} ${pt.bg} ${pt.border}">
                     ${sectionCicdCalloutIcon()}
                     <div>
-                        <strong id="cicd-title" class="${cls.calloutTitle}">${cicdDefault.title}</strong>
+                        <strong id="cicd-title" class="${cls.calloutTitle}">${unsafeHTML(cicdDefault.title)}</strong>
                         <span id="cicd-text">${unsafeHTML(cicdDefault.body)}</span>
                     </div>
                 </div>

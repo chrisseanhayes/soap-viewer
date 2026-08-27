@@ -36,19 +36,19 @@
   </devImpact>
 
   <interaction>
-    Carries the serialized SOAP HTTP payload over the wire between the client and server.
+    Carries the serialized <def id="SOAP">SOAP</def> HTTP payload over the wire between the client and server.
   </interaction>
 
   <bigPicture>
-    <role>The Dumb Pipe — The Physical Reality RPC Tries to Hide</role>
+    <role>The Dumb Pipe — The Physical Reality <def id="RPC">RPC</def> Tries to Hide</role>
     <summary>
-      This is the part of the journey that RPC frameworks pretend doesn't exist. The HTTP request is broken into thousands of tiny TCP packets by your OS, each one routed independently across the internet through switches, routers, and load balancers, then reassembled in order on the other side. TCP guarantees delivery and ordering — if a packet is lost, it is automatically retransmitted. If you are on HTTPS (port 443), a TLS handshake encrypted everything before the first byte left your machine.
+      This is the part of the journey that <def id="RPC">RPC</def> frameworks pretend doesn't exist. The HTTP request is broken into thousands of tiny TCP packets by your OS, each one routed independently across the internet through switches, routers, and load balancers, then reassembled in order on the other side. TCP guarantees delivery and ordering — if a packet is lost, it is automatically retransmitted. If you are on HTTPS (port 443), a TLS handshake encrypted everything before the first byte left your machine.
     </summary>
     <whyItExists>
-      The internet was not designed for method calls — it was designed for routing packets between IP addresses. This layer is the fundamental physical infrastructure that all networked software depends on. The latency incurred here (typically 1–500ms) is the unavoidable cost of the RPC abstraction and why carelessly calling a proxy inside a loop is catastrophic.
+      The internet was not designed for method calls — it was designed for routing packets between IP addresses. This layer is the fundamental physical infrastructure that all networked software depends on. The latency incurred here (typically 1–500ms) is the unavoidable cost of the <def id="RPC">RPC</def> abstraction and why carelessly calling a proxy inside a loop is catastrophic.
     </whyItExists>
     <journeyStep>
-      Step 3 of 5: Bytes in transit. The SOAP message is invisible packets crossing the internet.
+      Step 3 of 5: Bytes in transit. The <def id="SOAP">SOAP</def> message is invisible packets crossing the internet.
     </journeyStep>
   </bigPicture>
 
@@ -132,10 +132,10 @@
         >
       <sidebar>
         <title>Action: Returns via Port 80/443</title>
-        <overview>The server sends the SOAP Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for SOAP Faults — the HTTP layer succeeds; the SOAP layer contains the error).</overview>
+        <overview>The server sends the <def id="SOAP">SOAP</def> Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for <def id="SOAP">SOAP</def> Faults — the HTTP layer succeeds; the <def id="SOAP">SOAP</def> layer contains the error).</overview>
         <handledBy>&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing and SSL/TLS encryption on the return path.</handledBy>
         <devImpact>The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return.</devImpact>
-        <considerations>Note that SOAP Faults are returned with an HTTP 200 status in SOAP 1.1. In SOAP 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</considerations>
+        <considerations>Note that <def id="SOAP">SOAP</def> Faults are returned with an HTTP 200 status in <def id="SOAP">SOAP</def> 1.1. In <def id="SOAP">SOAP</def> 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</considerations>
       </sidebar>
       <definitionPills>
         <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
@@ -183,7 +183,7 @@
         >
       <sidebar>
         <title>Action: Delivers Response</title>
-        <overview>The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the SOAP library.</overview>
+        <overview>The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the <def id="SOAP">SOAP</def> library.</overview>
         <handledBy>&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</handledBy>
         <devImpact>Transparent to developers, but contributes to the total round-trip time the application experiences.</devImpact>
         <considerations>If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</considerations>

@@ -71,7 +71,7 @@ function baseSectionTpl(title, themeObj, iconFn, content, extraClasses = '') {
         <div class="${containerClasses}">
             <h4 class="${cls.sectionTitleBase}">
                 ${iconFn()}
-                ${title}
+                ${unsafeHTML(title)}
             </h4>
             <p class="${cls.sectionBodyBase}">${unsafeHTML(content)}</p>
         </div>
@@ -97,7 +97,7 @@ export function sidebarDetailTpl(node, nodeId, label, definitions) {
     return html`
         <div class="${cls.container}">
             <div class="${cls.header}">
-                <h3 class="${cls.title}">${node.title}</h3>
+                <h3 class="${cls.title}">${unsafeHTML(node.title)}</h3>
                 <span class="${cls.idBadge}">
                     ${label}: ${nodeId}
                 </span>
@@ -142,8 +142,8 @@ export function sidebarBigPictureTpl(node, definitions) {
                         return tooltipPillTpl(def.icon, def.label, def.body, def.colorClass);
                     })}
                 </div>
-                <h3 class="${cls.bpTitle} ${t.text}">${title}</h3>
-                <p class="${cls.bpRole}">${bp.role}</p>
+                <h3 class="${cls.bpTitle} ${t.text}">${unsafeHTML(title)}</h3>
+                <p class="${cls.bpRole}">${unsafeHTML(bp.role)}</p>
             </div>
 
             <div>
@@ -164,7 +164,7 @@ export function sidebarBigPictureTpl(node, definitions) {
 
             <div class="${cls.journeyStepCard}">
                 ${bpJourneyStepIcon()}
-                <p class="${cls.journeyStepText} ${t.stepText}">${bp.journeyStep}</p>
+                <p class="${cls.journeyStepText} ${t.stepText}">${unsafeHTML(bp.journeyStep)}</p>
             </div>
         </div>
     `;

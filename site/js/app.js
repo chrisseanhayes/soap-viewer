@@ -1,4 +1,5 @@
 import { render, html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
 import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
 import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
@@ -52,7 +53,7 @@ async function loadData() {
         currentLang = content.meta?.defaultLanguage || 'java';
         currentActiveNode = content.meta?.initialNodeId || 'AppClient';
         
-        document.title = content.meta?.pageTitle || 'Architecture Viewer';
+        document.title = (content.meta?.pageTitle || 'Architecture Viewer').replace(/<[^>]+>/g, '');
         
         renderApp();
         initMermaidDiagram();
@@ -71,8 +72,8 @@ function renderApp() {
         <div class="${cls.appContainer}">
             <header class="${cls.appHeader}">
                 <div class="${cls.appHeaderText}">
-                    <h1 class="${cls.appTitle}">${content.meta?.pageTitle || 'Architecture Viewer'}</h1>
-                    <p class="${cls.appSubtitle}">${content.meta?.pageDescription || 'Explore the request-response lifecycle.'}</p>
+                    <h1 class="${cls.appTitle}">${content.meta?.pageTitle ? unsafeHTML(content.meta.pageTitle) : 'Architecture Viewer'}</h1>
+                    <p class="${cls.appSubtitle}">${content.meta?.pageDescription ? unsafeHTML(content.meta.pageDescription) : 'Explore the request-response lifecycle.'}</p>
                 </div>
                 <div class="${cls.appLangToggleContainer}">
                     <div class="${cls.appLangToggleInner}">

@@ -1,4 +1,5 @@
 import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
+import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 import { iconSvg } from './icons.js';
 import { cls as sharedCls } from './classes.js';
 
@@ -77,7 +78,7 @@ export function diagramAndSidebarTpl(sb) {
                 <div class="${cls.sidebarHeader}">
                     <h2 class="${cls.sidebarTitle}">
                         ${shellSidebarTitleIcon()}
-                        <span class="${cls.sidebarTitleText}">${sb.heading}</span>
+                        <span class="${cls.sidebarTitleText}">${unsafeHTML(sb.heading)}</span>
                         <span id="sidebar-lang-badge" class="${cls.sidebarLangBadge} ${sharedCls.pill}">Java</span>
                     </h2>
                 </div>

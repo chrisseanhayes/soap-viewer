@@ -2,27 +2,27 @@
 <node id="Server" label="💻 Server Provider Environment" nodeType="Compute" nodeTypeIcon="💻" diagramClass="osiLayer">
   <title>Server Provider Environment</title>
   <overview>
-    The remote environment hosting the SOAP web service. It receives network requests, unpackages the SOAP messages, validates them, and executes business logic.
+    The remote environment hosting the <def id="SOAP">SOAP</def> web service. It receives network requests, unpackages the <def id="SOAP">SOAP</def> messages, validates them, and executes business logic.
   </overview>
   <handledBy>
-    &lt;strong&gt;The Backend Developer &amp; Server OS:&lt;/strong&gt; Backend devs implement the service logic and WSDL contracts, while the app server manages threads and HTTP connections.
+    &lt;strong&gt;The Backend Developer &amp; Server OS:&lt;/strong&gt; Backend devs implement the service logic and <def id="WSDL">WSDL</def> contracts, while the app server manages threads and HTTP connections.
   </handledBy>
   <devImpact>
-    The backend dictates the WSDL contract. If the server updates its WSDL, clients must regenerate their proxy classes.
+    The backend dictates the <def id="WSDL">WSDL</def> contract. If the server updates its <def id="WSDL">WSDL</def>, clients must regenerate their proxy classes.
   </devImpact>
   <interaction>
-    Reads incoming SOAP messages, processes the data, and returns a SOAP response or a SOAP Fault.
+    Reads incoming <def id="SOAP">SOAP</def> messages, processes the data, and returns a <def id="SOAP">SOAP</def> response or a <def id="SOAP">SOAP</def> Fault.
   </interaction>
   <considerations>
     Scalability, security, and schema versioning are critical. Changes to the schema must be backward-compatible, or client proxies will break.
   </considerations>
   <bigPicture>
-    <role>The Mirror — The RPC Journey in Reverse</role>
+    <role>The Mirror — The <def id="RPC">RPC</def> Journey in Reverse</role>
     <summary>
-      Everything the client did to prepare the call, the server now does in reverse. The web server receives TCP packets and reassembles the HTTP request. The SOAP engine strips the HTTP wrapper and extracts the XML. The parser converts XML back into native server-side objects. The WSDL validator acts as a strict gatekeeper — ensuring the incoming data perfectly matches the contract before any business logic runs. Finally, the actual service method is invoked. The result follows the same path back: serialize → HTTP response → TCP packets → client receives → deserialize → the developer's method call returns a value.
+      Everything the client did to prepare the call, the server now does in reverse. The web server receives TCP packets and reassembles the HTTP request. The <def id="SOAP">SOAP</def> engine strips the HTTP wrapper and extracts the <def id="XML">XML</def>. The parser converts <def id="XML">XML</def> back into native server-side objects. The <def id="WSDL">WSDL</def> validator acts as a strict gatekeeper — ensuring the incoming data perfectly matches the contract before any business logic runs. Finally, the actual service method is invoked. The result follows the same path back: serialize → HTTP response → TCP packets → client receives → deserialize → the developer's method call returns a value.
     </summary>
     <whyItExists>
-      This is the destination of the RPC call. The server is the reason the whole system exists — it exposes business capabilities (process a payment, look up an account) in a standardized, discoverable, strongly-typed way. The SOAP/WSDL contract is what makes those capabilities usable by any client on any platform without custom integration code.
+      This is the destination of the <def id="RPC">RPC</def> call. The server is the reason the whole system exists — it exposes business capabilities (process a payment, look up an account) in a standardized, discoverable, strongly-typed way. The <def id="SOAP">SOAP</def>/<def id="WSDL">WSDL</def> contract is what makes those capabilities usable by any client on any platform without custom integration code.
     </whyItExists>
     <journeyStep>
       Step 4–5 of 5: Arrival, execution, and the response begins its journey back to the waiting client.
@@ -50,11 +50,11 @@
       <edges direction="out">
         <edge to="Deserialize" label="📚 Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML">
           <sidebar>
-            <title>Action: Extracts XML</title>
-            <overview>The web server identifies the request as a SOAP endpoint, extracts the HTTP body (the XML), and passes it to the SOAP engine.</overview>
-            <handledBy>&lt;strong&gt;The Web Server / SOAP Framework:&lt;/strong&gt; Strips transport headers and extracts the payload.</handledBy>
+            <title>Action: Extracts <def id="XML">XML</def></title>
+            <overview>The web server identifies the request as a <def id="SOAP">SOAP</def> endpoint, extracts the HTTP body (the <def id="XML">XML</def>), and passes it to the <def id="SOAP">SOAP</def> engine.</overview>
+            <handledBy>&lt;strong&gt;The Web Server / <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Strips transport headers and extracts the payload.</handledBy>
             <devImpact>Mismatched content types will cause early rejection before any parsing happens.</devImpact>
-            <considerations>The server must check the Content-Type header to ensure it's receiving a valid XML format.</considerations>
+            <considerations>The server must check the Content-Type header to ensure it's receiving a valid <def id="XML">XML</def> format.</considerations>
           </sidebar>
           <definitionPills>
             <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml" />
@@ -92,8 +92,8 @@
     </diagram>
     <sidebar>
       <title>5. Web Server / Listener</title>
-      <overview>The server-side endpoint that receives the network connection, terminates TLS, and strips away the HTTP headers to extract the raw XML payload.</overview>
-      <interaction>Passes the raw SOAP XML payload to the backend application's Deserializer.</interaction>
+      <overview>The server-side endpoint that receives the network connection, terminates TLS, and strips away the HTTP headers to extract the raw <def id="XML">XML</def> payload.</overview>
+      <interaction>Passes the raw <def id="SOAP">SOAP</def> <def id="XML">XML</def> payload to the backend application's Deserializer.</interaction>
       <branching>If the server is overloaded, it may reject the connection here with an HTTP 503 (Service Unavailable).</branching>
       <handledBy>&lt;strong&gt;The Web Server:&lt;/strong&gt; Manages thread pools, HTTP parsing, and forwards the payload to the application.</handledBy>
     </sidebar>
@@ -118,7 +118,7 @@ host.Open();
         <devImpact>Deployed via WSGI/ASGI servers like Gunicorn or Uvicorn.</devImpact>
         <codeSnippet>
 from spyne.server.wsgi import WsgiApplication
-# Wrap the SOAP app in a WSGI container
+# Wrap the <def id="SOAP">SOAP</def> app in a WSGI container
 wsgi_app = WsgiApplication(application)
         </codeSnippet>
       </language>
@@ -135,7 +135,7 @@ wsgi_app = WsgiApplication(application)
   </node>
   <node id="Deserialize" nodeType="LibraryCode" nodeTypeIcon="📚">
     <diagram>
-      <nodeLabel>📚 6. Parse SOAP XML</nodeLabel>
+      <nodeLabel>📚 6. Parse <def id="SOAP">SOAP</def> <def id="XML">XML</def></nodeLabel>
       <nodeId>Deserialize</nodeId>
       <classes>
         <class name="process" style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px" />
@@ -144,9 +144,9 @@ wsgi_app = WsgiApplication(application)
       <edges direction="out">
         <edge to="Validate" label="📚 Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL">
           <sidebar>
-            <title>Action: Validates vs WSDL</title>
-            <overview>The SOAP framework parses the XML and validates it strictly against the service's XML Schema (XSD) defined in the WSDL.</overview>
-            <handledBy>&lt;strong&gt;The SOAP Framework:&lt;/strong&gt; Enforces the strong typing contract.</handledBy>
+            <title>Action: Validates vs <def id="WSDL">WSDL</def></title>
+            <overview>The <def id="SOAP">SOAP</def> framework parses the <def id="XML">XML</def> and validates it strictly against the service's <def id="XML">XML</def> Schema (XSD) defined in the <def id="WSDL">WSDL</def>.</overview>
+            <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Enforces the strong typing contract.</handledBy>
             <devImpact>Ensures the business logic never receives malformed data. It is a strict gatekeeper.</devImpact>
             <considerations>Any missing required elements, extra unauthorized elements, or type mismatches (e.g., passing a string for an integer field) will cause a Validation Fault.</considerations>
           </sidebar>
@@ -164,11 +164,11 @@ wsgi_app = WsgiApplication(application)
       <edges direction="in">
         <edge from="ServerTransport" label="📚 Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML">
           <sidebar>
-            <title>Action: Extracts XML</title>
-            <overview>The web server identifies the request as a SOAP endpoint, extracts the HTTP body (the XML), and passes it to the SOAP engine.</overview>
-            <handledBy>&lt;strong&gt;The Web Server / SOAP Framework:&lt;/strong&gt; Strips transport headers and extracts the payload.</handledBy>
+            <title>Action: Extracts <def id="XML">XML</def></title>
+            <overview>The web server identifies the request as a <def id="SOAP">SOAP</def> endpoint, extracts the HTTP body (the <def id="XML">XML</def>), and passes it to the <def id="SOAP">SOAP</def> engine.</overview>
+            <handledBy>&lt;strong&gt;The Web Server / <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Strips transport headers and extracts the payload.</handledBy>
             <devImpact>Mismatched content types will cause early rejection before any parsing happens.</devImpact>
-            <considerations>The server must check the Content-Type header to ensure it's receiving a valid XML format.</considerations>
+            <considerations>The server must check the Content-Type header to ensure it's receiving a valid <def id="XML">XML</def> format.</considerations>
           </sidebar>
           <definitionPills>
             <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml" />
@@ -184,13 +184,13 @@ wsgi_app = WsgiApplication(application)
       <clickHandler>call showDetails() "Details on Parsing"</clickHandler>
     </diagram>
     <sidebar>
-      <title>6. Parse SOAP XML</title>
-      <overview>The server-side SOAP engine reads the raw XML string and translates it back into native server-side memory objects.</overview>
+      <title>6. Parse <def id="SOAP">SOAP</def> <def id="XML">XML</def></title>
+      <overview>The server-side <def id="SOAP">SOAP</def> engine reads the raw <def id="XML">XML</def> string and translates it back into native server-side memory objects.</overview>
       <interaction>Sends the parsed objects to the Validation layer.</interaction>
-      <branching>If the XML is malformed, the parser throws an immediate fatal error and returns an HTTP 500 or Bad Request Fault.</branching>
-      <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
-      <devImpact>Framework handles this. Devs configure the server-side XML parsers and ensure their endpoint is correctly mapped to the incoming URL route.</devImpact>
-      <considerations>Deserialization is computationally expensive. Developers should consider the impact of receiving massive XML payloads, which can bog down the CPU and memory.</considerations>
+      <branching>If the <def id="XML">XML</def> is malformed, the parser throws an immediate fatal error and returns an HTTP 500 or Bad Request Fault.</branching>
+      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
+      <devImpact>Framework handles this. Devs configure the server-side <def id="XML">XML</def> parsers and ensure their endpoint is correctly mapped to the incoming URL route.</devImpact>
+      <considerations>Deserialization is computationally expensive. Developers should consider the impact of receiving massive <def id="XML">XML</def> payloads, which can bog down the CPU and memory.</considerations>
     </sidebar>
     <definitionPills>
       <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml" />
@@ -204,7 +204,7 @@ wsgi_app = WsgiApplication(application)
   </node>
   <node id="Validate" nodeType="LibraryCode" nodeTypeIcon="📚">
     <diagram>
-      <nodeLabel>📚 7. WSDL Contract Validation</nodeLabel>
+      <nodeLabel>📚 7. <def id="WSDL">WSDL</def> Contract Validation</nodeLabel>
       <nodeId>Validate</nodeId>
       <classes>
         <class name="process" style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px" />
@@ -214,10 +214,10 @@ wsgi_app = WsgiApplication(application)
         <edge to="AppServer" label="🧑‍💻 Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic">
           <sidebar>
             <title>Action: Invokes Logic</title>
-            <overview>Once validated, the framework translates the XML back into native server objects and calls the actual service implementation method written by the backend developer.</overview>
-            <handledBy>&lt;strong&gt;The SOAP Framework &amp; Backend Developer:&lt;/strong&gt; The framework maps the call, and the developer's logic executes.</handledBy>
+            <overview>Once validated, the framework translates the <def id="XML">XML</def> back into native server objects and calls the actual service implementation method written by the backend developer.</overview>
+            <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework &amp; Backend Developer:&lt;/strong&gt; The framework maps the call, and the developer's logic executes.</handledBy>
             <devImpact>This is where the actual business value is generated (e.g., saving a user, processing a payment).</devImpact>
-            <considerations>The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic SOAP Faults if necessary.</considerations>
+            <considerations>The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic <def id="SOAP">SOAP</def> Faults if necessary.</considerations>
           </sidebar>
           <definitionPills>
             <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml" />
@@ -233,9 +233,9 @@ wsgi_app = WsgiApplication(application)
       <edges direction="in">
         <edge from="Deserialize" label="📚 Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL">
           <sidebar>
-            <title>Action: Validates vs WSDL</title>
-            <overview>The SOAP framework parses the XML and validates it strictly against the service's XML Schema (XSD) defined in the WSDL.</overview>
-            <handledBy>&lt;strong&gt;The SOAP Framework:&lt;/strong&gt; Enforces the strong typing contract.</handledBy>
+            <title>Action: Validates vs <def id="WSDL">WSDL</def></title>
+            <overview>The <def id="SOAP">SOAP</def> framework parses the <def id="XML">XML</def> and validates it strictly against the service's <def id="XML">XML</def> Schema (XSD) defined in the <def id="WSDL">WSDL</def>.</overview>
+            <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Enforces the strong typing contract.</handledBy>
             <devImpact>Ensures the business logic never receives malformed data. It is a strict gatekeeper.</devImpact>
             <considerations>Any missing required elements, extra unauthorized elements, or type mismatches (e.g., passing a string for an integer field) will cause a Validation Fault.</considerations>
           </sidebar>
@@ -253,11 +253,11 @@ wsgi_app = WsgiApplication(application)
       <clickHandler>call showDetails() "Details on Validation"</clickHandler>
     </diagram>
     <sidebar>
-      <title>7. WSDL Contract Validation</title>
-      <overview>The server strictly checks the parsed XML against its XML Schema Definition (XSD). This enforces strong typing and strict structural rules.</overview>
+      <title>7. <def id="WSDL">WSDL</def> Contract Validation</title>
+      <overview>The server strictly checks the parsed <def id="XML">XML</def> against its <def id="XML">XML</def> Schema Definition (XSD). This enforces strong typing and strict structural rules.</overview>
       <interaction>If valid, triggers the execution of the Application Service Logic.</interaction>
       <branching>If data types are wrong, fields are missing, or extra unauthorized fields exist, it rejects it immediately and generates a validation Fault.</branching>
-      <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
+      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
       <devImpact>Devs rely on this so they do not have to write manual null checks or type-checking logic in their business code. The schema guarantees the data is exactly the right shape.</devImpact>
     </sidebar>
     <definitionPills>
@@ -281,11 +281,11 @@ wsgi_app = WsgiApplication(application)
       <edges direction="out">
         <edge to="SOAPResponse" label="📚 Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML">
           <sidebar>
-            <title>Action: Generates Response XML</title>
-            <overview>The server-side SOAP framework intercepts the return value (or exception) from the business logic and serializes it into a formal SOAP Response Envelope.</overview>
-            <handledBy>&lt;strong&gt;The SOAP Framework:&lt;/strong&gt; Automatically performs the object-to-XML mapping for the response.</handledBy>
+            <title>Action: Generates Response <def id="XML">XML</def></title>
+            <overview>The server-side <def id="SOAP">SOAP</def> framework intercepts the return value (or exception) from the business logic and serializes it into a formal <def id="SOAP">SOAP</def> Response Envelope.</overview>
+            <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping for the response.</handledBy>
             <devImpact>Transparent to the backend developer, saving them from manual string concatenation.</devImpact>
-            <considerations>Exceptions must be properly typed so the framework can map them to standard SOAP Faults.</considerations>
+            <considerations>Exceptions must be properly typed so the framework can map them to standard <def id="SOAP">SOAP</def> Faults.</considerations>
           </sidebar>
           <definitionPills>
             <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml" />
@@ -302,10 +302,10 @@ wsgi_app = WsgiApplication(application)
         <edge from="Validate" label="🧑‍💻 Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic">
           <sidebar>
             <title>Action: Invokes Logic</title>
-            <overview>Once validated, the framework translates the XML back into native server objects and calls the actual service implementation method written by the backend developer.</overview>
-            <handledBy>&lt;strong&gt;The SOAP Framework &amp; Backend Developer:&lt;/strong&gt; The framework maps the call, and the developer's logic executes.</handledBy>
+            <overview>Once validated, the framework translates the <def id="XML">XML</def> back into native server objects and calls the actual service implementation method written by the backend developer.</overview>
+            <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework &amp; Backend Developer:&lt;/strong&gt; The framework maps the call, and the developer's logic executes.</handledBy>
             <devImpact>This is where the actual business value is generated (e.g., saving a user, processing a payment).</devImpact>
-            <considerations>The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic SOAP Faults if necessary.</considerations>
+            <considerations>The developer's code executes here and should handle domain-specific exceptions, wrapping them in generic <def id="SOAP">SOAP</def> Faults if necessary.</considerations>
           </sidebar>
           <definitionPills>
             <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml" />
@@ -322,14 +322,14 @@ wsgi_app = WsgiApplication(application)
     </diagram>
     <sidebar>
       <title>8. Service Business Logic</title>
-      <overview>The core application code where the remote method's actual business rules are executed after the SOAP payload has been validated and deserialized.</overview>
+      <overview>The core application code where the remote method's actual business rules are executed after the <def id="SOAP">SOAP</def> payload has been validated and deserialized.</overview>
       <interaction>Completes the work, generates a response object, and sends it backward through the stack.</interaction>
-      <branching>If a business rule fails (e.g., "Account not found"), the dev manually throws an exception which the framework translates into a SOAP Fault.</branching>
+      <branching>If a business rule fails (e.g., "Account not found"), the dev manually throws an exception which the framework translates into a <def id="SOAP">SOAP</def> Fault.</branching>
       <handledBy>&lt;strong&gt;The Backend Developer:&lt;/strong&gt; Implements the specific business requirements.</handledBy>
     </sidebar>
     <languages>
       <language id="java" label="Java">
-        <devImpact>Backend engineers write standard Java classes and use annotations like `@WebService` and `@WebMethod` to expose them via SOAP.</devImpact>
+        <devImpact>Backend engineers write standard Java classes and use annotations like `@WebService` and `@WebMethod` to expose them via <def id="SOAP">SOAP</def>.</devImpact>
         <codeSnippet>
 @WebService(targetNamespace = "http://api.example.com/")
 public class PaymentImpl {
@@ -377,16 +377,16 @@ class PaymentService(ServiceBase):
     </navigation>
   </node>
   <node id="SOAPResponse" label="📄 SOAP Response Message" nodeType="Serialization" nodeTypeIcon="📄" diagramClass="osiLayer">
-    <title>SOAP Response Message</title>
-    <overview>The standardized XML document the server constructs and returns after processing a request. It follows the same Envelope structure as the request but carries the result — either a populated Body with the return value, or a Body containing a SOAP Fault if the operation failed.</overview>
-    <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; The server-side framework serializes the result (or fault) into the response envelope automatically.</handledBy>
+    <title><def id="SOAP">SOAP</def> Response Message</title>
+    <overview>The standardized <def id="XML">XML</def> document the server constructs and returns after processing a request. It follows the same Envelope structure as the request but carries the result — either a populated Body with the return value, or a Body containing a <def id="SOAP">SOAP</def> Fault if the operation failed.</overview>
+    <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; The server-side framework serializes the result (or fault) into the response envelope automatically.</handledBy>
     <devImpact>Errors not caught and mapped to Faults by the developer will often result in generic HTTP 500 responses that are much harder for clients to parse meaningfully.</devImpact>
     <interaction>Travels back from the server through TCP/IP to the waiting client, where it is unpacked and deserialized.</interaction>
-    <considerations>Developers must ensure their service methods return the correct types defined in the WSDL, or throw exceptions the framework will correctly map to SOAP Faults.</considerations>
+    <considerations>Developers must ensure their service methods return the correct types defined in the <def id="WSDL">WSDL</def>, or throw exceptions the framework will correctly map to <def id="SOAP">SOAP</def> Faults.</considerations>
     <bigPicture>
       <role>The Return Journey — Completing the Round Trip</role>
-      <summary>The SOAP Response Message is the mirror of the request. Once the server's business logic finishes, the SOAP framework serializes the result (or wraps an exception in a SOAP Fault) into a new XML envelope. This envelope travels back through the same TCP/IP stack, is received by the client's transport layer, unwrapped from HTTP, and deserialized into native objects. The developer's original blocking method call then unblocks and returns — completing the full round trip.</summary>
-      <whyItExists>A request without a response is a fire-and-forget message. SOAP's RPC model fundamentally requires a synchronous round trip — the client blocks until it receives confirmation, a result, or a fault. The response message is what makes it a true Remote Procedure Call.</whyItExists>
+      <summary>The <def id="SOAP">SOAP</def> Response Message is the mirror of the request. Once the server's business logic finishes, the <def id="SOAP">SOAP</def> framework serializes the result (or wraps an exception in a <def id="SOAP">SOAP</def> Fault) into a new <def id="XML">XML</def> envelope. This envelope travels back through the same TCP/IP stack, is received by the client's transport layer, unwrapped from HTTP, and deserialized into native objects. The developer's original blocking method call then unblocks and returns — completing the full round trip.</summary>
+      <whyItExists>A request without a response is a fire-and-forget message. <def id="SOAP">SOAP</def>'s <def id="RPC">RPC</def> model fundamentally requires a synchronous round trip — the client blocks until it receives confirmation, a result, or a fault. The response message is what makes it a true Remote Procedure Call.</whyItExists>
       <journeyStep>Step 4b–5 of 5: The server's answer. It travels back through TCP, is received by the client, and deserialized.</journeyStep>
     </bigPicture>
     <definitionPills>
@@ -397,7 +397,7 @@ class PaymentService(ServiceBase):
     </navigation>
     <node id="RespEnvelope" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Envelope</nodeLabel>
+        <nodeLabel>📚 <def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def></nodeLabel>
         <nodeId>RespEnvelope</nodeId>
         <classes>
           <class name="soapResponse" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" />
@@ -406,11 +406,11 @@ class PaymentService(ServiceBase):
         <edges direction="in">
           <edge from="AppServer" label="📚 Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML">
             <sidebar>
-              <title>Action: Generates Response XML</title>
-              <overview>The server-side SOAP framework intercepts the return value (or exception) from the business logic and serializes it into a formal SOAP Response Envelope.</overview>
-              <handledBy>&lt;strong&gt;The SOAP Framework:&lt;/strong&gt; Automatically performs the object-to-XML mapping for the response.</handledBy>
+              <title>Action: Generates Response <def id="XML">XML</def></title>
+              <overview>The server-side <def id="SOAP">SOAP</def> framework intercepts the return value (or exception) from the business logic and serializes it into a formal <def id="SOAP">SOAP</def> Response Envelope.</overview>
+              <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Framework:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping for the response.</handledBy>
               <devImpact>Transparent to the backend developer, saving them from manual string concatenation.</devImpact>
-              <considerations>Exceptions must be properly typed so the framework can map them to standard SOAP Faults.</considerations>
+              <considerations>Exceptions must be properly typed so the framework can map them to standard <def id="SOAP">SOAP</def> Faults.</considerations>
             </sidebar>
             <definitionPills>
               <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml" />
@@ -427,10 +427,10 @@ class PaymentService(ServiceBase):
           <edge to="TCP" label="⚙️ ☁️ Returns via Port 80/443" type="solid-arrow" edgeKey="EdgeReturnsViaPort">
             <sidebar>
               <title>Action: Returns via Port 80/443</title>
-              <overview>The server sends the SOAP Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for SOAP Faults — the HTTP layer succeeds; the SOAP layer contains the error).</overview>
+              <overview>The server sends the <def id="SOAP">SOAP</def> Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for <def id="SOAP">SOAP</def> Faults — the HTTP layer succeeds; the <def id="SOAP">SOAP</def> layer contains the error).</overview>
               <handledBy>&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing and SSL/TLS encryption on the return path.</handledBy>
               <devImpact>The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return.</devImpact>
-              <considerations>Note that SOAP Faults are returned with an HTTP 200 status in SOAP 1.1. In SOAP 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</considerations>
+              <considerations>Note that <def id="SOAP">SOAP</def> Faults are returned with an HTTP 200 status in <def id="SOAP">SOAP</def> 1.1. In <def id="SOAP">SOAP</def> 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</considerations>
             </sidebar>
             <definitionPills>
               <definitionRef id="Network" file="soap-xml/definitions/Network.xml" />
@@ -447,13 +447,13 @@ class PaymentService(ServiceBase):
         <clickHandler>call showDetails() "Details on Response Envelope"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Envelope (Response)</title>
-        <overview>The mandatory root element of the server's outbound SOAP response message. Structurally identical to the request envelope, but carries the result of the operation (or a fault).</overview>
-        <interaction>Wraps the response Header and Body. The client's SOAP library unwraps it after the HTTP response is received.</interaction>
-        <branching>If the client cannot parse this envelope (wrong namespace, malformed XML), it throws a deserialization exception.</branching>
+        <title><def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def> (Response)</title>
+        <overview>The mandatory root element of the server's outbound <def id="SOAP">SOAP</def> response message. Structurally identical to the request envelope, but carries the result of the operation (or a fault).</overview>
+        <interaction>Wraps the response Header and Body. The client's <def id="SOAP">SOAP</def> library unwraps it after the HTTP response is received.</interaction>
+        <branching>If the client cannot parse this envelope (wrong namespace, malformed <def id="XML">XML</def>), it throws a deserialization exception.</branching>
         <devImpact>Transparent to developers — the framework handles construction on the server side and parsing on the client side.</devImpact>
-        <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; The server-side framework serializes the response; the client-side library deserializes it.</handledBy>
-        <considerations>The response envelope must use the same SOAP version as the request. Version mismatches cause parse failures.</considerations>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; The server-side framework serializes the response; the client-side library deserializes it.</handledBy>
+        <considerations>The response envelope must use the same <def id="SOAP">SOAP</def> version as the request. Version mismatches cause parse failures.</considerations>
         <codeSnippet>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;soapenv:Envelope
@@ -475,7 +475,7 @@ class PaymentService(ServiceBase):
     </node>
     <node id="RespHeader" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Header - Optional</nodeLabel>
+        <nodeLabel>📚 <def id="SOAP">SOAP</def> Header - Optional</nodeLabel>
         <nodeId>RespHeader</nodeId>
         <classes>
           <class name="soapResponse" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" />
@@ -484,12 +484,12 @@ class PaymentService(ServiceBase):
         <clickHandler>call showDetails() "Details on Response Header"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Header (Response)</title>
-        <overview>An optional element in the server's response for returning metadata such as correlation IDs, session tokens, or WS-Addressing reply-to information.</overview>
+        <title><def id="SOAP">SOAP</def> Header (Response)</title>
+        <overview>An optional element in the server's response for returning metadata such as correlation IDs, session tokens, or <def id="WSAddressing">WS-Addressing</def> reply-to information.</overview>
         <interaction>Processed by client-side interceptors before the response Body is deserialized into application objects.</interaction>
         <branching>Rarely causes failures, but a client configured to require a specific header (mustUnderstand) will throw if the server omits it.</branching>
         <devImpact>Developers may inspect response headers to extract trace IDs or refresh authentication tokens returned by the server.</devImpact>
-        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Backend Developer:&lt;/strong&gt; The server framework injects standard headers; developers add custom ones.</handledBy>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; The Backend Developer:&lt;/strong&gt; The server framework injects standard headers; developers add custom ones.</handledBy>
         <considerations>Response headers are a useful place for servers to return correlation data without polluting the business payload in the Body.</considerations>
       </sidebar>
       <definitionPills>
@@ -504,7 +504,7 @@ class PaymentService(ServiceBase):
     </node>
     <node id="RespBody" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Body - Required</nodeLabel>
+        <nodeLabel>📚 <def id="SOAP">SOAP</def> Body - Required</nodeLabel>
         <nodeId>RespBody</nodeId>
         <classes>
           <class name="soapResponse" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" />
@@ -513,12 +513,12 @@ class PaymentService(ServiceBase):
         <clickHandler>call showDetails() "Details on Response Body"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Body (Response)</title>
+        <title><def id="SOAP">SOAP</def> Body (Response)</title>
         <overview>The required payload of the server's response. On success it contains the serialized return value of the remote method. On failure it contains a soap:Fault element.</overview>
-        <interaction>Deserialized by the client SOAP library into native objects and returned to the calling application (or a Fault is translated into a thrown exception).</interaction>
+        <interaction>Deserialized by the client <def id="SOAP">SOAP</def> library into native objects and returned to the calling application (or a Fault is translated into a thrown exception).</interaction>
         <branching>Success → return value deserialized into native object. Failure → soap:Fault present; client library translates it into a language-native exception.</branching>
         <devImpact>This is what the developer's original method call ultimately receives as its return value. The round-trip is complete when this is deserialized.</devImpact>
-        <handledBy>&lt;strong&gt;The SOAP Library:&lt;/strong&gt; Serializes the response on the server; deserializes it on the client.</handledBy>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Serializes the response on the server; deserializes it on the client.</handledBy>
         <considerations>Large response payloads slow down the return transmission and can spike client-side memory during deserialization.</considerations>
         <codeSnippet>
 &lt;soapenv:Body&gt;
@@ -541,7 +541,7 @@ class PaymentService(ServiceBase):
     </node>
     <node id="RespFault" nodeType="LibraryCode" nodeTypeIcon="📚">
       <diagram>
-        <nodeLabel>📚 SOAP Fault - On Error</nodeLabel>
+        <nodeLabel>📚 <def id="SOAP">SOAP</def> Fault - On Error</nodeLabel>
         <nodeId>RespFault</nodeId>
         <classes>
           <class name="soapResponse" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" />
@@ -550,11 +550,11 @@ class PaymentService(ServiceBase):
         <clickHandler>call showDetails() "Details on Fault"</clickHandler>
       </diagram>
       <sidebar>
-        <title>SOAP Fault</title>
+        <title><def id="SOAP">SOAP</def> Fault</title>
         <overview>A standardized error element nested inside the response Body — only present when the operation failed. It contains a machine-readable fault code, a human-readable fault string, and optional detail elements.</overview>
-        <interaction>Transmitted back to the client inside the HTTP response body. The client SOAP library detects it and translates it into a native language exception.</interaction>
+        <interaction>Transmitted back to the client inside the HTTP response body. The client <def id="SOAP">SOAP</def> library detects it and translates it into a native language exception.</interaction>
         <branching>A Fault replaces the normal response Body. The client application is branched into its error-handling flow rather than receiving a result.</branching>
-        <handledBy>&lt;strong&gt;The SOAP Library &amp;amp; The Developer:&lt;/strong&gt; The library parses the fault and throws an exception; the developer must catch it and decide how to recover.</handledBy>
+        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; The Developer:&lt;/strong&gt; The library parses the fault and throws an exception; the developer must catch it and decide how to recover.</handledBy>
         <considerations>Faults only ever appear in server responses, never in client requests. Developers should map fault codes to recoverable vs. unrecoverable error categories in their error-handling logic.</considerations>
         <codeSnippet>
 &lt;soapenv:Body&gt;
@@ -583,7 +583,7 @@ try {
 try {
     proxy.ProcessCharge("1234-5678", 50.0);
 } catch (FaultException ex) {
-    Console.WriteLine($"SOAP Error: {ex.Message}");
+    Console.WriteLine($"<def id="SOAP">SOAP</def> Error: {ex.Message}");
 }
           </codeSnippet>
         </language>
@@ -595,7 +595,7 @@ import zeep.exceptions
 try:
     client.service.processCharge("1234-5678", 50.0)
 except zeep.exceptions.Fault as ex:
-    print(f"SOAP Fault: {ex.message}")
+    print(f"<def id="SOAP">SOAP</def> Fault: {ex.message}")
           </codeSnippet>
         </language>
       </languages>
