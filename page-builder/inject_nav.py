@@ -10,7 +10,9 @@ containers = {
     'SOAPResponse': 30
 }
 
-for f in glob.glob("../soap-xml/nodes/*.xml"):
+import sys
+project_name = sys.argv[1] if len(sys.argv) > 1 else 'soap'
+for f in glob.glob(f"../data/{project_name}/nodes/*.xml"):
     tree = ET.parse(f)
     root = tree.getroot()
     

@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import glob
 
-def generate_mermaid_code():
+def generate_mermaid_code(project_name="soap"):
     class_defs = {}
     edges_out = []
     click_handlers = []
@@ -77,7 +77,7 @@ def generate_mermaid_code():
         return out
 
     mermaid_code = "graph TD\n"
-    for f in glob.glob("../soap-xml/nodes/*.xml"):
+    for f in glob.glob(f"../data/{project_name}/nodes/*.xml"):
         tree = ET.parse(f)
         mermaid_code += parse_node(tree.getroot(), 0) + "\n"
 
@@ -91,8 +91,8 @@ def generate_mermaid_code():
 
     # Write standalone MMD just in case
     import os
-    os.makedirs("../dist/data", exist_ok=True)
-    with open("../dist/data/diagram.mmd", "w") as f:
+    os.makedirs(f"../site/data/{project_name}", exist_ok=True)
+    with open(f"../site/data/{project_name}/diagram.mmd", "w") as f:
         f.write(mermaid_code)
 
     return mermaid_code

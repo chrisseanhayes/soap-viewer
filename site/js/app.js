@@ -37,11 +37,13 @@ let currentLang = 'java';
 let currentActiveNode = null;
 let svgPanZoomInstance = null;
 
+const projectName = window.location.pathname.split('/').pop().replace('.html', '') || 'soap';
+
 async function loadData() {
     try {
         const [contentRes, langRes] = await Promise.all([
-            fetch('./data/content.json'),
-            fetch('./data/language-data.json')
+            fetch(`./data/${projectName}/content.json`),
+            fetch(`./data/${projectName}/language-data.json`)
         ]);
         content = await contentRes.json();
         langData = await langRes.json();
@@ -105,7 +107,7 @@ function renderApp() {
 }
 
 async function initMermaidDiagram() {
-    const mermaidRes = await fetch('./data/diagram.mmd');
+    const mermaidRes = await fetch(`./data/${projectName}/diagram.mmd`);
     const mermaidCode = await mermaidRes.text();
     const mermaidEl = document.querySelector('.mermaid');
     if (mermaidEl) {

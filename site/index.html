@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Viewer Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center py-20 px-6">
+    
+    <div class="max-w-4xl w-full">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold text-slate-800 tracking-tight">Architecture Library</h1>
+            <p class="text-slate-500 mt-3 text-lg">Select a system or concept below to view its architectural breakdown.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <a href="soap.html" class="block bg-white p-8 rounded-2xl border border-slate-200 hover:border-blue-400 hover:ring-4 hover:ring-blue-50 transition-all group cursor-pointer shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">SOAP Integration</h2>
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <p class="text-slate-500 text-sm leading-relaxed">
+                    Interactive diagram and documentation for the legacy SOAP message integration layer, exploring proxy patterns, OSI networking, and language-specific implementations.
+                </p>
+            </a>
+
+            <!-- Future topics can go here -->
+            <div class="block bg-slate-100 p-8 rounded-2xl border border-slate-200 border-dashed flex items-center justify-center text-center">
+                <p class="text-slate-400 text-sm italic">More architecture topics coming soon...</p>
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+</html>

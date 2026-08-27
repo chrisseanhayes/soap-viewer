@@ -11,8 +11,8 @@ def inner_xml(element):
     if element is None: return ""
     return (element.text or "") + "".join(ET.tostring(child, encoding='unicode') for child in element)
 
-def parse_all():
-    tree = ET.parse('../soap-xml/PageContent.xml')
+def parse_all(project_name="soap"):
+    tree = ET.parse(f'../data/{project_name}/PageContent.xml')
     root = tree.getroot()
     
     meta = root.find('meta')
@@ -185,11 +185,11 @@ def parse_all():
                             c_edge["considerations"] = inner_xml(edge_sidebar.find("considerations")).strip() if edge_sidebar.find("considerations") is not None else ""
                             content["nodes"][edge_id] = {k: v for k, v in c_edge.items() if v}
                             
-    for f in glob.glob("../soap-xml/nodes/*.xml"):
+    for f in glob.glob(f"../data/{project_name}/nodes/*.xml"):
         ntree = ET.parse(f)
         extract_node_data(ntree.getroot())
 
-    os.makedirs('../dist/data', exist_ok=True)
+    os.makedirs(f'../site/data/{project_name}', exist_ok=True)
     
     # helper for unescaping html entities that inner_xml keeps escaped
     import html
@@ -209,11 +209,13 @@ def parse_all():
     unescape_dict(content)
     unescape_dict(language_data)
     
-    with open('../dist/data/content.json', 'w') as f:
+    with open(f'../site/data/{project_name}/content.json', 'w') as f:
         json.dump(content, f, indent=2)
         
-    with open('../dist/data/language-data.json', 'w') as f:
+    with open(f'../site/data/{project_name}/language-data.json', 'w') as f:
         json.dump(language_data, f, indent=2)
 
 if __name__ == '__main__':
-    parse_all()
+    import sys
+    project_name = sys.argv[1] if len(sys.argv) > 1 else 'soap'
+    parse_all(project_name)

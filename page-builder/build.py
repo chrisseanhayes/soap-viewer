@@ -5,10 +5,13 @@ import os
 
 from mermaid_generator import generate_mermaid_code
 
+import sys
+project_name = sys.argv[1] if len(sys.argv) > 1 else 'soap'
+
 # ---------------------------------------------------------
 # 1. GENERATE MERMAID DIAGRAM
 # ---------------------------------------------------------
-mermaid_code = generate_mermaid_code()
+mermaid_code = generate_mermaid_code(project_name)
 
 
 # ---------------------------------------------------------
@@ -18,11 +21,9 @@ import json
 import shutil
 import os
 
-# Copy the static harness app to dist
-os.makedirs('../dist', exist_ok=True)
-shutil.copytree('harness', '../dist', dirs_exist_ok=True)
 
-tree = ET.parse('../soap-xml/PageContent.xml')
+
+tree = ET.parse(f'../data/{project_name}/PageContent.xml')
 root = tree.getroot()
 
 def get_text(parent, path):
@@ -51,7 +52,7 @@ content = {
 }
 
 # parse definitions
-for f in glob.glob("../soap-xml/definitions/*.xml"):
+for f in glob.glob(f"../data/{project_name}/definitions/*.xml"):
     if os.path.basename(f) == "_definitions.xml": continue
     dtree = ET.parse(f)
     droot = dtree.getroot()
@@ -310,7 +311,7 @@ def extract_node_data(xml_node, parent_id=None):
 
                         content["nodes"][edge_id] = {k: v for k, v in c_edge.items() if v}
                         
-for f in glob.glob("../soap-xml/nodes/*.xml"):
+for f in glob.glob(f"../data/{project_name}/nodes/*.xml"):
     ntree = ET.parse(f)
     extract_node_data(ntree.getroot())
 
@@ -359,11 +360,11 @@ for d_id, d_data in content["definitions"].items():
 unescape_dict(content)
 unescape_dict(language_data)
 
-os.makedirs('../dist/data', exist_ok=True)
-with open('../dist/data/content.json', 'w') as f:
+os.makedirs(f'../site/data/{project_name}', exist_ok=True)
+with open(f'../site/data/{project_name}/content.json', 'w') as f:
     json.dump(content, f, indent=2)
     
-with open('../dist/data/language-data.json', 'w') as f:
+with open(f'../site/data/{project_name}/language-data.json', 'w') as f:
     json.dump(language_data, f, indent=2)
 
-print("JSON data and diagram.mmd generated in ../dist/data/")
+print(f"JSON data and diagram.mmd generated in ../site/data/{project_name}/")
