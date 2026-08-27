@@ -163,7 +163,7 @@ function updateSidebar() {
     if (isBigPicture) {
         const baseNodeId = currentActiveNode.replace('_BigPicture', '');
         const node = content.nodes[baseNodeId];
-        template = sidebarBigPictureTpl(node.bigPicture, node.title);
+        template = sidebarBigPictureTpl(node, content.definitions);
     } else {
         const node = content.nodes[currentActiveNode];
         template = sidebarDetailTpl(node, currentActiveNode, content.sidebar.labelIdentifier, content.definitions);

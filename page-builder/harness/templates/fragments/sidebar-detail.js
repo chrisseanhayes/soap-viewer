@@ -127,13 +127,20 @@ export function sidebarDetailTpl(node, nodeId, label, definitions) {
     `;
 }
 
-export function sidebarBigPictureTpl(bp, title) {
+export function sidebarBigPictureTpl(node, definitions) {
+    const bp = node.bigPicture;
+    const title = node.title;
     const t = theme.colors.bigPicture;
     return html`
         <div class="${cls.bpContainer}">
             <div class="${cls.bpHeader}">
                 <div class="${cls.bpBadgeContainer}">
                     <span class="${cls.bpBadge} ${t.badgeBg} ${t.badgeText}">Big Picture</span>
+                    ${(node.definitionPills || []).map(pill => {
+                        const def = definitions[pill.id];
+                        if (!def) return nothing;
+                        return tooltipPillTpl(def.icon, def.label, def.body, def.colorClass);
+                    })}
                 </div>
                 <h3 class="${cls.bpTitle} ${t.text}">${title}</h3>
                 <p class="${cls.bpRole}">${bp.role}</p>

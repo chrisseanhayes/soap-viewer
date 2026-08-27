@@ -57,11 +57,19 @@ for f in glob.glob("../soap-xml/definitions/*.xml"):
     droot = dtree.getroot()
     d_id = droot.get("id")
     if d_id:
+        assigned_to = []
+        assigned_node = droot.find("assignedTo")
+        if assigned_node is not None:
+            for ref in assigned_node.findall("nodeRef"):
+                if ref.get("id"):
+                    assigned_to.append(ref.get("id"))
+                    
         content["definitions"][d_id] = {
             "icon": get_text(droot, "icon"),
             "label": get_text(droot, "label"),
             "colorClass": get_text(droot, "colorClass"),
-            "body": inner_xml(droot.find("body"))
+            "body": inner_xml(droot.find("body")),
+            "_assignedTo": assigned_to
         }
 
 language_data = {
@@ -334,6 +342,19 @@ def unescape_dict(d):
                     v[i] = html.unescape(v[i])
                 elif isinstance(v[i], dict):
                     unescape_dict(v[i])
+
+# Attach definitions to nodes based on _assignedTo
+for d_id, d_data in content["definitions"].items():
+    if "_assignedTo" in d_data:
+        for target_node in d_data["_assignedTo"]:
+            if target_node in content["nodes"]:
+                if "definitionPills" not in content["nodes"][target_node]:
+                    content["nodes"][target_node]["definitionPills"] = []
+                # Avoid duplicates
+                existing_pills = [p["id"] for p in content["nodes"][target_node]["definitionPills"]]
+                if d_id not in existing_pills:
+                    content["nodes"][target_node]["definitionPills"].append({"id": d_id})
+        del d_data["_assignedTo"]
 
 unescape_dict(content)
 unescape_dict(language_data)
