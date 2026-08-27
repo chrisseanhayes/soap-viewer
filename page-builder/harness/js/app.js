@@ -181,6 +181,10 @@ window.showDetails = function(id) {
     window.dispatchEvent(new CustomEvent('node:selected', { detail: { id, source: 'click' } }));
 };
 
+window.showBigPicture = function(id) {
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: id + '_BigPicture', source: 'click' } }));
+};
+
 window.addEventListener('node:selected', (e) => {
     // Only update sidebar if the event contains an id (it might just be a string if dispatched differently, but we send an object)
     const newId = typeof e.detail === 'string' ? e.detail : e.detail.id;
