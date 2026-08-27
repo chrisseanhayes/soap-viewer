@@ -157,7 +157,7 @@ function updateSidebar() {
         return;
     }
     
-    const isBigPicture = content.nodes[currentActiveNode]?.isBigPicture || currentActiveNode.endsWith('_BigPicture');
+    const isBigPicture = currentActiveNode.endsWith('_BigPicture');
     let template;
     
     if (isBigPicture) {
