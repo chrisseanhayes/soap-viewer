@@ -120,7 +120,7 @@ window.prevStep = function() {
     if (currentIndex > 0) {
         currentActiveNode = content.navigationSequence[currentIndex - 1];
         updateSidebar();
-        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
+        window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'nav' } }));
     }
 };
 
@@ -130,7 +130,7 @@ window.nextStep = function() {
     if (currentIndex < content.navigationSequence.length - 1) {
         currentActiveNode = content.navigationSequence[currentIndex + 1];
         updateSidebar();
-        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
+        window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'nav' } }));
     }
 };
 
@@ -177,9 +177,17 @@ function updateSidebar() {
     if (stepCounter) stepCounter.textContent = `Step ${currentIndex + 1} of ${content.navigationSequence.length}`;
 }
 
-window.addEventListener('mermaid-node-clicked', (e) => {
-    currentActiveNode = e.detail.nodeId;
-    updateSidebar();
+window.showDetails = function(id) {
+    window.dispatchEvent(new CustomEvent('node:selected', { detail: { id, source: 'click' } }));
+};
+
+window.addEventListener('node:selected', (e) => {
+    // Only update sidebar if the event contains an id (it might just be a string if dispatched differently, but we send an object)
+    const newId = typeof e.detail === 'string' ? e.detail : e.detail.id;
+    if (newId && currentActiveNode !== newId) {
+        currentActiveNode = newId;
+        updateSidebar();
+    }
 });
 
 const modalCloseIcon = () => iconSvg('close', 'w-6 h-6');
@@ -209,7 +217,7 @@ window.closeDefinitionModal = function() {
 window.toggleZoomOnSelect = function toggleZoomOnSelect() {
     const zoomToggle = document.getElementById('zoom-on-select-toggle');
     if (zoomToggle && zoomToggle.checked) {
-        window.dispatchEvent(new CustomEvent('mermaid-select-node', { detail: { nodeId: currentActiveNode } }));
+        window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'nav' } }));
     }
 }
 
