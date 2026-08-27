@@ -25,7 +25,7 @@
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <!-- Displayed as plain text inside the modal <p> element -->
   <body>
-    The Network is the unpredictable space between machines. It's the cables, routers, switches, and radio waves that carry data from one place to another. Unlike the predictable Compute environment, the network can drop data, experience latency, or lose connection entirely.
+    The Network is the unpredictable space between machines. It&#x27;s the cables, routers, switches, and radio waves that carry data from one place to another. Unlike the predictable Compute environment, the network can drop data, experience latency, or lose connection entirely.
   </body>
 
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->

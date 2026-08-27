@@ -94,4 +94,100 @@
     colorClass="bg-slate-50 text-slate-800 border border-slate-200"
     file="soap/data/definitions/WSDL.xml"
   />
+
+  <definition
+    id="Facade"
+    icon="📖"
+    label="Facade"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/Facade.xml"
+  />
+
+  <definition
+    id="Proxy"
+    icon="📖"
+    label="Proxy"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/Proxy.xml"
+  />
+
+  <definition
+    id="LeakyAbstraction"
+    icon="📖"
+    label="Leaky Abstraction"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/LeakyAbstraction.xml"
+  />
+
+  <definition
+    id="NPlus1Problem"
+    icon="📖"
+    label="N+1 Problem"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/NPlus1Problem.xml"
+  />
+
+  <definition
+    id="CLI"
+    icon="📖"
+    label="CLI"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/CLI.xml"
+  />
+
+  <definition
+    id="WS"
+    icon="📖"
+    label="WS"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/WS.xml"
+  />
+
+  <definition
+    id="XML"
+    icon="📖"
+    label="XML"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/XML.xml"
+  />
+
+  <definition
+    id="SOAPEnvelope"
+    icon="📖"
+    label="SOAP Envelope"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/SOAPEnvelope.xml"
+  />
+
+  <definition
+    id="RPC"
+    icon="📖"
+    label="RPC"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/RPC.xml"
+  />
+
+  <definition
+    id="WSSecurity"
+    icon="📖"
+    label="WS-Security"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/WSSecurity.xml"
+  />
+
+  <definition
+    id="WSReliableMessaging"
+    icon="📖"
+    label="WS-ReliableMessaging"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/WSReliableMessaging.xml"
+  />
+
+  <definition
+    id="WSAddressing"
+    icon="📖"
+    label="WS-Addressing"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/WSAddressing.xml"
+  />
 </definitions>

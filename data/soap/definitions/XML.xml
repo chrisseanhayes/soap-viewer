@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="XML">
+  <icon>📖</icon>
+  <label>XML</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>The underlying hierarchical data and messaging format of SOAP. Every SOAP interaction consists of a well-formed XML document structured with a root &lt;Envelope&gt;, an optional &lt;Header&gt; for metadata, and a &lt;Body&gt; containing the operation payload, strictly validated against XML Schemas (XSD).</body>
+</definition>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="CLI">
+  <icon>📖</icon>
+  <label>CLI</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>Terminal-based tooling used within SOAP development workflows, primarily for generating strongly typed client proxy stubs directly from WSDL contracts (e.g., wsimport, wsdl2java) or testing and inspecting raw SOAP XML envelopes over HTTP (e.g., curl).</body>
+</definition>

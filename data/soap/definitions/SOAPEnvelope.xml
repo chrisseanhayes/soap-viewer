@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="SOAPEnvelope">
+  <icon>📖</icon>
+  <label>SOAP Envelope</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>The mandatory top-level root XML element (&lt;soap:Envelope&gt;) that defines an XML document as a SOAP message. It declares the necessary XML namespaces and encapsulates both the optional &lt;Header&gt; (used for routing and security metadata) and the mandatory &lt;Body&gt; (containing the application payload or &lt;Fault&gt; details).</body>
+</definition>

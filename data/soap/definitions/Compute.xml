@@ -25,7 +25,7 @@
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <!-- Displayed as plain text inside the modal <p> element -->
   <body>
-    Compute represents the physical or virtual machines where your application's actual work happens. It's the processor crunching numbers, memory holding data, and the operating system managing it all. In this context, it's where the code you write actually executes.
+    Compute represents the physical or virtual machines where your application&#x27;s actual work happens. It&#x27;s the processor crunching numbers, memory holding data, and the operating system managing it all. In this context, it&#x27;s where the code you write actually executes.
   </body>
 
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->

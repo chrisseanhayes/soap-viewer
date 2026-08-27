@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="WSReliableMessaging">
+  <icon>📖</icon>
+  <label>WS-ReliableMessaging</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>A WS-* specification that provides guaranteed, end-to-end delivery of SOAP messages across unreliable networks or multi-hop intermediary nodes. It supports delivery assurances such as AtLeastOnce, AtMostOnce, ExactlyOnce, and InOrder by managing acknowledgment sequences and message retransmissions at the SOAP protocol level.</body>
+</definition>

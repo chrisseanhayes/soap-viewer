@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="WSAddressing">
+  <icon>📖</icon>
+  <label>WS-Addressing</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>A standard that places transport-neutral routing information directly into the SOAP &lt;Header&gt; (e.g., &lt;wsa:To&gt;, &lt;wsa:Action&gt;, &lt;wsa:MessageID&gt;, and &lt;wsa:ReplyTo&gt;). This decouples message routing from the underlying transport protocol (such as HTTP or JMS), allowing stateful conversations, asynchronous callbacks, and multi-hop routing where responses can be directed to an endpoint different from the sender.</body>
+</definition>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="WS">
+  <icon>📖</icon>
+  <label>WS</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>The modular suite of enterprise-grade standards layered on top of core SOAP messaging to handle complex cross-platform requirements. These specifications extend standard SOAP envelopes with standardized headers to support enterprise features such as security, transactions, reliable delivery, and routing.</body>
+</definition>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="RPC">
+  <icon>📖</icon>
+  <label>RPC</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>A SOAP messaging style that formats operation requests and responses to directly mimic traditional function or method signatures. Request parameters and return values are explicitly mapped as individual child elements within the SOAP &lt;Body&gt;, conceptually treating remote web service calls like local procedural invocations.</body>
+</definition>

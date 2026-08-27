@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="LeakyAbstraction">
+  <icon>📖</icon>
+  <label>Leaky Abstraction</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>The failure of SOAP&#x27;s RPC (Remote Procedure Call) model to completely hide the complexities of network communication. While invoking a SOAP operation appears syntactically identical to a local function call, lower-level distributed system realities—such as network latency, dropped connections, timeouts, and XML parsing errors—unavoidably leak through and must be handled by the caller.</body>
+</definition>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="NPlus1Problem">
+  <icon>📖</icon>
+  <label>N+1 Problem</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>A distributed performance bottleneck occurring when a client makes 1 initial SOAP request to retrieve a collection of entity identifiers, followed by $N$ separate SOAP requests to fetch the details for each individual item. In SOAP environments, this causes substantial latency and XML processing overhead, and is resolved by providing bulk/batch operations (e.g., GetCustomersByIds).</body>
+</definition>

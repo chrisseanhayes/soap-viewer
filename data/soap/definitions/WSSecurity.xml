@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="WSSecurity">
+  <icon>📖</icon>
+  <label>WS-Security</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>A standard (OASIS) specifying how to apply end-to-end security directly at the message layer within the SOAP &lt;Header&gt;, independent of the transport layer (e.g., HTTPS). It defines protocols for embedding security tokens (such as UsernameToken or SAML), creating XML digital signatures for integrity, and encrypting XML payload elements for confidentiality across multiple intermediaries.</body>
+</definition>

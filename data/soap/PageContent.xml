@@ -4,7 +4,7 @@
   =========================================================================
   Contains the high-level sections displayed on the root page beneath the
   diagram, including the meta titles, "Understanding the Layers", 
-  "The Proxy & Facade Pattern Abstraction", and multi-language "Tooling".
+  "The <def id="Proxy">Proxy</def> & <def id="Facade">Facade</def> Pattern Abstraction", and multi-language "Tooling".
   
   Sources: 
     soap/data/content.json (lines 2-50)
@@ -30,13 +30,13 @@
         <subsection id="osi7">
           <heading>OSI Layer 7 (Application)</heading>
           <body>
-            <def id="SOAP">SOAP</def> operates entirely within the Application Layer. While it often uses HTTP as its transport mechanism (treating HTTP like a lower-level network protocol), it can conceptually sit on top of any Layer 7 protocol, including SMTP or FTP. The heavy lifting of security (WS-Security) and routing (WS-Addressing) happens here, inside the XML envelope.
+            <def id="SOAP">SOAP</def> operates entirely within the Application Layer. While it often uses HTTP as its transport mechanism (treating HTTP like a lower-level network protocol), it can conceptually sit on top of any Layer 7 protocol, including SMTP or FTP. The heavy lifting of security (<def id="WSSecurity">WS-Security</def>) and routing (<def id="WSAddressing">WS-Addressing</def>) happens here, inside the <def id="XML">XML</def> envelope.
           </body>
         </subsection>
         <subsection id="proxy">
-          <heading>The Role of the Proxy</heading>
+          <heading>The Role of the <def id="Proxy">Proxy</def></heading>
           <body>
-            A key difference between <def id="SOAP">SOAP</def> and REST is the strong typing provided by <def id="WSDL">WSDL</def> (Web Services Description Language). The <def id="WSDL">WSDL</def> defines the exact shape of the XML required. Development tools use this to generate a "Proxy" class, allowing developers to call a remote API exactly like a local function, hiding all the XML serialization complexity.
+            A key difference between <def id="SOAP">SOAP</def> and REST is the strong typing provided by <def id="WSDL">WSDL</def> (Web Services Description Language). The <def id="WSDL">WSDL</def> defines the exact shape of the <def id="XML">XML</def> required. Development tools use this to generate a "<def id="Proxy">Proxy</def>" class, allowing developers to call a remote API exactly like a local function, hiding all the <def id="XML">XML</def> serialization complexity.
           </body>
         </subsection>
       </subsections>
@@ -44,33 +44,33 @@
 
     <!-- 2. The Proxy & Facade Pattern Abstraction -->
     <section id="proxyPattern">
-      <heading>The Proxy &amp; Facade Pattern Abstraction</heading>
+      <heading>The <def id="Proxy">Proxy</def> &amp; <def id="Facade">Facade</def> Pattern Abstraction</heading>
       <intro>
-        <def id="SOAP">SOAP</def> inherently relies on the &lt;strong&gt;Proxy Pattern&lt;/strong&gt;, which acts much like a &lt;strong&gt;Facade&lt;/strong&gt; to completely abstract the complexity of network calls away from the developer. The foundation of this is the <def id="WSDL">WSDL</def>, which IDEs use to auto-generate Client Proxies (stubs).
+        <def id="SOAP">SOAP</def> inherently relies on the &lt;strong&gt;<def id="Proxy">Proxy</def> Pattern&lt;/strong&gt;, which acts much like a &lt;strong&gt;<def id="Facade">Facade</def>&lt;/strong&gt; to completely abstract the complexity of network calls away from the developer. The foundation of this is the <def id="WSDL">WSDL</def>, which IDEs use to auto-generate Client Proxies (stubs).
       </intro>
       <subsections>
         <subsection id="developerView">
-          <heading>1. The Developer's View (The Facade)</heading>
+          <heading>1. The Developer's View (The <def id="Facade">Facade</def>)</heading>
           <body>
-            To the developer writing the application logic, calling the remote server looks exactly like calling a local method on a local object. They do not write HTTP clients or parse XML.
+            To the developer writing the application logic, calling the remote server looks exactly like calling a local method on a local object. They do not write HTTP clients or parse <def id="XML">XML</def>.
           </body>
         </subsection>
         <subsection id="hiddenComplexity">
           <heading>2. The Hidden Complexity</heading>
           <body>
-            When the developer calls that method, the generated Proxy intercepts it and handles massive complexity behind the scenes:
+            When the developer calls that method, the generated <def id="Proxy">Proxy</def> intercepts it and handles massive complexity behind the scenes:
           </body>
           <bullets>
-            <bullet>&lt;strong&gt;Serialization:&lt;/strong&gt; Converts native objects into XML structure.</bullet>
+            <bullet>&lt;strong&gt;Serialization:&lt;/strong&gt; Converts native objects into <def id="XML">XML</def> structure.</bullet>
             <bullet>&lt;strong&gt;Envelope Construction:&lt;/strong&gt; Wraps payload in <def id="SOAP">SOAP</def> Headers/Body.</bullet>
             <bullet>&lt;strong&gt;Network Transport:&lt;/strong&gt; Opens HTTP/TCP connections and sends data.</bullet>
-            <bullet>&lt;strong&gt;Error Translation:&lt;/strong&gt; Parses returning XML and translates <def id="SOAP">SOAP</def> Faults into native language Exceptions.</bullet>
+            <bullet>&lt;strong&gt;Error Translation:&lt;/strong&gt; Parses returning <def id="XML">XML</def> and translates <def id="SOAP">SOAP</def> Faults into native language Exceptions.</bullet>
           </bullets>
         </subsection>
         <subsection id="leakyAbstraction">
-          <heading>The "Leaky Abstraction" Drawback</heading>
+          <heading>The "<def id="LeakyAbstraction">Leaky Abstraction</def>" Drawback</heading>
           <body>
-            While this abstraction enables rapid development, it completely hides the network. Because remote calls look identical to local method calls, developers can easily forget they incur significant network latency (e.g., carelessly placing a proxy call inside a tight &lt;code&gt;for&lt;/code&gt; loop), leading to severe performance bottlenecks known as the N+1 problem.
+            While this abstraction enables rapid development, it completely hides the network. Because remote calls look identical to local method calls, developers can easily forget they incur significant network latency (e.g., carelessly placing a proxy call inside a tight &lt;code&gt;for&lt;/code&gt; loop), leading to severe performance bottlenecks known as the <def id="NPlus1Problem">N+1 problem</def>.
           </body>
         </subsection>
       </subsections>
@@ -105,13 +105,13 @@ success = client.service.processCharge(card_num, amt)
     <section id="tooling">
       <heading>Tooling: Generating Proxies</heading>
       <intro>
-        Because the <def id="WSDL">WSDL</def> acts as a strict, machine-readable contract, developers rarely write the <def id="SOAP">SOAP</def> XML or the network routing code manually. Instead, they rely on language-specific tools to generate the local Proxy classes (stubs) and data models.
+        Because the <def id="WSDL">WSDL</def> acts as a strict, machine-readable contract, developers rarely write the <def id="SOAP">SOAP</def> <def id="XML">XML</def> or the network routing code manually. Instead, they rely on language-specific tools to generate the local <def id="Proxy">Proxy</def> classes (stubs) and data models.
       </intro>
       
       <!-- Language-specific Tooling & CI/CD Content -->
       <languages>
         <language id="java" dotColor="bg-red-500">
-          <heading>Java CLI Tool: &lt;code&gt;wsimport&lt;/code&gt;</heading>
+          <heading>Java <def id="CLI">CLI</def> Tool: &lt;code&gt;wsimport&lt;/code&gt;</heading>
           <body>
             Java developers typically use the &lt;code&gt;wsimport&lt;/code&gt; tool (or Apache CXF's &lt;code&gt;wsdl2java&lt;/code&gt;). It parses the <def id="WSDL">WSDL</def> and physically generates the native &lt;code&gt;.java&lt;/code&gt; files containing the strongly-typed interfaces.
           </body>
@@ -123,13 +123,13 @@ wsimport -keep -p com.enterprise.billing \
           <cicd>
             <title>The CI/CD Build-Time Guarantee (For Compiled Languages)</title>
             <body>
-              In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their <def id="WSDL">WSDL</def>, the CI/CD pipeline fetches the new <def id="WSDL">WSDL</def>, attempts to regenerate the classes, and &lt;em&gt;fails the build immediately&lt;/em&gt; because the new contract breaks the existing application code.
+              In mature legacy architectures using Java or .NET, these <def id="CLI">CLI</def> commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their <def id="WSDL">WSDL</def>, the CI/CD pipeline fetches the new <def id="WSDL">WSDL</def>, attempts to regenerate the classes, and &lt;em&gt;fails the build immediately&lt;/em&gt; because the new contract breaks the existing application code.
             </body>
           </cicd>
         </language>
         
         <language id="dotnet" dotColor="bg-blue-500">
-          <heading>.NET CLI Tool: &lt;code&gt;svcutil&lt;/code&gt;</heading>
+          <heading>.NET <def id="CLI">CLI</def> Tool: &lt;code&gt;svcutil&lt;/code&gt;</heading>
           <body>
             In the Microsoft ecosystem (WCF), developers use the ServiceModel Metadata Utility Tool (&lt;code&gt;svcutil.exe&lt;/code&gt;) or the modern &lt;code&gt;dotnet-svcutil&lt;/code&gt; to generate C# client code and configuration.
           </body>
@@ -141,7 +141,7 @@ svcutil.exe http://api.example.com/billing?wsdl \
           <cicd>
             <title>The CI/CD Build-Time Guarantee (For Compiled Languages)</title>
             <body>
-              In mature legacy architectures using Java or .NET, these CLI commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their <def id="WSDL">WSDL</def>, the CI/CD pipeline fetches the new <def id="WSDL">WSDL</def>, attempts to regenerate the classes, and &lt;em&gt;fails the build immediately&lt;/em&gt; because the new contract breaks the existing application code.
+              In mature legacy architectures using Java or .NET, these <def id="CLI">CLI</def> commands are often integrated directly into the automated build pipeline. If an external provider introduces a breaking change to their <def id="WSDL">WSDL</def>, the CI/CD pipeline fetches the new <def id="WSDL">WSDL</def>, attempts to regenerate the classes, and &lt;em&gt;fails the build immediately&lt;/em&gt; because the new contract breaks the existing application code.
             </body>
           </cicd>
         </language>
@@ -154,7 +154,7 @@ svcutil.exe http://api.example.com/billing?wsdl \
           <code>
 from zeep import Client
 
-# Zeep fetches and parses the XML schema dynamically
+# Zeep fetches and parses the <def id="XML">XML</def> schema dynamically
 client = Client(wsdl='http://api.example.com/billing?wsdl')
 
 # Call the remote <def id="SOAP">SOAP</def> service as if it were a local Python method

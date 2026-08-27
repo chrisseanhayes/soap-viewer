@@ -22,7 +22,7 @@
 
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <body>
-    Serialization is neither pure compute nor network—it's the translator between them. It is the process of converting live, in-memory objects from your application into a standardized text format (like XML or JSON) so they can be safely transmitted across the network and understood by a completely different machine on the other side.
+    Serialization is neither pure compute nor network—it&#x27;s the translator between them. It is the process of converting live, in-memory objects from your application into a standardized text format (like XML or JSON) so they can be safely transmitted across the network and understood by a completely different machine on the other side.
   </body>
 
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
