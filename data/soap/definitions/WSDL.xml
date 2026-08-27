@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="WSDL">
+  <icon>📜</icon>
+  <label>WSDL</label>
+  <colorClass>bg-amber-50 text-amber-800 border border-amber-200</colorClass>
+  <body>The Web Services Description Language (WSDL) is an XML-based interface description language that acts as a strict contract between a client and a web service. It provides a machine-readable description of how the service can be called, what parameters it expects, and what data structures it returns.</body>
+</definition>

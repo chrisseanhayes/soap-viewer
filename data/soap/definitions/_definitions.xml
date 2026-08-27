@@ -78,4 +78,20 @@
     file="soap/data/definitions/OSHardwareCode.xml"
   />
 
+
+  <definition
+    id="SOAP"
+    icon="📖"
+    label="SOAP"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/SOAP.xml"
+  />
+
+  <definition
+    id="WSDL"
+    icon="📖"
+    label="WSDL"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="soap/data/definitions/WSDL.xml"
+  />
 </definitions>

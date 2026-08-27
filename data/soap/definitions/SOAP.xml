@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition id="SOAP">
+  <icon>📨</icon>
+  <label>SOAP</label>
+  <colorClass>bg-blue-50 text-blue-800 border border-blue-200</colorClass>
+  <body>Simple Object Access Protocol (SOAP) is a messaging protocol specification for exchanging structured information in the implementation of web services in computer networks. It relies on XML for its message format and provides strict rules for security and transaction handling.</body>
+</definition>

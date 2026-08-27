@@ -229,6 +229,13 @@ window.showDefinitionModal = function(title, definition) {
     render(modalTpl, document.getElementById('modal-root'));
 };
 
+window.showDefinitionById = function(defId) {
+    if (content && content.definitions && content.definitions[defId]) {
+        const def = content.definitions[defId];
+        window.showDefinitionModal(def.icon + ' ' + def.label, def.body);
+    }
+};
+
 window.closeDefinitionModal = function() {
     render(html``, document.getElementById('modal-root'));
 };

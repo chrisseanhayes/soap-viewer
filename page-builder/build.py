@@ -344,6 +344,68 @@ def unescape_dict(d):
                 elif isinstance(v[i], dict):
                     unescape_dict(v[i])
 
+def create_definition_xml(def_id, word, project_name):
+    path = f'../data/{project_name}/definitions/{def_id}.xml'
+    if not os.path.exists(path):
+        xml_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<definition id="{def_id}">
+  <icon>📖</icon>
+  <label>{word}</label>
+  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <body>Auto-generated definition for {word}.</body>
+</definition>
+'''
+        with open(path, 'w') as f:
+            f.write(xml_content)
+        
+        idx_path = f'../data/{project_name}/definitions/_definitions.xml'
+        if os.path.exists(idx_path):
+            with open(idx_path, 'r') as idx_f:
+                idx_content = idx_f.read()
+            if f'id="{def_id}"' not in idx_content:
+                entry = f'''
+  <definition
+    id="{def_id}"
+    icon="📖"
+    label="{word}"
+    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
+    file="{project_name}/data/definitions/{def_id}.xml"
+  />
+</definitions>'''
+                idx_content = idx_content.replace('</definitions>', entry)
+                with open(idx_path, 'w') as idx_f:
+                    idx_f.write(idx_content)
+
+def process_text_for_defs(text, definitions_dict, project_name):
+    if not isinstance(text, str): return text
+    pattern = r'<def\s+id="([^"]+)">([^<]+)</def>'
+    def replacer(match):
+        def_id = match.group(1)
+        word = match.group(2)
+        if def_id not in definitions_dict:
+            create_definition_xml(def_id, word, project_name)
+            definitions_dict[def_id] = {
+                "icon": "📖",
+                "label": word,
+                "colorClass": "bg-slate-50 text-slate-800 border border-slate-200",
+                "body": f"Auto-generated definition for {word}."
+            }
+        return f'<button type="button" class="text-blue-600 underline decoration-dashed decoration-blue-400 hover:text-blue-800 transition-colors" onclick="window.showDefinitionById(\'{def_id}\')">{word}</button>'
+    return re.sub(pattern, replacer, text)
+
+def replace_def_tags_in_dict(d, definitions_dict, project_name):
+    for k, v in d.items():
+        if isinstance(v, str):
+            d[k] = process_text_for_defs(v, definitions_dict, project_name)
+        elif isinstance(v, dict):
+            replace_def_tags_in_dict(v, definitions_dict, project_name)
+        elif isinstance(v, list):
+            for i in range(len(v)):
+                if isinstance(v[i], str):
+                    v[i] = process_text_for_defs(v[i], definitions_dict, project_name)
+                elif isinstance(v[i], dict):
+                    replace_def_tags_in_dict(v[i], definitions_dict, project_name)
+
 # Attach definitions to nodes based on _assignedTo
 for d_id, d_data in content["definitions"].items():
     if "_assignedTo" in d_data:
@@ -359,6 +421,9 @@ for d_id, d_data in content["definitions"].items():
 
 unescape_dict(content)
 unescape_dict(language_data)
+
+replace_def_tags_in_dict(content, content["definitions"], project_name)
+replace_def_tags_in_dict(language_data, content["definitions"], project_name)
 
 os.makedirs(f'../site/data/{project_name}', exist_ok=True)
 with open(f'../site/data/{project_name}/content.json', 'w') as f:
