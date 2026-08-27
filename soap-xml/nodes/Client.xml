@@ -91,6 +91,11 @@
       file="soap/data/definitions/Compute.xml"
     />
   </definitionPills>
+  <navigation>
+    <sequenceIndex>-1</sequenceIndex>
+    <autoSelect>true</autoSelect>
+  </navigation>
+
 
   <sourceFiles>
     <file path="soap/data/diagram.mmd"
@@ -277,7 +282,6 @@ result = client.service.processCharge("1234-5678", 50.00)
       <sequenceIndex>0</sequenceIndex>
       <stepCounter>Step 1 of 41</stepCounter>
       <!-- Auto-selected on diagram:rendered — app.js lines 292-295 -->
-      <autoSelect>true</autoSelect>
       <prev>null</prev>
       <next>EdgeInitiatesRequest</next>
     </navigation>

@@ -131,6 +131,10 @@ window.nextStep = function() {
         currentActiveNode = content.navigationSequence[currentIndex + 1];
         updateSidebar();
         window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'nav' } }));
+    } else if (currentIndex === content.navigationSequence.length - 1) {
+        currentActiveNode = content.navigationSequence[0];
+        updateSidebar();
+        window.dispatchEvent(new CustomEvent('node:selected', { detail: { id: currentActiveNode, source: 'nav' } }));
     }
 };
 
@@ -173,7 +177,16 @@ function updateSidebar() {
     
     const currentIndex = content.navigationSequence.indexOf(currentActiveNode);
     if (btnPrev) btnPrev.disabled = currentIndex <= 0;
-    if (btnNext) btnNext.disabled = currentIndex >= content.navigationSequence.length - 1;
+    
+    if (btnNext) {
+        btnNext.disabled = false; // Never disabled because of Start Over
+        if (currentIndex >= content.navigationSequence.length - 1) {
+            btnNext.innerHTML = 'Start Over &#8634;'; // unicode ↺
+        } else {
+            btnNext.innerHTML = 'Next &rarr;';
+        }
+    }
+    
     if (stepCounter) stepCounter.textContent = `Step ${currentIndex + 1} of ${content.navigationSequence.length}`;
 }
 
