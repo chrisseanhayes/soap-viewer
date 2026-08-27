@@ -390,7 +390,7 @@ def process_text_for_defs(text, definitions_dict, project_name):
                 "colorClass": "bg-slate-50 text-slate-800 border border-slate-200",
                 "body": f"Auto-generated definition for {word}."
             }
-        return f'<button type="button" class="border-b border-dashed border-slate-400 hover:text-blue-600 hover:border-blue-600 transition-colors" onclick="window.showDefinitionById(\'{def_id}\')">{word}</button>'
+        return f'<button type="button" class="border-b border-dotted border-slate-300 hover:border-slate-500 cursor-help transition-colors" onclick="window.showDefinitionById(\'{def_id}\')">{word}</button>'
     return re.sub(pattern, replacer, text)
 
 def replace_def_tags_in_dict(d, definitions_dict, project_name):
