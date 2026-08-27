@@ -2,7 +2,14 @@ import xml.etree.ElementTree as ET
 import glob
 
 def generate_mermaid_code(project_name="soap"):
-    class_defs = {}
+    # Pre-defined app-level styles
+    class_defs = {
+        "osiLayer": "fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5",
+        "process": "fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px",
+        "clickable": "cursor:pointer,transition:all 0.2s",
+        "soapResponse": "fill:#f0fdf4,stroke:#16a34a,stroke-width:2px",
+        "soapLayer": "fill:#fef3c7,stroke:#d97706,stroke-width:2px"
+    }
     edges_out = []
     click_handlers = []
 
@@ -37,20 +44,28 @@ def generate_mermaid_code(project_name="soap"):
             leaf_label = get_full_text(diagram.find("nodeLabel")) or ""
             leaf_id = get_full_text(diagram.find("nodeId")) or node_id
             
+            is_clickable = False
             classes_tags = diagram.findall("classes/class")
             for c in classes_tags:
                 c_name = c.get("name")
-                c_style = c.get("style").replace(";", ",")
-                if c_style.endswith(","): c_style = c_style[:-1]
-                class_defs[c_name] = c_style
+                if c_name == "clickable":
+                    is_clickable = True
+                c_style = c.get("style")
+                if c_style:
+                    c_style = c_style.replace(";", ",")
+                    if c_style.endswith(","): c_style = c_style[:-1]
+                    class_defs[c_name] = c_style
                 # Instead of :::class1:::class2, we use class Node class1
                 click_handlers.append(f"class {leaf_id} {c_name}")
                 
             out += f"{indent}{leaf_id}[{escape_label_node(leaf_label)}]\n"
             
-            click_handler = get_full_text(diagram.find("clickHandler"))
-            if click_handler:
-                click_handlers.append(f"click {leaf_id} {click_handler}")
+            if is_clickable:
+                import re
+                clean_label = re.sub(r'^.*?[\d\.]+\s*', '', leaf_label).strip()
+                if not clean_label:
+                    clean_label = leaf_label
+                click_handlers.append(f'click {leaf_id} call showDetails() "Details on {clean_label}"')
                 
             for edges_dir in diagram.findall("edges"):
                 if edges_dir.get("direction") == "out":
@@ -74,9 +89,6 @@ def generate_mermaid_code(project_name="soap"):
                 # Subgraph title should not have quotes for compatibility with older mermaid, use brackets
                 out += f"{indent}subgraph {node_id} [{escape_label_node(label)}]\n"
                 if diagram_class:
-                    # Add default fallback style for container if not defined
-                    if diagram_class not in class_defs:
-                        class_defs[diagram_class] = "fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5"
                     click_handlers.append(f"class {node_id} {diagram_class}")
                     
                 for child in children:

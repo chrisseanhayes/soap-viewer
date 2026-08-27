@@ -2,7 +2,6 @@ import { render, html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 import { diagramAndSidebarTpl } from '../templates/fragments/diagram.js';
 import { sidebarPlaceholderTpl, sidebarDetailTpl, sidebarBigPictureTpl } from '../templates/fragments/sidebar-detail.js';
-import { understandingLayersTpl, proxyPatternTpl, toolingSectionTpl } from '../templates/fragments/sections.js';
 import { iconSvg } from '../templates/fragments/icons.js';
 import { cls as sharedCls } from '../templates/fragments/classes.js';
 import { theme } from '../templates/fragments/theme.js';
@@ -83,10 +82,6 @@ async function loadData() {
 }
 
 function renderApp() {
-    const cicdDefault = langData.cicd && langData.cicd[currentLang] 
-        ? langData.cicd[currentLang] 
-        : { title: "CI/CD Deployment", body: "Deployment pipelines typically package the built artifact and deploy it to a container registry or application server." };
-
     const appTpl = html`
         <div class="${cls.appContainer}">
             <header class="${cls.appHeader}">
@@ -106,11 +101,9 @@ function renderApp() {
 
             ${diagramAndSidebarTpl(content.sidebar)}
 
-            ${understandingLayersTpl(content.sections.understandingLayers)}
-            
-            ${proxyPatternTpl(content.sections.proxyPattern, facadeBlocksTpl(langData.facades, currentLang))}
-            
-            ${toolingSectionTpl(content.sections.tooling, toolingBlocksTpl(langData.tooling, currentLang), cicdDefault)}
+            <div id="dynamic-sections">
+                ${unsafeHTML(content.sectionsHtml || '')}
+            </div>
         </div>
         <div id="modal-root"></div>
     `;
@@ -121,6 +114,45 @@ function renderApp() {
             appRoot.innerHTML = ''; 
         }
         render(appTpl, appRoot);
+        
+        // Toggle language visibility dynamically inside the static HTML
+        document.querySelectorAll('#dynamic-sections .language-block').forEach(el => {
+            if (el.getAttribute('data-lang') === currentLang) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+        
+        // Apply dynamic themes
+        document.querySelectorAll('#dynamic-sections .theme-target').forEach(el => {
+            const themeName = el.getAttribute('data-theme');
+            const t = theme.colors[themeName];
+            if (t) {
+                if (t.bg) el.classList.add(...t.bg.split(' '));
+                if (t.border) el.classList.add(...t.border.split(' '));
+            }
+        });
+
+        // Apply icons
+        document.querySelectorAll('#dynamic-sections .theme-icon-placeholder').forEach(el => {
+            const themeName = el.getAttribute('data-theme');
+            let iconName = el.getAttribute('data-icon');
+            
+            // Default icons if none specified
+            if (!iconName && themeName) {
+                if (themeName === 'infoBox') iconName = 'lightning';
+                else if (themeName === 'highlightBox') iconName = 'flask';
+                else if (themeName === 'warningNote') iconName = 'warning';
+            }
+            
+            if (iconName) {
+                const t = theme.colors[themeName] || {};
+                const sizeClasses = el.getAttribute('data-icon-size') || "w-5 h-5";
+                const iconClasses = t.icon ? `${sizeClasses} ${t.icon}` : sizeClasses;
+                render(iconSvg(iconName, iconClasses), el);
+            }
+        });
     }
     
     updateSidebar();

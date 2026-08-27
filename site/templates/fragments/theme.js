@@ -50,13 +50,13 @@ export const theme = {
             idBorder: "border-blue-100"
         },
 
-        // Semantic section colors
-        overview: { text: "text-blue-500", icon: "text-blue-500" },
-        handledBy: { text: "text-indigo-500", icon: "text-indigo-500" },
-        considerations: { text: "text-teal-500", icon: "text-teal-500", bg: "bg-teal-50", border: "border-teal-100" },
-        devImpact: { text: "text-purple-500", icon: "text-purple-500", bg: "bg-slate-50", border: "border-slate-100" },
-        interaction: { text: "text-green-500", icon: "text-green-500" },
-        branching: { text: "text-orange-500", icon: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
+        // Semantic sidebar section themes
+        infoCard: { text: "text-blue-500", icon: "text-blue-500" },
+        briefcaseCard: { text: "text-indigo-500", icon: "text-indigo-500" },
+        lightbulbCard: { text: "text-teal-500", icon: "text-teal-500", bg: "bg-teal-50", border: "border-teal-100" },
+        lightningCard: { text: "text-purple-500", icon: "text-purple-500", bg: "bg-slate-50", border: "border-slate-100" },
+        arrowRightCard: { text: "text-green-500", icon: "text-green-500" },
+        arrowsCard: { text: "text-orange-500", icon: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
         
         bigPicture: {
             text: "text-indigo-700",
@@ -72,9 +72,9 @@ export const theme = {
         
         code: { text: "text-emerald-400", icon: "text-emerald-400" },
         
-        developerView: { icon: "text-indigo-500", bg: "bg-indigo-50", border: "border-indigo-100" },
-        hiddenComplexity: { icon: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-        leakyAbstraction: { icon: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
+        infoBox: { icon: "text-indigo-500", bg: "bg-indigo-50", border: "border-indigo-100" },
+        highlightBox: { icon: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+        warningNote: { icon: "text-orange-500", bg: "bg-orange-50", border: "border-orange-200" },
         cicdCallout: { icon: "text-slate-500", bg: "bg-slate-100", border: "border-slate-200" },
         
         langToggle: {
@@ -85,8 +85,15 @@ export const theme = {
             btnInactiveText: "text-slate-600"
         },
         
-        definition: {
-            pill: "bg-slate-50 text-slate-800 border border-slate-200"
+        definitions: {
+            pillTheme01: "bg-purple-50 text-purple-800 border border-purple-200",
+            pillTheme02: "bg-indigo-50 text-indigo-800 border border-indigo-200",
+            pillTheme03: "bg-amber-50 text-amber-800 border border-amber-200",
+            pillTheme04: "bg-slate-100 text-slate-800 border border-slate-300",
+            pillTheme05: "bg-slate-50 text-slate-800 border border-slate-200",
+            pillTheme06: "bg-emerald-50 text-emerald-800 border border-emerald-200",
+            pillTheme07: "bg-blue-50 text-blue-800 border border-blue-200",
+            pillTheme08: "bg-sky-50 text-sky-800 border border-sky-200"
         }
     }
 };

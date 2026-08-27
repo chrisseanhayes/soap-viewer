@@ -2,6 +2,6 @@
 <definition id="Facade">
   <icon>📖</icon>
   <label>Facade</label>
-  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <theme>pillTheme05</theme>
   <body>A design pattern where a single, unified SOAP endpoint or operation is placed in front of complex internal subsystems, legacy databases, or multiple microservices. It presents a clean, simplified interface to external consumers while managing orchestration and data aggregation behind the scenes.</body>
 </definition>

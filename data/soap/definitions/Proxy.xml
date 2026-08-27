@@ -2,6 +2,6 @@
 <definition id="Proxy">
   <icon>📖</icon>
   <label>Proxy</label>
-  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
+  <theme>pillTheme05</theme>
   <body>A generated local client object that mirrors the remote SOAP service defined by a WSDL. It allows developers to invoke remote operations as standard local method calls, automatically handling XML request serialization, HTTP transport, and XML response deserialization into native objects.</body>
 </definition>

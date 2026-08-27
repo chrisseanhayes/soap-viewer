@@ -68,7 +68,7 @@ for f in glob.glob(f"../data/{project_name}/definitions/*.xml"):
         content["definitions"][d_id] = {
             "icon": get_text(droot, "icon"),
             "label": get_text(droot, "label"),
-            "colorClass": get_text(droot, "colorClass"),
+            "theme": get_text(droot, "theme"),
             "body": inner_xml(droot.find("body")),
             "_assignedTo": assigned_to
         }
@@ -85,66 +85,26 @@ language_data = {
     "cicd": {}
 }
 
-# parse sections
-sections = root.find('sections')
-sec1 = sections.find("section[@id='understandingLayers']")
-content["sections"]["understandingLayers"] = {
-    "heading": get_text(sec1, 'heading'),
-    "osi7": {
-        "heading": inner_xml(sec1.find("subsections/subsection[@id='osi7']/heading")),
-        "body": inner_xml(sec1.find("subsections/subsection[@id='osi7']/body"))
-    },
-    "proxy": {
-        "heading": inner_xml(sec1.find("subsections/subsection[@id='proxy']/heading")),
-        "body": inner_xml(sec1.find("subsections/subsection[@id='proxy']/body"))
-    }
-}
+# parse sections via xsltproc
+import subprocess
+try:
+    xslt_result = subprocess.run(
+        ["xsltproc", "sections.xslt", f'../data/{project_name}/PageContent.xml'],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    content["sectionsHtml"] = xslt_result.stdout.strip()
+except Exception as e:
+    print("Warning: Failed to run xsltproc:", e)
+    content["sectionsHtml"] = ""
 
-sec2 = sections.find("section[@id='proxyPattern']")
-content["sections"]["proxyPattern"] = {
-    "heading": inner_xml(sec2.find('heading')),
-    "intro": inner_xml(sec2.find('intro')),
-    "developerView": {
-        "heading": inner_xml(sec2.find("subsections/subsection[@id='developerView']/heading")),
-        "body": inner_xml(sec2.find("subsections/subsection[@id='developerView']/body"))
-    },
-    "hiddenComplexity": {
-        "heading": inner_xml(sec2.find("subsections/subsection[@id='hiddenComplexity']/heading")),
-        "body": inner_xml(sec2.find("subsections/subsection[@id='hiddenComplexity']/body")),
-        "bullets": [inner_xml(b) for b in sec2.findall("subsections/subsection[@id='hiddenComplexity']/bullets/bullet")]
-    },
-    "leakyAbstraction": {
-        "heading": inner_xml(sec2.find("subsections/subsection[@id='leakyAbstraction']/heading")),
-        "body": inner_xml(sec2.find("subsections/subsection[@id='leakyAbstraction']/body"))
-    }
-}
-
-for i, lang in enumerate(sec2.findall("languages/language")):
-    l_id = lang.get("id")
-    if i == 0:
-        content["meta"]["defaultLanguage"] = l_id
-    language_data["facades"][l_id] = (lang.find("facadeCode").text or "").strip()
-
-sec3 = sections.find("section[@id='tooling']")
-content["sections"]["tooling"] = {
-    "heading": inner_xml(sec3.find('heading')),
-    "intro": inner_xml(sec3.find('intro'))
-}
-
-for lang in sec3.findall("languages/language"):
-    l_id = lang.get("id")
-    language_data["tooling"][l_id] = {
-        "dotColor": lang.get("dotColor") or "bg-slate-500",
-        "heading": inner_xml(lang.find("heading")),
-        "body": inner_xml(lang.find("body")),
-        "code": (lang.find("code").text or "").strip()
-    }
-    cicd = lang.find("cicd")
-    if cicd is not None:
-        language_data["cicd"][l_id] = {
-            "title": inner_xml(cicd.find("title")),
-            "body": inner_xml(cicd.find("body"))
-        }
+# Keep finding defaultLanguage dynamically
+sections_node = root.find('sections')
+if sections_node is not None:
+    first_lang = sections_node.find(".//languages/language")
+    if first_lang is not None:
+        content["meta"]["defaultLanguage"] = first_lang.get("id")
 
 # parse nodes
 diagram_meta = {
@@ -153,33 +113,44 @@ diagram_meta = {
     "labelToNodeMap": {},
     "nodeToLabelMap": {}
 }
-nav_nodes = []
+next_pointers = {}
+big_picture_nodes = set()
 edges_list = []
 
 def extract_node_data(xml_node, parent_id=None):
+
     node_id = xml_node.get("id")
     if not node_id: return
     
     label_text = xml_node.get("label") or ""
     c_node = {}
     c_node["title"] = inner_xml(xml_node.find("title")) if xml_node.find("title") is not None else label_text or node_id
-    c_node["overview"] = inner_xml(xml_node.find("overview")) if xml_node.find("overview") is not None else ""
-    c_node["handledBy"] = inner_xml(xml_node.find("handledBy")) if xml_node.find("handledBy") is not None else ""
-    c_node["devImpact"] = inner_xml(xml_node.find("devImpact")) if xml_node.find("devImpact") is not None else ""
-    c_node["interaction"] = inner_xml(xml_node.find("interaction")) if xml_node.find("interaction") is not None else ""
-    c_node["branching"] = inner_xml(xml_node.find("branching")) if xml_node.find("branching") is not None else ""
-    c_node["considerations"] = inner_xml(xml_node.find("considerations")) if xml_node.find("considerations") is not None else ""
     c_node["codeSnippet"] = (xml_node.find("codeSnippet").text or "").strip() if xml_node.find("codeSnippet") is not None else ""
     
+    c_node["sections"] = []
+    
+    # Extract sections from the node directly
+    for child in xml_node:
+        if child.tag.endswith("Card"):
+            c_node["sections"].append({
+                "title": child.get("title", ""),
+                "theme": child.tag,
+                "icon": child.tag.replace("Card", ""),
+                "body": inner_xml(child)
+            })
+            
+    # Extract sections from a <sidebar> wrapper (used by edges)
     sidebar = xml_node.find("sidebar")
     if sidebar is not None:
         c_node["title"] = inner_xml(sidebar.find("title")) if sidebar.find("title") is not None else c_node["title"]
-        c_node["overview"] = inner_xml(sidebar.find("overview")) if sidebar.find("overview") is not None else c_node["overview"]
-        c_node["handledBy"] = inner_xml(sidebar.find("handledBy")) if sidebar.find("handledBy") is not None else c_node["handledBy"]
-        c_node["devImpact"] = inner_xml(sidebar.find("devImpact")) if sidebar.find("devImpact") is not None else c_node["devImpact"]
-        c_node["interaction"] = inner_xml(sidebar.find("interaction")) if sidebar.find("interaction") is not None else c_node["interaction"]
-        c_node["branching"] = inner_xml(sidebar.find("branching")) if sidebar.find("branching") is not None else c_node["branching"]
-        c_node["considerations"] = inner_xml(sidebar.find("considerations")) if sidebar.find("considerations") is not None else c_node["considerations"]
+        for child in sidebar:
+            if child.tag.endswith("Card"):
+                c_node["sections"].append({
+                    "title": child.get("title", ""),
+                    "theme": child.tag,
+                    "icon": child.tag.replace("Card", ""),
+                    "body": inner_xml(child)
+                })
     
     big = xml_node.find("bigPicture")
     if big is not None:
@@ -191,25 +162,19 @@ def extract_node_data(xml_node, parent_id=None):
             "journeyStep": inner_xml(big.find("journeyStep"))
         }
 
-    nav = xml_node.find("navigation")
-    if nav is not None:
-        seq = nav.find("sequenceIndex")
-        if seq is not None and seq.text:
-            idx = float(seq.text.strip())
-            nav_nodes.append((idx, node_id))
-            if big is not None:
-                nav_nodes.append((idx - 0.5, node_id + "_BigPicture"))
-        autoselect = nav.find("autoSelect")
-        if autoselect is not None and autoselect.text == "true":
-            content["meta"]["initialNodeId"] = node_id
+    # Extract next pointer
+    node_next = xml_node.get("next")
+    if node_next:
+        next_pointers[node_id] = node_next
+    if big is not None:
+        big_picture_nodes.add(node_id)
 
     def_pills = xml_node.find("definitionPills")
     if def_pills is not None:
         pills = []
-        for pill in def_pills.findall("definitionRef"):
+        for pill in def_pills.findall("definitionPill"):
             pills.append({
-                "id": pill.get("id"),
-                "file": pill.get("file")
+                "id": pill.get("id")
             })
         c_node["definitionPills"] = pills
 
@@ -260,11 +225,9 @@ def extract_node_data(xml_node, parent_id=None):
             for edge in edges_dir.findall("edge"):
                 edge_id = edge.get("edgeKey")
                 if edge_id:
-                    e_nav = edge.find("navigation")
-                    if e_nav is not None:
-                        e_seq = e_nav.find("sequenceIndex")
-                        if e_seq is not None and e_seq.text:
-                            nav_nodes.append((float(e_seq.text.strip()), edge_id))
+                    e_next = edge.get("next")
+                    if e_next:
+                        next_pointers[edge_id] = e_next
 
                     e_label = edge.get("label")
                     if e_label:
@@ -292,20 +255,22 @@ def extract_node_data(xml_node, parent_id=None):
                     if edge_sidebar is not None:
                         c_edge = {}
                         c_edge["title"] = inner_xml(edge_sidebar.find("title")) if edge_sidebar.find("title") is not None else ""
-                        c_edge["overview"] = inner_xml(edge_sidebar.find("overview")) if edge_sidebar.find("overview") is not None else ""
-                        c_edge["handledBy"] = inner_xml(edge_sidebar.find("handledBy")) if edge_sidebar.find("handledBy") is not None else ""
-                        c_edge["devImpact"] = inner_xml(edge_sidebar.find("devImpact")) if edge_sidebar.find("devImpact") is not None else ""
-                        c_edge["interaction"] = inner_xml(edge_sidebar.find("interaction")) if edge_sidebar.find("interaction") is not None else ""
-                        c_edge["branching"] = inner_xml(edge_sidebar.find("branching")) if edge_sidebar.find("branching") is not None else ""
-                        c_edge["considerations"] = inner_xml(edge_sidebar.find("considerations")) if edge_sidebar.find("considerations") is not None else ""
+                        c_edge["sections"] = []
+                        for child in edge_sidebar:
+                            if child.tag.endswith("Card"):
+                                c_edge["sections"].append({
+                                    "title": child.get("title", ""),
+                                    "theme": child.tag,
+                                    "icon": child.tag.replace("Card", ""),
+                                    "body": inner_xml(child)
+                                })
                         
                         e_def_pills = edge.find("definitionPills")
                         if e_def_pills is not None:
                             e_pills = []
-                            for pill in e_def_pills.findall("definitionRef"):
+                            for pill in e_def_pills.findall("definitionPill"):
                                 e_pills.append({
-                                    "id": pill.get("id"),
-                                    "file": pill.get("file")
+                                    "id": pill.get("id")
                                 })
                             c_edge["definitionPills"] = e_pills
 
@@ -322,12 +287,44 @@ for edge in edges_list:
     if from_sg and to_sg and from_sg == to_sg:
         diagram_meta["nodeToSubgraphMap"][edge["id"]] = from_sg
 
-unique_nav = {}
-for seq, node_id in nav_nodes:
-    unique_nav[node_id] = seq
+# Find start node (in-degree 0 among those that are in next_pointers or are targets)
+all_sources = set(next_pointers.keys())
+all_targets = set(next_pointers.values())
+start_nodes = all_sources - all_targets
 
-nav_nodes_list = sorted([(v, k) for k, v in unique_nav.items()])
-content["navigationSequence"] = [n[1] for n in nav_nodes_list]
+if not start_nodes and next_pointers:
+    raise ValueError("Circular reference detected with no start node!")
+start_node = "Client" if "Client" in start_nodes else (list(start_nodes)[0] if start_nodes else None)
+
+nav_seq = []
+current = start_node
+visited = set()
+
+while current:
+    if current in visited:
+        raise ValueError(f"Circular reference detected at node {current}!")
+    visited.add(current)
+    
+    # Inject big picture node right BEFORE the node itself if it has one
+    if current in big_picture_nodes:
+        nav_seq.append(current + "_BigPicture")
+        
+    nav_seq.append(current)
+    
+    current = next_pointers.get(current)
+    
+    # Strict check for missing IDs
+    if current:
+        valid_node = current in content["nodes"]
+        valid_edge = any(e["id"] == current for e in edges_list)
+        is_big_picture = current.endswith("_BigPicture")
+        if not (valid_node or valid_edge or is_big_picture):
+            raise ValueError(f"Build broken: Missing next ID reference '{current}' in the XML graph!")
+
+content["navigationSequence"] = nav_seq
+if nav_seq:
+    content["meta"]["initialNodeId"] = nav_seq[0]
+
 content["diagramMeta"] = diagram_meta
 
 import html

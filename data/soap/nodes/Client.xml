@@ -1,63 +1,40 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  AppClient.xml — Source-of-truth data node for "1. Client Application"
-  =========================================================================
-  Structure:
-    <node id="Client">          ← subgraph container (Client Application Environment)
-      <node id="AppClient">     ← the diagram node being documented
+<?xml version='1.0' encoding='utf-8'?>
+<node id="Client" next="AppClient" label="💻 Client Application Environment" nodeType="Compute" nodeTypeIcon="💻" diagramClass="osiLayer">
 
-  Sources referenced:
-    soap/data/diagram.mmd          (lines 9-16, 68-69, 72)
-    soap/data/content.json         (lines 52-57, 177-190)
-    soap/data/language-data.json   (lines 8-18)
-    soap/templates/fragments/sidebar-detail.js (lines 55-56, 65-66)
-    soap/js/app.js                 (lines 63-64, 292-295)
--->
-
-<node id="Client"
-      label="💻 Client Application Environment"
-      nodeType="Compute"
-      nodeTypeIcon="💻"
-      diagramClass="osiLayer">
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       PARENT: Client Application Environment
-       Source: soap/data/content.json → nodes.Client  (lines 177-190)
-       Rendered via sidebarBigPictureTpl when the subgraph label is clicked
-       ═══════════════════════════════════════════════════════════════════ -->
+  
 
   <title>Client Application Environment</title>
 
-  <overview>
+  <infoCard title="Overview">
     The entire local execution environment where the client application resides.
     This boundary encloses everything that happens in memory before bytes are
     placed onto the network.
-  </overview>
+  </infoCard>
 
-  <handledBy>
+  <briefcaseCard title="Handled By">
     &lt;strong&gt;The Developer &amp;amp; Client OS:&lt;/strong&gt; Developers manage
     the application and proxy, while the runtime/OS handles memory and threading.
-  </handledBy>
+  </briefcaseCard>
 
-  <devImpact>
+  <lightningCard title="Developer Impact">
     Errors inside this boundary are usually local exceptions
     (e.g. Type mismatch, NullReference), which are much faster and easier to
     debug than network-level faults.
-  </devImpact>
+  </lightningCard>
 
-  <interaction>
+  <arrowRightCard title="Next Steps">
     Coordinates local proxies to serialize data and pass it to the transport layer.
-  </interaction>
+  </arrowRightCard>
 
-  <branching>
+  <arrowsCard title="Branching &amp; Flow">
     Local validation failures occur entirely within this zone, saving a
     round-trip to the server.
-  </branching>
+  </arrowsCard>
 
-  <considerations>
+  <lightbulbCard title="Developer Considerations">
     Developers should consider memory constraints, local dependency injection,
     and overall client configuration before engaging the <def id="SOAP">SOAP</def> service.
-  </considerations>
+  </lightbulbCard>
 
   <bigPicture>
     <role>The Caller — Where the <def id="RPC">RPC</def> Illusion Begins</role>
@@ -86,152 +63,96 @@
   </bigPicture>
 
   <definitionPills>
-    <definitionRef
-      id="Compute"
-      file="soap/data/definitions/Compute.xml"
-    />
+    <definitionPill id="Compute"/>
   </definitionPills>
-  <navigation>
-    <sequenceIndex>-1</sequenceIndex>
-    <autoSelect>true</autoSelect>
-  </navigation>
 
 
-  <sourceFiles>
-    <file path="soap/data/diagram.mmd"
-          lines="9,68-69"
-          contains="subgraph declaration and osiLayer class assignment"/>
-    <file path="soap/data/content.json"
-          lines="177-190"
-          contains="all Client container sidebar fields and bigPicture"/>
-    <file path="soap/templates/fragments/sidebar-detail.js"
-          lines="55-56"
-          contains="Compute tooltip pill assigned to Client node"/>
-  </sourceFiles>
+  
 
+  <node id="AppClient" next="EdgeInitiatesRequest" nodeType="ApplicationCode" nodeTypeIcon="🧑‍💻">
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       CHILD: 1. Client Application
-       ═══════════════════════════════════════════════════════════════════ -->
-
-  <node id="AppClient"
-        nodeType="ApplicationCode"
-        nodeTypeIcon="🧑‍💻">
-
-    <!-- ── 1. MERMAID DIAGRAM DEFINITION ──────────────────────────────
-         Source: soap/data/diagram.mmd  (lines 10, 14-15, 72)
-         ─────────────────────────────────────────────────────────────── -->
+    
     <diagram>
 
       <nodeLabel>🧑‍💻 1. Client Application</nodeLabel>
       <nodeId>AppClient</nodeId>
 
       <classes>
-        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
-        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        <class name="process" />
+        <class name="clickable" />
       </classes>
 
       <edges direction="out">
-        <edge
-          to="Proxy"
-          label="🧑‍💻 Initiates Request"
-          type="solid-arrow"
-          edgeKey="EdgeInitiatesRequest"
-        >
+        <edge to="Proxy" label="🧑‍💻 Initiates Request" type="solid-arrow" edgeKey="EdgeInitiatesRequest" next="Proxy">
       <sidebar>
         <title>Action: Initiates Request</title>
-        <overview>The client application calls a method on the generated <def id="Proxy">Proxy</def> object, passing in native programming objects (e.g., a Customer object or a string ID).</overview>
-        <handledBy>&lt;strong&gt;The Developer:&lt;/strong&gt; Calls the local method and provides the arguments.</handledBy>
-        <devImpact>Seems like a local function call, but acts as the gateway to a remote network operation.</devImpact>
-        <considerations>The application thread will typically block here waiting for a response unless asynchronous methods are used.</considerations>
+        <infoCard title="Overview">The client application calls a method on the generated <def id="Proxy">Proxy</def> object, passing in native programming objects (e.g., a Customer object or a string ID).</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The Developer:&lt;/strong&gt; Calls the local method and provides the arguments.</briefcaseCard>
+        <lightningCard title="Developer Impact">Seems like a local function call, but acts as the gateway to a remote network operation.</lightningCard>
+        <lightbulbCard title="Developer Considerations">The application thread will typically block here waiting for a response unless asynchronous methods are used.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml"/>
+        <definitionPill id="ApplicationCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>1</sequenceIndex>
-        <stepCounter>Step 2 of 41</stepCounter>
-        <prev>AppClient</prev>
-        <next><def id="Proxy">Proxy</def></next>
-      </navigation>
       </edge>
       </edges>
 
       <edges direction="in">
-        <edge
-          from="Deserialize2"
-          label="🧑‍💻 Returns Result / Throws Fault"
-          type="solid-arrow"
-          edgeKey="EdgeReturnsResult"
-        >
+        <edge from="Deserialize2" label="🧑‍💻 Returns Result / Throws Fault" type="solid-arrow" edgeKey="EdgeReturnsResult">
       <sidebar>
         <title>Action: Returns Result / Throws Fault</title>
-        <overview>The final step of the round trip. The <def id="SOAP">SOAP</def> framework hands the deserialized result back to the application, completing the remote method call. If a <def id="SOAP">SOAP</def> Fault was in the response, a native exception is thrown instead.</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Developer:&lt;/strong&gt; The library completes the call; the developer's code receives the return value or catches the exception.</handledBy>
-        <devImpact>From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method.</devImpact>
-        <considerations>This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.</considerations>
+        <infoCard title="Overview">The final step of the round trip. The <def id="SOAP">SOAP</def> framework hands the deserialized result back to the application, completing the remote method call. If a <def id="SOAP">SOAP</def> Fault was in the response, a native exception is thrown instead.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Developer:&lt;/strong&gt; The library completes the call; the developer's code receives the return value or catches the exception.</briefcaseCard>
+        <lightningCard title="Developer Impact">From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method.</lightningCard>
+        <lightbulbCard title="Developer Considerations">This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml"/>
+        <definitionPill id="ApplicationCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>40</sequenceIndex>
-        <stepCounter>Step 41 of 41</stepCounter>
-        <prev>Deserialize2</prev>
-        <next>null</next>
-      </navigation>
       </edge>
       </edges>
-
-      <!-- Source: diagram.mmd line 72 -->
-      <clickHandler>call showDetails() "Details on Client"</clickHandler>
 
     </diagram>
 
 
-    <!-- ── 2. SIDEBAR CONTENT  (language-neutral) ─────────────────────
-         Source: soap/data/content.json → nodes.AppClient  (lines 52-57)
-         ─────────────────────────────────────────────────────────────── -->
+    
     <sidebar>
 
       <title>1. Client Application</title>
 
-      <overview>
+      <infoCard title="Overview">
         The originating software system that needs to consume a remote <def id="SOAP">SOAP</def> service
         to fetch data or trigger an action.
-      </overview>
+      </infoCard>
 
-      <interaction>
+      <arrowRightCard title="Next Steps">
         Passes arguments to the locally instantiated <def id="Proxy">Proxy</def> class.
-      </interaction>
+      </arrowRightCard>
 
-      <branching>
+      <arrowsCard title="Branching &amp; Flow">
         If the data provided to the method is invalid locally, the application
         throws an exception before the network is even engaged.
-      </branching>
+      </arrowsCard>
 
-      <handledBy>
+      <briefcaseCard title="Handled By">
         &lt;strong&gt;The Developer:&lt;/strong&gt; It's the developer's responsibility
         to know this and implement this.
-      </handledBy>
+      </briefcaseCard>
 
-      <!-- devImpact and codeSnippet are language-variant — see <languages> below -->
+      
 
     </sidebar>
 
 
-    <!-- ── 3. LANGUAGE-VARIANT FIELDS ────────────────────────────────
-         Source: soap/data/language-data.json → nodes.AppClient (lines 8-18)
-         Resolved at runtime by app.js → mergeNode() / resolveText()
-         ─────────────────────────────────────────────────────────────── -->
+    
     <languages>
 
       <language id="java" label="Java">
-        <devImpact>
+        <lightningCard title="Developer Impact">
           Developers write standard local method calls
           (e.g., `paymentService.processCharge(...)`).
           They interact with strongly typed Java objects.
-        </devImpact>
+        </lightningCard>
         <codeSnippet>
 PaymentService proxy = new PaymentService();
 boolean success = proxy.processCharge("1234-5678", 50.00);
@@ -239,11 +160,11 @@ boolean success = proxy.processCharge("1234-5678", 50.00);
       </language>
 
       <language id="dotnet" label=".NET / C#">
-        <devImpact>
+        <lightningCard title="Developer Impact">
           Developers write standard local method calls
           (e.g., `paymentService.ProcessCharge(...)`).
           They interact with strongly typed C# objects.
-        </devImpact>
+        </lightningCard>
         <codeSnippet>
 var proxy = new PaymentServiceClient();
 bool success = proxy.ProcessCharge("1234-5678", 50.00);
@@ -251,11 +172,11 @@ bool success = proxy.ProcessCharge("1234-5678", 50.00);
       </language>
 
       <language id="python" label="Python">
-        <devImpact>
+        <lightningCard title="Developer Impact">
           Developers write standard local method calls
           (e.g., `client.service.processCharge(...)`).
           They pass standard Python data structures like dicts.
-        </devImpact>
+        </lightningCard>
         <codeSnippet>
 result = client.service.processCharge("1234-5678", 50.00)
         </codeSnippet>
@@ -264,121 +185,67 @@ result = client.service.processCharge("1234-5678", 50.00)
     </languages>
 
 
-    <!-- ── 4. DEFINITION PILLS ────────────────────────────────────────
-         Source: soap/templates/fragments/sidebar-detail.js  (lines 65-66)
-         ─────────────────────────────────────────────────────────────── -->
+    
     <definitionPills>
-      <definitionRef
-        id="ApplicationCode"
-        file="soap/data/definitions/ApplicationCode.xml"
-      />
+      <definitionPill id="ApplicationCode"/>
     </definitionPills>
 
-
-    <!-- ── 5. NAVIGATION METADATA ─────────────────────────────────────
-         Source: soap/js/app.js  (lines 63-64, 292-295)
-         ─────────────────────────────────────────────────────────────── -->
-    <navigation>
-      <sequenceIndex>0</sequenceIndex>
-      <stepCounter>Step 1 of 41</stepCounter>
-      <!-- Auto-selected on diagram:rendered — app.js lines 292-295 -->
-      <prev>null</prev>
-      <next>EdgeInitiatesRequest</next>
-    </navigation>
+  </node>
 
 
-    <!-- ── 6. SOURCE FILE MAP ─────────────────────────────────────────── -->
-    <sourceFiles>
-      <file path="soap/data/diagram.mmd"
-            lines="10,14-15,72"
-            contains="mermaid node, classes, click handler"/>
-      <file path="soap/data/content.json"
-            lines="52-57"
-            contains="title, overview, interaction, branching, handledBy"/>
-      <file path="soap/data/language-data.json"
-            lines="8-18"
-            contains="devImpact (per-lang), codeSnippet (per-lang)"/>
-      <file path="soap/templates/fragments/sidebar-detail.js"
-            lines="65-66"
-            contains="Application Code tooltip pill assignment"/>
-      <file path="soap/js/app.js"
-            lines="63-64,292-295"
-            contains="navigation sequence position (index 0), auto-select on diagram:rendered"/>
-    </sourceFiles>
+  
 
-  </node><!-- /AppClient -->
-
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       CHILD: 2. Client Proxy / Stub
-       ═══════════════════════════════════════════════════════════════════ -->
-
-  <node id="Proxy"
-        nodeType="LibraryCode"
-        nodeTypeIcon="📚">
+  <node id="Proxy" next="EdgeGeneratesXML" nodeType="LibraryCode" nodeTypeIcon="📚">
 
     <diagram>
       <nodeLabel>📚 2. Client <def id="Proxy">Proxy</def> / Stub</nodeLabel>
       <nodeId><def id="Proxy">Proxy</def></nodeId>
       <classes>
-        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
-        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        <class name="process" />
+        <class name="clickable" />
       </classes>
       <edges direction="out">
-        <edge to="Serialize" label="📚 Generates XML" type="solid-arrow" edgeKey="EdgeGeneratesXML">
+        <edge to="Serialize" label="📚 Generates XML" type="solid-arrow" edgeKey="EdgeGeneratesXML" next="Serialize">
       <sidebar>
         <title>Action: Generates <def id="XML">XML</def></title>
-        <overview>The proxy intercepts the method call and invokes the <def id="SOAP">SOAP</def> serialization engine to convert the native objects into a strict <def id="XML">XML</def> structure according to the <def id="WSDL">WSDL</def>.</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping.</handledBy>
-        <devImpact>Saves the developer from writing manual <def id="XML">XML</def> string concatenation and parsing logic.</devImpact>
-        <considerations>If the objects contain circular references or unsupported data types, this step will throw a serialization exception.</considerations>
+        <infoCard title="Overview">The proxy intercepts the method call and invokes the <def id="SOAP">SOAP</def> serialization engine to convert the native objects into a strict <def id="XML">XML</def> structure according to the <def id="WSDL">WSDL</def>.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping.</briefcaseCard>
+        <lightningCard title="Developer Impact">Saves the developer from writing manual <def id="XML">XML</def> string concatenation and parsing logic.</lightningCard>
+        <lightbulbCard title="Developer Considerations">If the objects contain circular references or unsupported data types, this step will throw a serialization exception.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml"/>
+        <definitionPill id="LibraryCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>3</sequenceIndex>
-        <stepCounter>Step 4 of 41</stepCounter>
-        <prev><def id="Proxy">Proxy</def></prev>
-        <next>Serialize</next>
-      </navigation>
       </edge>
       </edges>
       <edges direction="in">
-        <edge from="AppClient" label="🧑‍💻 Initiates Request" type="solid-arrow" edgeKey="EdgeInitiatesRequest">
+        <edge from="AppClient" label="🧑‍💻 Initiates Request" type="solid-arrow" edgeKey="EdgeInitiatesRequest" next="Proxy">
       <sidebar>
         <title>Action: Initiates Request</title>
-        <overview>The client application calls a method on the generated <def id="Proxy">Proxy</def> object, passing in native programming objects (e.g., a Customer object or a string ID).</overview>
-        <handledBy>&lt;strong&gt;The Developer:&lt;/strong&gt; Calls the local method and provides the arguments.</handledBy>
-        <devImpact>Seems like a local function call, but acts as the gateway to a remote network operation.</devImpact>
-        <considerations>The application thread will typically block here waiting for a response unless asynchronous methods are used.</considerations>
+        <infoCard title="Overview">The client application calls a method on the generated <def id="Proxy">Proxy</def> object, passing in native programming objects (e.g., a Customer object or a string ID).</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The Developer:&lt;/strong&gt; Calls the local method and provides the arguments.</briefcaseCard>
+        <lightningCard title="Developer Impact">Seems like a local function call, but acts as the gateway to a remote network operation.</lightningCard>
+        <lightbulbCard title="Developer Considerations">The application thread will typically block here waiting for a response unless asynchronous methods are used.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml"/>
+        <definitionPill id="ApplicationCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>1</sequenceIndex>
-        <stepCounter>Step 2 of 41</stepCounter>
-        <prev>AppClient</prev>
-        <next><def id="Proxy">Proxy</def></next>
-      </navigation>
       </edge>
       </edges>
-      <clickHandler>call showDetails() "Details on <def id="Proxy">Proxy</def>"</clickHandler>
     </diagram>
 
     <sidebar>
       <title>2. Client <def id="Proxy">Proxy</def> / Stub</title>
-      <overview>A piece of code acting as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.</overview>
-      <interaction>Takes language-specific objects and passes them to the Serialization framework.</interaction>
-      <branching>The proxy enforces type safety. If the developer tries to call a method not defined in the <def id="WSDL">WSDL</def> contract, it fails (at compile time for Java/.NET, or runtime for Python).</branching>
-      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
-      <considerations>Developers need to consider network latency. While proxy methods appear as local calls, they incur significant network overhead. Calling them inside tight loops can lead to severe performance bottlenecks (the <def id="NPlus1Problem">N+1 problem</def>).</considerations>
+      <infoCard title="Overview">A piece of code acting as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.</infoCard>
+      <arrowRightCard title="Next Steps">Takes language-specific objects and passes them to the Serialization framework.</arrowRightCard>
+      <arrowsCard title="Branching &amp; Flow">The proxy enforces type safety. If the developer tries to call a method not defined in the <def id="WSDL">WSDL</def> contract, it fails (at compile time for Java/.NET, or runtime for Python).</arrowsCard>
+      <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</briefcaseCard>
+      <lightbulbCard title="Developer Considerations">Developers need to consider network latency. While proxy methods appear as local calls, they incur significant network overhead. Calling them inside tight loops can lead to severe performance bottlenecks (the <def id="NPlus1Problem">N+1 problem</def>).</lightbulbCard>
     </sidebar>
 
     <languages>
       <language id="java" label="Java">
-        <devImpact>Developers rarely write this manually. They use tooling like `wsimport` (JAX-WS) or `wsdl2java` (Apache CXF) to point at a <def id="WSDL">WSDL</def> URL and generate these classes.</devImpact>
+        <lightningCard title="Developer Impact">Developers rarely write this manually. They use tooling like `wsimport` (JAX-WS) or `wsdl2java` (Apache CXF) to point at a <def id="WSDL">WSDL</def> URL and generate these classes.</lightningCard>
         <codeSnippet>
 // Auto-generated interface stub
 @WebService(targetNamespace = "http://api.example.com/")
@@ -389,7 +256,7 @@ public interface PaymentService {
         </codeSnippet>
       </language>
       <language id="dotnet" label=".NET / C#">
-        <devImpact>Developers rarely write this manually. They use tooling like `svcutil` (WCF) or `dotnet-svcutil` to point at a <def id="WSDL">WSDL</def> URL and generate these C# classes.</devImpact>
+        <lightningCard title="Developer Impact">Developers rarely write this manually. They use tooling like `svcutil` (WCF) or `dotnet-svcutil` to point at a <def id="WSDL">WSDL</def> URL and generate these C# classes.</lightningCard>
         <codeSnippet>
 // Auto-generated interface stub
 [System.ServiceModel.ServiceContractAttribute]
@@ -400,7 +267,7 @@ public interface IPaymentService {
         </codeSnippet>
       </language>
       <language id="python" label="Python">
-        <devImpact>Developers use libraries like Zeep, which dynamically parses the <def id="WSDL">WSDL</def> at runtime and generates proxy objects in memory, embracing Python's dynamic typing.</devImpact>
+        <lightningCard title="Developer Impact">Developers use libraries like Zeep, which dynamically parses the <def id="WSDL">WSDL</def> at runtime and generates proxy objects in memory, embracing Python's dynamic typing.</lightningCard>
         <codeSnippet>
 # Zeep parses the <def id="WSDL">WSDL</def> dynamically at runtime
 # No physical stub classes are generated.
@@ -410,89 +277,65 @@ client = Client(wsdl="http://api.example.com/pay?wsdl")
     </languages>
 
     <definitionPills>
-      <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      <definitionPill id="LibraryCode"/>
     </definitionPills>
 
-    <navigation>
-      <sequenceIndex>2</sequenceIndex>
-      <stepCounter>Step 3 of 41</stepCounter>
-      <prev>EdgeInitiatesRequest</prev>
-      <next>EdgeGeneratesXML</next>
-    </navigation>
-
-  </node><!-- /Proxy -->
+  </node>
 
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       CHILD: 3. Serialize to SOAP Message
-       ═══════════════════════════════════════════════════════════════════ -->
+  
 
-  <node id="Serialize"
-        nodeType="LibraryCode"
-        nodeTypeIcon="📚">
+  <node id="Serialize" next="OSILayer7" nodeType="LibraryCode" nodeTypeIcon="📚">
 
     <diagram>
       <nodeLabel>📚 3. Serialize to <def id="SOAP">SOAP</def> Message</nodeLabel>
       <nodeId>Serialize</nodeId>
       <classes>
-        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
-        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        <class name="process" />
+        <class name="clickable" />
       </classes>
       <edges direction="out">
-        <edge to="TransportProtocol" label="⚙️ Wraps in HTTP/SMTP" type="solid-arrow" edgeKey="EdgeWrapsInHTTP">
+        <edge to="TransportProtocol" label="⚙️ Wraps in HTTP/SMTP" type="solid-arrow" edgeKey="EdgeWrapsInHTTP" next="TransportProtocol">
       <sidebar>
         <title>Action: Wraps in HTTP/SMTP</title>
-        <overview>The raw <def id="XML">XML</def> string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.</overview>
-        <handledBy>&lt;strong&gt;The Transport Protocol (HTTP Client):&lt;/strong&gt; Prepares the message for the network stack.</handledBy>
-        <devImpact>The HTTP status codes (200 OK, 500 Internal Server Error) often dictate the initial success or failure of the transmission.</devImpact>
-        <considerations>Custom headers (like Authorization for Basic Auth) must be injected before this step is finalized.</considerations>
+        <infoCard title="Overview">The raw <def id="XML">XML</def> string is wrapped in a transport protocol envelope. For HTTP, this means creating an HTTP POST request with specific headers like 'Content-Type: text/xml' and 'SOAPAction'.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The Transport Protocol (HTTP Client):&lt;/strong&gt; Prepares the message for the network stack.</briefcaseCard>
+        <lightningCard title="Developer Impact">The HTTP status codes (200 OK, 500 Internal Server Error) often dictate the initial success or failure of the transmission.</lightningCard>
+        <lightbulbCard title="Developer Considerations">Custom headers (like Authorization for Basic Auth) must be injected before this step is finalized.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+        <definitionPill id="OSHardwareCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>7</sequenceIndex>
-        <stepCounter>Step 8 of 41</stepCounter>
-        <prev>OSILayer7</prev>
-        <next>TransportProtocol</next>
-      </navigation>
       </edge>
       </edges>
       <edges direction="in">
-        <edge from="Proxy" label="📚 Generates XML" type="solid-arrow" edgeKey="EdgeGeneratesXML">
+        <edge from="Proxy" label="📚 Generates XML" type="solid-arrow" edgeKey="EdgeGeneratesXML" next="Serialize">
       <sidebar>
         <title>Action: Generates <def id="XML">XML</def></title>
-        <overview>The proxy intercepts the method call and invokes the <def id="SOAP">SOAP</def> serialization engine to convert the native objects into a strict <def id="XML">XML</def> structure according to the <def id="WSDL">WSDL</def>.</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping.</handledBy>
-        <devImpact>Saves the developer from writing manual <def id="XML">XML</def> string concatenation and parsing logic.</devImpact>
-        <considerations>If the objects contain circular references or unsupported data types, this step will throw a serialization exception.</considerations>
+        <infoCard title="Overview">The proxy intercepts the method call and invokes the <def id="SOAP">SOAP</def> serialization engine to convert the native objects into a strict <def id="XML">XML</def> structure according to the <def id="WSDL">WSDL</def>.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically performs the object-to-<def id="XML">XML</def> mapping.</briefcaseCard>
+        <lightningCard title="Developer Impact">Saves the developer from writing manual <def id="XML">XML</def> string concatenation and parsing logic.</lightningCard>
+        <lightbulbCard title="Developer Considerations">If the objects contain circular references or unsupported data types, this step will throw a serialization exception.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml"/>
+        <definitionPill id="LibraryCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>3</sequenceIndex>
-        <stepCounter>Step 4 of 41</stepCounter>
-        <prev><def id="Proxy">Proxy</def></prev>
-        <next>Serialize</next>
-      </navigation>
       </edge>
       </edges>
-      <clickHandler>call showDetails() "Details on Serialization"</clickHandler>
     </diagram>
 
     <sidebar>
       <title>3. Serialize to <def id="SOAP">SOAP</def> Message</title>
-      <overview>The framework's engine converts the application's native in-memory objects into a structured <def id="SOAP">SOAP</def> <def id="XML">XML</def> document format according to <def id="XML">XML</def> Schema rules.</overview>
-      <interaction>Passes the resulting raw <def id="XML">XML</def> string to the Transport Protocol layer.</interaction>
-      <branching>If serialization fails (e.g., encountering a circular reference), a runtime serialization exception is thrown.</branching>
-      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</handledBy>
-      <considerations>Be mindful of object graph sizes. Serializing extremely large objects or lists can cause massive memory spikes and OutOfMemory errors.</considerations>
+      <infoCard title="Overview">The framework's engine converts the application's native in-memory objects into a structured <def id="SOAP">SOAP</def> <def id="XML">XML</def> document format according to <def id="XML">XML</def> Schema rules.</infoCard>
+      <arrowRightCard title="Next Steps">Passes the resulting raw <def id="XML">XML</def> string to the Transport Protocol layer.</arrowRightCard>
+      <arrowsCard title="Branching &amp; Flow">If serialization fails (e.g., encountering a circular reference), a runtime serialization exception is thrown.</arrowsCard>
+      <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; It's the library's responsibility to transform/perform the task.</briefcaseCard>
+      <lightbulbCard title="Developer Considerations">Be mindful of object graph sizes. Serializing extremely large objects or lists can cause massive memory spikes and OutOfMemory errors.</lightbulbCard>
     </sidebar>
 
     <languages>
       <language id="java" label="Java">
-        <devImpact>Usually a "black box" handled by frameworks like JAX-WS or Apache CXF. Devs intervene here to configure <def id="XML">XML</def> namespace mappings or inject interceptors.</devImpact>
+        <lightningCard title="Developer Impact">Usually a "black box" handled by frameworks like JAX-WS or Apache CXF. Devs intervene here to configure <def id="XML">XML</def> namespace mappings or inject interceptors.</lightningCard>
         <codeSnippet>
 // Injecting a custom interceptor during serialization
 BindingProvider bp = (BindingProvider) proxy;
@@ -502,7 +345,7 @@ bp.getBinding().setHandlerChain(handlers);
         </codeSnippet>
       </language>
       <language id="dotnet" label=".NET / C#">
-        <devImpact>Usually a "black box" handled by the Windows Communication Foundation (WCF). Devs use behaviors and message inspectors to manipulate headers.</devImpact>
+        <lightningCard title="Developer Impact">Usually a "black box" handled by the Windows Communication Foundation (WCF). Devs use behaviors and message inspectors to manipulate headers.</lightningCard>
         <codeSnippet>
 // Injecting an endpoint behavior in WCF
 proxy.Endpoint.EndpointBehaviors.Add(
@@ -511,7 +354,7 @@ proxy.Endpoint.EndpointBehaviors.Add(
         </codeSnippet>
       </language>
       <language id="python" label="Python">
-        <devImpact>Handled under the hood by Zeep (using lxml). Developers can pass standard Python dictionaries, and Zeep securely maps them to the required <def id="XML">XML</def> Schema.</devImpact>
+        <lightningCard title="Developer Impact">Handled under the hood by Zeep (using lxml). Developers can pass standard Python dictionaries, and Zeep securely maps them to the required <def id="XML">XML</def> Schema.</lightningCard>
         <codeSnippet>
 from zeep.plugins import HistoryPlugin
 # Zeep plugins can inspect/modify the <def id="XML">XML</def> tree
@@ -522,181 +365,126 @@ client = Client(wsdl, plugins=[history])
     </languages>
 
     <definitionPills>
-      <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      <definitionPill id="LibraryCode"/>
     </definitionPills>
 
-    <navigation>
-      <sequenceIndex>4</sequenceIndex>
-      <stepCounter>Step 5 of 41</stepCounter>
-      <prev>EdgeGeneratesXML</prev>
-      <next>OSILayer7_BigPicture</next>
-    </navigation>
-
-  </node><!-- /Serialize -->
+  </node>
 
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       CHILD: 9. Client Transport Receives
-       ═══════════════════════════════════════════════════════════════════ -->
+  
 
-  <node id="ClientTransport"
-        nodeType="LibraryCode"
-        nodeTypeIcon="📚">
+  <node id="ClientTransport" next="EdgeDeserializesResponseXML" nodeType="LibraryCode" nodeTypeIcon="📚">
 
     <diagram>
       <nodeLabel>📚 9. Client Transport Receives</nodeLabel>
       <nodeId>ClientTransport</nodeId>
       <classes>
-        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
-        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        <class name="process" />
+        <class name="clickable" />
       </classes>
       <edges direction="out">
-        <edge to="Deserialize2" label="📚 Deserializes Response XML" type="solid-arrow" edgeKey="EdgeDeserializesResponseXML">
+        <edge to="Deserialize2" label="📚 Deserializes Response XML" type="solid-arrow" edgeKey="EdgeDeserializesResponseXML" next="Deserialize2">
       <sidebar>
         <title>Action: Deserializes Response <def id="XML">XML</def></title>
-        <overview>The client <def id="SOAP">SOAP</def> library extracts the <def id="XML">XML</def> from the HTTP response body and converts it back into native language objects (or throws a fault exception).</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically handles <def id="XML">XML</def> parsing and object mapping.</handledBy>
-        <devImpact>The developer receives the result as a native object — completely unaware of the <def id="XML">XML</def> that was transmitted.</devImpact>
-        <considerations>Very large response bodies cause proportionally large memory allocations during deserialization. Streaming parsers can mitigate this for list-type responses.</considerations>
+        <infoCard title="Overview">The client <def id="SOAP">SOAP</def> library extracts the <def id="XML">XML</def> from the HTTP response body and converts it back into native language objects (or throws a fault exception).</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically handles <def id="XML">XML</def> parsing and object mapping.</briefcaseCard>
+        <lightningCard title="Developer Impact">The developer receives the result as a native object — completely unaware of the <def id="XML">XML</def> that was transmitted.</lightningCard>
+        <lightbulbCard title="Developer Considerations">Very large response bodies cause proportionally large memory allocations during deserialization. Streaming parsers can mitigate this for list-type responses.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml"/>
+        <definitionPill id="LibraryCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>38</sequenceIndex>
-        <stepCounter>Step 39 of 41</stepCounter>
-        <prev>ClientTransport</prev>
-        <next>Deserialize2</next>
-      </navigation>
       </edge>
       </edges>
       <edges direction="in">
-        <edge from="TCP" label="⚙️ ☁️ Delivers Response" type="solid-arrow" edgeKey="EdgeDeliversResponse">
+        <edge from="TCP" label="⚙️ ☁️ Delivers Response" type="solid-arrow" edgeKey="EdgeDeliversResponse" next="ClientTransport">
       <sidebar>
         <title>Action: Delivers Response</title>
-        <overview>The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the <def id="SOAP">SOAP</def> library.</overview>
-        <handledBy>&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</handledBy>
-        <devImpact>Transparent to developers, but contributes to the total round-trip time the application experiences.</devImpact>
-        <considerations>If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</considerations>
+        <infoCard title="Overview">The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the <def id="SOAP">SOAP</def> library.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</briefcaseCard>
+        <lightningCard title="Developer Impact">Transparent to developers, but contributes to the total round-trip time the application experiences.</lightningCard>
+        <lightbulbCard title="Developer Considerations">If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="Network" file="soap-xml/definitions/Network.xml"/>
-        <definitionRef id="OSHardwareCode" file="soap-xml/definitions/OSHardwareCode.xml"/>
+        <definitionPill id="Network"/>
+        <definitionPill id="OSHardwareCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>36</sequenceIndex>
-        <stepCounter>Step 37 of 41</stepCounter>
-        <prev>EdgeReturnsViaPort</prev>
-        <next>ClientTransport</next>
-      </navigation>
       </edge>
       </edges>
-      <clickHandler>call showDetails() "Details on Client Transport"</clickHandler>
     </diagram>
 
     <sidebar>
       <title>9. Client Transport Receives</title>
-      <overview>The client-side HTTP client layer receives the HTTP response from the network stack. It checks the HTTP status code and passes the response body (the <def id="XML">XML</def>) to the <def id="SOAP">SOAP</def> deserialization layer.</overview>
-      <interaction>Receives the reassembled HTTP response from the OS networking stack and passes the <def id="XML">XML</def> body to the client <def id="SOAP">SOAP</def> library for parsing.</interaction>
-      <branching>If the HTTP status is a transport-level error (e.g., 503 Service Unavailable, timeout), the <def id="SOAP">SOAP</def> library throws a transport exception before attempting to parse any <def id="XML">XML</def>.</branching>
-      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Network Layer:&lt;/strong&gt; The OS handles packet reassembly; the <def id="SOAP">SOAP</def> framework handles the HTTP layer.</handledBy>
-      <devImpact>Generally handled by the <def id="SOAP">SOAP</def> framework, but developers must configure timeouts to avoid threads blocking indefinitely waiting for a response that will never arrive.</devImpact>
-      <considerations>Developers should configure both connection and read timeouts. An unreachable server that silently drops packets will cause an indefinitely blocked thread without a read timeout.</considerations>
+      <infoCard title="Overview">The client-side HTTP client layer receives the HTTP response from the network stack. It checks the HTTP status code and passes the response body (the <def id="XML">XML</def>) to the <def id="SOAP">SOAP</def> deserialization layer.</infoCard>
+      <arrowRightCard title="Next Steps">Receives the reassembled HTTP response from the OS networking stack and passes the <def id="XML">XML</def> body to the client <def id="SOAP">SOAP</def> library for parsing.</arrowRightCard>
+      <arrowsCard title="Branching &amp; Flow">If the HTTP status is a transport-level error (e.g., 503 Service Unavailable, timeout), the <def id="SOAP">SOAP</def> library throws a transport exception before attempting to parse any <def id="XML">XML</def>.</arrowsCard>
+      <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Network Layer:&lt;/strong&gt; The OS handles packet reassembly; the <def id="SOAP">SOAP</def> framework handles the HTTP layer.</briefcaseCard>
+      <lightningCard title="Developer Impact">Generally handled by the <def id="SOAP">SOAP</def> framework, but developers must configure timeouts to avoid threads blocking indefinitely waiting for a response that will never arrive.</lightningCard>
+      <lightbulbCard title="Developer Considerations">Developers should configure both connection and read timeouts. An unreachable server that silently drops packets will cause an indefinitely blocked thread without a read timeout.</lightbulbCard>
     </sidebar>
 
     <definitionPills>
-      <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      <definitionPill id="LibraryCode"/>
     </definitionPills>
 
-    <navigation>
-      <sequenceIndex>37</sequenceIndex>
-      <stepCounter>Step 38 of 41</stepCounter>
-      <prev>EdgeDeliversResponse</prev>
-      <next>EdgeDeserializesResponseXML</next>
-    </navigation>
-
-  </node><!-- /ClientTransport -->
+  </node>
 
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       CHILD: 10. Deserialize Response
-       ═══════════════════════════════════════════════════════════════════ -->
+  
 
-  <node id="Deserialize2"
-        nodeType="LibraryCode"
-        nodeTypeIcon="📚">
+  <node id="Deserialize2" next="EdgeReturnsResult" nodeType="LibraryCode" nodeTypeIcon="📚">
 
     <diagram>
       <nodeLabel>📚 10. Deserialize Response</nodeLabel>
       <nodeId>Deserialize2</nodeId>
       <classes>
-        <class name="process"   style="fill:#e0f2fe;stroke:#0ea5e9;stroke-width:2px"/>
-        <class name="clickable" style="cursor:pointer;transition:all 0.2s"/>
+        <class name="process" />
+        <class name="clickable" />
       </classes>
       <edges direction="out">
         <edge to="AppClient" label="🧑‍💻 Returns Result / Throws Fault" type="solid-arrow" edgeKey="EdgeReturnsResult">
       <sidebar>
         <title>Action: Returns Result / Throws Fault</title>
-        <overview>The final step of the round trip. The <def id="SOAP">SOAP</def> framework hands the deserialized result back to the application, completing the remote method call. If a <def id="SOAP">SOAP</def> Fault was in the response, a native exception is thrown instead.</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Developer:&lt;/strong&gt; The library completes the call; the developer's code receives the return value or catches the exception.</handledBy>
-        <devImpact>From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method.</devImpact>
-        <considerations>This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.</considerations>
+        <infoCard title="Overview">The final step of the round trip. The <def id="SOAP">SOAP</def> framework hands the deserialized result back to the application, completing the remote method call. If a <def id="SOAP">SOAP</def> Fault was in the response, a native exception is thrown instead.</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library &amp;amp; Developer:&lt;/strong&gt; The library completes the call; the developer's code receives the return value or catches the exception.</briefcaseCard>
+        <lightningCard title="Developer Impact">From the developer's perspective, the entire network round-trip is invisible — they see only a return value or an exception, exactly as if they had called a local method.</lightningCard>
+        <lightbulbCard title="Developer Considerations">This is why developers must always wrap proxy calls in try/catch. Both the happy path and the fault path emerge from this single point.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="ApplicationCode" file="soap-xml/definitions/ApplicationCode.xml"/>
+        <definitionPill id="ApplicationCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>40</sequenceIndex>
-        <stepCounter>Step 41 of 41</stepCounter>
-        <prev>Deserialize2</prev>
-        <next>null</next>
-      </navigation>
       </edge>
       </edges>
       <edges direction="in">
-        <edge from="ClientTransport" label="📚 Deserializes Response XML" type="solid-arrow" edgeKey="EdgeDeserializesResponseXML">
+        <edge from="ClientTransport" label="📚 Deserializes Response XML" type="solid-arrow" edgeKey="EdgeDeserializesResponseXML" next="Deserialize2">
       <sidebar>
         <title>Action: Deserializes Response <def id="XML">XML</def></title>
-        <overview>The client <def id="SOAP">SOAP</def> library extracts the <def id="XML">XML</def> from the HTTP response body and converts it back into native language objects (or throws a fault exception).</overview>
-        <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically handles <def id="XML">XML</def> parsing and object mapping.</handledBy>
-        <devImpact>The developer receives the result as a native object — completely unaware of the <def id="XML">XML</def> that was transmitted.</devImpact>
-        <considerations>Very large response bodies cause proportionally large memory allocations during deserialization. Streaming parsers can mitigate this for list-type responses.</considerations>
+        <infoCard title="Overview">The client <def id="SOAP">SOAP</def> library extracts the <def id="XML">XML</def> from the HTTP response body and converts it back into native language objects (or throws a fault exception).</infoCard>
+        <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically handles <def id="XML">XML</def> parsing and object mapping.</briefcaseCard>
+        <lightningCard title="Developer Impact">The developer receives the result as a native object — completely unaware of the <def id="XML">XML</def> that was transmitted.</lightningCard>
+        <lightbulbCard title="Developer Considerations">Very large response bodies cause proportionally large memory allocations during deserialization. Streaming parsers can mitigate this for list-type responses.</lightbulbCard>
       </sidebar>
       <definitionPills>
-        <definitionRef id="LibraryCode" file="soap-xml/definitions/LibraryCode.xml"/>
+        <definitionPill id="LibraryCode"/>
       </definitionPills>
-      <navigation>
-        <sequenceIndex>38</sequenceIndex>
-        <stepCounter>Step 39 of 41</stepCounter>
-        <prev>ClientTransport</prev>
-        <next>Deserialize2</next>
-      </navigation>
       </edge>
       </edges>
-      <clickHandler>call showDetails() "Details on Client Deserialization"</clickHandler>
     </diagram>
 
     <sidebar>
       <title>10. Deserialize Response</title>
-      <overview>The client <def id="SOAP">SOAP</def> library parses the response <def id="XML">XML</def>. On success, it maps the <def id="XML">XML</def> elements back into native language objects and returns them. On failure (<def id="SOAP">SOAP</def> Fault present), it parses the fault codes and throws a language-native exception.</overview>
-      <interaction>Returns the deserialized result object to the calling application, completing the round trip. On fault, throws an exception that propagates up to the application code.</interaction>
-      <branching>Success path → native return object handed back to the developer's code. Fault path → <def id="SOAP">SOAP</def> Fault parsed and thrown as a native exception (e.g., WebServiceException in Java, SoapException in .NET).</branching>
-      <handledBy>&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically deserializes the <def id="XML">XML</def> response; the developer only interacts with the resulting native object or exception.</handledBy>
-      <devImpact>This is the last step in the <def id="SOAP">SOAP</def> call. The developer's original blocking method call finally unblocks and receives either a return value or an exception.</devImpact>
-      <considerations>Developers must implement try/catch around proxy calls to handle <def id="SOAP">SOAP</def> Faults. Uncaught exceptions from this step will crash the calling thread.</considerations>
+      <infoCard title="Overview">The client <def id="SOAP">SOAP</def> library parses the response <def id="XML">XML</def>. On success, it maps the <def id="XML">XML</def> elements back into native language objects and returns them. On failure (<def id="SOAP">SOAP</def> Fault present), it parses the fault codes and throws a language-native exception.</infoCard>
+      <arrowRightCard title="Next Steps">Returns the deserialized result object to the calling application, completing the round trip. On fault, throws an exception that propagates up to the application code.</arrowRightCard>
+      <arrowsCard title="Branching &amp; Flow">Success path → native return object handed back to the developer's code. Fault path → <def id="SOAP">SOAP</def> Fault parsed and thrown as a native exception (e.g., WebServiceException in Java, SoapException in .NET).</arrowsCard>
+      <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; Automatically deserializes the <def id="XML">XML</def> response; the developer only interacts with the resulting native object or exception.</briefcaseCard>
+      <lightningCard title="Developer Impact">This is the last step in the <def id="SOAP">SOAP</def> call. The developer's original blocking method call finally unblocks and receives either a return value or an exception.</lightningCard>
+      <lightbulbCard title="Developer Considerations">Developers must implement try/catch around proxy calls to handle <def id="SOAP">SOAP</def> Faults. Uncaught exceptions from this step will crash the calling thread.</lightbulbCard>
     </sidebar>
 
     <definitionPills>
-      <definitionRef id="LibraryCode" file="soap/data/definitions/LibraryCode.xml"/>
+      <definitionPill id="LibraryCode"/>
     </definitionPills>
 
-    <navigation>
-      <sequenceIndex>39</sequenceIndex>
-      <stepCounter>Step 40 of 41</stepCounter>
-      <prev>EdgeDeserializesResponseXML</prev>
-      <next>EdgeReturnsResult</next>
-    </navigation>
+  </node>
 
-  </node><!-- /Deserialize2 -->
-
-</node><!-- /Client -->
+</node>

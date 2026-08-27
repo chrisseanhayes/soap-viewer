@@ -18,7 +18,7 @@
   <modalTitle>⚙️ OS/Hardware Code</modalTitle>
 
   <!-- ── Styling ──────────────────────────────────────────────────────── -->
-  <colorClass>bg-slate-100 text-slate-800 border border-slate-300</colorClass>
+  <theme>pillTheme04</theme>
 
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <body>
@@ -37,16 +37,5 @@
   </assignedTo>
 
   <!-- ── Source file map ──────────────────────────────────────────────── -->
-  <sourceFiles>
-    <file path="soap/templates/fragments/sidebar-detail.js"
-          lines="71-72"
-          contains="pill condition, tooltipPillTpl() call with all arguments"/>
-    <file path="soap/templates/fragments/sidebar-detail.js"
-          lines="33-39"
-          contains="tooltipPillTpl() function signature and modal trigger"/>
-    <file path="soap/js/app.js"
-          lines="152-168"
-          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
-  </sourceFiles>
 
 </definition>

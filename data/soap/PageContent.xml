@@ -48,14 +48,14 @@
       <intro>
         <def id="SOAP">SOAP</def> inherently relies on the &lt;strong&gt;<def id="Proxy">Proxy</def> Pattern&lt;/strong&gt;, which acts much like a &lt;strong&gt;<def id="Facade">Facade</def>&lt;/strong&gt; to completely abstract the complexity of network calls away from the developer. The foundation of this is the <def id="WSDL">WSDL</def>, which IDEs use to auto-generate Client Proxies (stubs).
       </intro>
-      <subsections>
-        <subsection id="developerView">
+      <subsections layout="grid">
+        <subsection id="developerView" theme="infoBox">
           <heading>1. The Developer's View (The <def id="Facade">Facade</def>)</heading>
           <body>
             To the developer writing the application logic, calling the remote server looks exactly like calling a local method on a local object. They do not write HTTP clients or parse <def id="XML">XML</def>.
           </body>
         </subsection>
-        <subsection id="hiddenComplexity">
+        <subsection id="hiddenComplexity" theme="highlightBox">
           <heading>2. The Hidden Complexity</heading>
           <body>
             When the developer calls that method, the generated <def id="Proxy">Proxy</def> intercepts it and handles massive complexity behind the scenes:
@@ -67,13 +67,14 @@
             <bullet>&lt;strong&gt;Error Translation:&lt;/strong&gt; Parses returning <def id="XML">XML</def> and translates <def id="SOAP">SOAP</def> Faults into native language Exceptions.</bullet>
           </bullets>
         </subsection>
-        <subsection id="leakyAbstraction">
-          <heading>The "<def id="LeakyAbstraction">Leaky Abstraction</def>" Drawback</heading>
-          <body>
-            While this abstraction enables rapid development, it completely hides the network. Because remote calls look identical to local method calls, developers can easily forget they incur significant network latency (e.g., carelessly placing a proxy call inside a tight &lt;code&gt;for&lt;/code&gt; loop), leading to severe performance bottlenecks known as the <def id="NPlus1Problem">N+1 problem</def>.
-          </body>
-        </subsection>
       </subsections>
+      
+      <subsection id="leakyAbstraction" theme="warningNote" layout="horizontal">
+        <heading>The "<def id="LeakyAbstraction">Leaky Abstraction</def>" Drawback</heading>
+        <body>
+          While this abstraction enables rapid development, it completely hides the network. Because remote calls look identical to local method calls, developers can easily forget they incur significant network latency (e.g., carelessly placing a proxy call inside a tight &lt;code&gt;for&lt;/code&gt; loop), leading to severe performance bottlenecks known as the <def id="NPlus1Problem">N+1 problem</def>.
+        </body>
+      </subsection>
       
       <!-- Language-specific Facade Code Snippets -->
       <languages>

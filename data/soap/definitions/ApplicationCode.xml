@@ -23,7 +23,7 @@
 
   <!-- ── Styling ──────────────────────────────────────────────────────── -->
   <!-- Tailwind classes applied to the pill button -->
-  <colorClass>bg-emerald-50 text-emerald-800 border border-emerald-200</colorClass>
+  <theme>pillTheme06</theme>
 
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <!-- Displayed as plain text inside the modal <p> element -->
@@ -43,16 +43,5 @@
   </assignedTo>
 
   <!-- ── Source file map ──────────────────────────────────────────────── -->
-  <sourceFiles>
-    <file path="soap/templates/fragments/sidebar-detail.js"
-          lines="65-66"
-          contains="pill condition, tooltipPillTpl() call with all arguments"/>
-    <file path="soap/templates/fragments/sidebar-detail.js"
-          lines="33-39"
-          contains="tooltipPillTpl() function signature and modal trigger"/>
-    <file path="soap/js/app.js"
-          lines="152-168"
-          contains="window.showDefinitionModal() — renders the modal from icon+label+body"/>
-  </sourceFiles>
 
 </definition>

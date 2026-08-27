@@ -47,12 +47,6 @@ const cls = {
 
 // Specific Icon Wrappers
 const sidebarEmptyStateIcon = () => iconSvg('emptyState', cls.placeholderIcon);
-const sidebarOverviewIcon = () => iconSvg('info', `w-4 h-4 ${theme.colors.overview.icon}`);
-const sidebarHandledByIcon = () => iconSvg('briefcase', `w-4 h-4 ${theme.colors.handledBy.icon}`);
-const sidebarConsiderationsIcon = () => iconSvg('lightbulb', `w-4 h-4 ${theme.colors.considerations.icon}`);
-const sidebarDevImpactIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.devImpact.icon}`);
-const sidebarInteractionIcon = () => iconSvg('arrowRight', `w-4 h-4 ${theme.colors.interaction.icon}`);
-const sidebarBranchingIcon = () => iconSvg('arrows', `w-4 h-4 ${theme.colors.branching.icon}`);
 const sidebarCodeSnippetIcon = () => iconSvg('lightning', `w-4 h-4 ${theme.colors.code.icon}`);
 const bpHowItFitsIcon = () => iconSvg('puzzle', `w-4 h-4 ${theme.colors.bigPicture.icon}`);
 const bpWhyItExistsIcon = () => iconSvg('question', `w-4 h-4 ${theme.colors.bigPicture.iconAlt}`);
@@ -67,32 +61,8 @@ export function sidebarPlaceholderTpl(emptyState) {
     `;
 }
 
-function baseSectionTpl(title, themeObj, iconFn, content, extraClasses = '') {
-    const containerClasses = extraClasses 
-        ? `${cls.section} ${extraClasses} ${themeObj.bg || ''} ${themeObj.border || ''}`.trim()
-        : cls.section;
-
-    return html`
-        <div class="${containerClasses}">
-            <h4 class="${cls.sectionTitleBase}">
-                ${iconFn()}
-                ${unsafeHTML(title)}
-            </h4>
-            <p class="${cls.sectionBodyBase}">${unsafeHTML(content)}</p>
-        </div>
-    `;
-}
-
-const overviewSectionTpl = (content) => baseSectionTpl('Overview', theme.colors.overview, sidebarOverviewIcon, content);
-const handledBySectionTpl = (content) => baseSectionTpl('Handled By', theme.colors.handledBy, sidebarHandledByIcon, content);
-const considerationsSectionTpl = (content) => baseSectionTpl('Developer Considerations', theme.colors.considerations, sidebarConsiderationsIcon, content, 'p-3 rounded-lg border');
-const devImpactSectionTpl = (content) => baseSectionTpl('Developer Impact', theme.colors.devImpact, sidebarDevImpactIcon, content, 'p-3 rounded-lg border');
-const interactionSectionTpl = (content) => baseSectionTpl('Next Steps', theme.colors.interaction, sidebarInteractionIcon, content);
-const branchingSectionTpl = (content) => baseSectionTpl('Branching & Flow', theme.colors.branching, sidebarBranchingIcon, content, 'p-3 rounded-lg border');
-
-export function tooltipPillTpl(icon, text, definition, colorClass) {
-    const fallbackColor = theme.colors.definition.pill;
-    const finalColor = (colorClass && colorClass.trim() !== '') ? colorClass : fallbackColor;
+export function tooltipPillTpl(icon, text, definition, themeKey) {
+    const finalColor = theme.colors.definitions[themeKey] || theme.colors.definitions.pillTheme05;
     return html`
         <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="${sharedCls.pill} ml-2 ${finalColor}">
             ${icon} ${text}
@@ -111,16 +81,24 @@ export function sidebarDetailTpl(node, nodeId, label, definitions) {
                 ${(node.definitionPills || []).map(pill => {
                     const def = definitions[pill.id];
                     if (!def) return nothing;
-                    return tooltipPillTpl(def.icon, def.label, def.body, def.colorClass);
+                    return tooltipPillTpl(def.icon, def.label, def.body, def.theme);
                 })}
             </div>
 
-            ${node.overview ? overviewSectionTpl(node.overview) : nothing}
-            ${node.handledBy ? handledBySectionTpl(node.handledBy) : nothing}
-            ${node.considerations ? considerationsSectionTpl(node.considerations) : nothing}
-            ${node.devImpact ? devImpactSectionTpl(node.devImpact) : nothing}
-            ${node.interaction ? interactionSectionTpl(node.interaction) : nothing}
-            ${node.branching ? branchingSectionTpl(node.branching) : nothing}
+            ${(node.sections || []).map(sec => {
+                const t = theme.colors[sec.theme] || {};
+                const containerClasses = t.bg || t.border ? `${cls.section} p-3 rounded-lg border ${t.bg || ''} ${t.border || ''}` : cls.section;
+                
+                return html`
+                    <div class="${containerClasses}">
+                        <h4 class="${cls.sectionTitleBase} ${t.text || ''}">
+                            ${iconSvg(sec.icon || 'info', `w-4 h-4 ${t.icon || ''}`)}
+                            ${unsafeHTML(sec.title)}
+                        </h4>
+                        <p class="${cls.sectionBodyBase}">${unsafeHTML(sec.body)}</p>
+                    </div>
+                `;
+            })}
 
             ${node.codeSnippet ? html`
                 <div class="${cls.codeSnippetContainer}">
@@ -146,7 +124,7 @@ export function sidebarBigPictureTpl(node, definitions) {
                     ${(node.definitionPills || []).map(pill => {
                         const def = definitions[pill.id];
                         if (!def) return nothing;
-                        return tooltipPillTpl(def.icon, def.label, def.body, def.colorClass);
+                        return tooltipPillTpl(def.icon, def.label, def.body, def.theme);
                     })}
                 </div>
                 <h3 class="${cls.bpTitle} ${t.text}">${unsafeHTML(title)}</h3>
