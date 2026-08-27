@@ -24,7 +24,7 @@ const cls = {
 const sectionDeveloperViewIcon = () => iconSvg('lightning', `w-5 h-5 ${theme.colors.developerView.icon}`);
 const sectionHiddenComplexityIcon = () => iconSvg('flask', `w-5 h-5 ${theme.colors.hiddenComplexity.icon}`);
 const sectionLeakyAbstractionIcon = () => iconSvg('warning', `w-6 h-6 ${theme.colors.leakyAbstraction.icon} flex-shrink-0 mt-0.5`);
-const sectionToolingHeadingIcon = () => iconSvg('terminal', 'w-6 h-6 text-slate-600');
+const sectionToolingHeadingIcon = () => iconSvg('terminal', `w-6 h-6 ${theme.colors.text.muted}`);
 const sectionCicdCalloutIcon = () => iconSvg('cog', `w-5 h-5 ${theme.colors.cicdCallout.icon} flex-shrink-0 mt-0.5`);
 
 export function understandingLayersTpl(section) {

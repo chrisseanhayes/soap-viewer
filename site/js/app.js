@@ -16,7 +16,7 @@ const ti = t.interactive;
 
 const cls = {
     appContainer: "max-w-7xl mx-auto px-4 py-6 space-y-8 animate-fade-in",
-    appHeader: "flex items-center justify-between gap-6 pb-4 border-b border-slate-200",
+    appHeader: `flex items-center justify-between gap-6 pb-4 border-b ${ts.border}`,
     appHeaderText: "min-w-0",
     appTitle: `text-2xl font-extrabold tracking-tight ${tx.h1}`,
     appSubtitle: `text-sm leading-snug mt-0.5 ${tx.muted}`,
@@ -29,7 +29,8 @@ const cls = {
     modalTitle: `text-xl font-bold mb-3 border-b pb-2 ${tx.h2} ${ts.borderLight}`,
     modalBody: `leading-relaxed text-sm ${tx.muted}`,
     modalFooter: "mt-6 flex justify-end",
-    modalActionBtn: `px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${ti.btnBg} ${ti.btnHover} ${tx.body}`
+    modalActionBtn: `px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${ti.btnBg} ${ti.btnHover} ${tx.body}`,
+    defLink: `border-b border-dotted ${ti.controlBorder} hover:border-slate-500 cursor-help transition-colors`
 };
 
 let content = null;
@@ -40,14 +41,32 @@ let svgPanZoomInstance = null;
 
 const projectName = window.location.pathname.split('/').pop().replace('.html', '') || 'soap';
 
+function processDefinitions(obj) {
+    if (typeof obj === 'string') {
+        return obj.replace(/<def\s+id="([^"]+)">([^<]+)<\/def>/g, (match, id, word) => {
+            return `<button type="button" class="${cls.defLink}" onclick="window.showDefinitionById('${id}')">${word}</button>`;
+        });
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(processDefinitions);
+    }
+    if (obj !== null && typeof obj === 'object') {
+        for (let k in obj) {
+            obj[k] = processDefinitions(obj[k]);
+        }
+    }
+    return obj;
+}
+
 async function loadData() {
     try {
         const [contentRes, langRes] = await Promise.all([
             fetch(`./data/${projectName}/content.json`),
             fetch(`./data/${projectName}/language-data.json`)
         ]);
-        content = await contentRes.json();
-        langData = await langRes.json();
+        
+        content = processDefinitions(await contentRes.json());
+        langData = processDefinitions(await langRes.json());
         
         window.__diagramMeta = content.diagramMeta || {};
         currentLang = content.meta?.defaultLanguage || 'java';

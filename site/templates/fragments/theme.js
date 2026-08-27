@@ -83,6 +83,10 @@ export const theme = {
             btnActiveBg: "bg-white",
             btnActiveText: "text-blue-700",
             btnInactiveText: "text-slate-600"
+        },
+        
+        definition: {
+            pill: "bg-slate-50 text-slate-800 border border-slate-200"
         }
     }
 };

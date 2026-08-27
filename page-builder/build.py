@@ -351,7 +351,6 @@ def create_definition_xml(def_id, word, project_name):
 <definition id="{def_id}">
   <icon>📖</icon>
   <label>{word}</label>
-  <colorClass>bg-slate-50 text-slate-800 border border-slate-200</colorClass>
   <body>Auto-generated definition for {word}.</body>
 </definition>
 '''
@@ -368,7 +367,6 @@ def create_definition_xml(def_id, word, project_name):
     id="{def_id}"
     icon="📖"
     label="{word}"
-    colorClass="bg-slate-50 text-slate-800 border border-slate-200"
     file="{project_name}/data/definitions/{def_id}.xml"
   />
 </definitions>'''
@@ -387,10 +385,9 @@ def process_text_for_defs(text, definitions_dict, project_name):
             definitions_dict[def_id] = {
                 "icon": "📖",
                 "label": word,
-                "colorClass": "bg-slate-50 text-slate-800 border border-slate-200",
                 "body": f"Auto-generated definition for {word}."
             }
-        return f'<button type="button" class="border-b border-dotted border-slate-300 hover:border-slate-500 cursor-help transition-colors" onclick="window.showDefinitionById(\'{def_id}\')">{word}</button>'
+        return match.group(0)
     return re.sub(pattern, replacer, text)
 
 def replace_def_tags_in_dict(d, definitions_dict, project_name):

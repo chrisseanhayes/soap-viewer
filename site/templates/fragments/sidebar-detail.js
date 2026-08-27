@@ -4,40 +4,45 @@ import { iconSvg } from './icons.js';
 import { theme } from './theme.js';
 import { cls as sharedCls } from './classes.js';
 
+const t = theme.colors;
+const ts = t.surface;
+const tx = t.text;
+const bp = t.bigPicture;
+
 const cls = {
     // Detail
     container: "animate-fade-in space-y-4",
-    header: "border-b border-slate-200 pb-3",
-    title: "text-2xl font-bold text-blue-700",
-    idBadge: "inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100",
+    header: `border-b ${ts.border} pb-3`,
+    title: `text-2xl font-bold ${tx.brand}`,
+    idBadge: `inline-flex items-center mt-2 px-2.5 py-0.5 rounded-md text-xs font-semibold ${t.badge.idBg} ${t.badge.idText} border ${t.badge.idBorder}`,
     section: "mb-4",
-    sectionTitleBase: "text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1",
-    sectionBodyBase: "text-slate-700 leading-relaxed text-sm",
+    sectionTitleBase: `text-sm font-bold ${tx.h1} uppercase tracking-wider mb-1 flex items-center gap-1`,
+    sectionBodyBase: `${tx.body} leading-relaxed text-sm`,
     
     // Code Snippet
-    codeSnippetContainer: "bg-slate-800 p-4 rounded-lg border border-slate-700 mt-5 shadow-inner",
-    codeSnippetTitle: "text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2",
+    codeSnippetContainer: `${ts.dark} p-4 rounded-lg border ${ts.borderDark} mt-5 shadow-inner`,
+    codeSnippetTitle: `text-xs font-bold ${tx.inverseTitle} uppercase tracking-wider mb-3 flex items-center gap-2`,
     codeSnippetText: "font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all",
     
     // Big Picture
     bpContainer: "animate-fade-in space-y-4",
-    bpHeader: "border-b border-indigo-100 pb-3",
+    bpHeader: `border-b ${bp.headerBorder} pb-3`,
     bpBadgeContainer: "flex items-center gap-2 mb-1",
     bpBadge: "text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide",
     bpTitle: "text-lg font-bold",
-    bpRole: "text-sm font-semibold text-slate-600 mt-1",
-    bpSectionTitle: "text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1",
-    bpSectionBody: "text-slate-700 leading-relaxed text-sm",
-    journeyStepCard: "bg-slate-800 px-4 py-3 rounded-lg flex items-start gap-3",
+    bpRole: `text-sm font-semibold ${tx.muted} mt-1`,
+    bpSectionTitle: `text-sm font-bold ${tx.h1} uppercase tracking-wider mb-1 flex items-center gap-1`,
+    bpSectionBody: `${tx.body} leading-relaxed text-sm`,
+    journeyStepCard: `${ts.dark} px-4 py-3 rounded-lg flex items-start gap-3`,
     journeyStepText: "text-xs font-mono leading-relaxed",
     
     // Callout
     calloutBase: "p-3 rounded-lg border",
     
     // Placeholder
-    placeholderContainer: "h-full flex flex-col items-center justify-center text-center text-slate-400",
+    placeholderContainer: `h-full flex flex-col items-center justify-center text-center ${tx.placeholder}`,
     placeholderText: "text-sm",
-    placeholderIcon: "w-12 h-12 mb-4 text-slate-300 animate-pulse"
+    placeholderIcon: `w-12 h-12 mb-4 ${tx.inverseTitle} animate-pulse`
 };
 
 // Specific Icon Wrappers
@@ -86,8 +91,10 @@ const interactionSectionTpl = (content) => baseSectionTpl('Next Steps', theme.co
 const branchingSectionTpl = (content) => baseSectionTpl('Branching & Flow', theme.colors.branching, sidebarBranchingIcon, content, 'p-3 rounded-lg border');
 
 export function tooltipPillTpl(icon, text, definition, colorClass) {
+    const fallbackColor = theme.colors.definition.pill;
+    const finalColor = (colorClass && colorClass.trim() !== '') ? colorClass : fallbackColor;
     return html`
-        <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="${sharedCls.pill} ml-2 ${colorClass}">
+        <button type="button" @click="${() => window.showDefinitionModal(icon + ' ' + text, definition)}" class="${sharedCls.pill} ml-2 ${finalColor}">
             ${icon} ${text}
         </button>
     `;

@@ -2,34 +2,40 @@ import { html } from 'https://cdn.jsdelivr.net/npm/lit-html@3/+esm';
 import { unsafeHTML } from 'https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js';
 import { iconSvg } from './icons.js';
 import { cls as sharedCls } from './classes.js';
+import { theme } from './theme.js';
+
+const t = theme.colors;
+const ts = t.surface;
+const tx = t.text;
+const ti = t.interactive;
 
 const cls = {
     diagramLayout: "flex flex-col lg:flex-row gap-6 h-[75vh] min-h-[600px]",
-    diagramMain: "mermaid-container w-full lg:w-3/4 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative",
-    diagramSidebar: "w-full lg:w-1/4 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full",
+    diagramMain: `mermaid-container w-full lg:w-3/4 ${ts.main} rounded-lg shadow-sm border ${ts.border} overflow-hidden relative`,
+    diagramSidebar: `w-full lg:w-1/4 ${ts.main} border ${ts.border} rounded-lg shadow-sm flex flex-col h-full`,
     
     // Zoom Controls
-    zoomControlContainer: "absolute bottom-4 right-4 z-20 flex bg-white/90 shadow-sm border border-slate-200 rounded-md p-1 backdrop-blur-sm gap-1",
-    zoomBtn: "custom-zoom-btn flex items-center justify-center w-8 h-8 rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors",
-    zoomDivider: "w-px bg-slate-200 mx-0.5 my-1",
+    zoomControlContainer: `absolute bottom-4 right-4 z-20 flex ${ts.transparent} shadow-sm border ${ts.border} rounded-md p-1 backdrop-blur-sm gap-1`,
+    zoomBtn: `custom-zoom-btn flex items-center justify-center w-8 h-8 rounded ${tx.muted} ${ti.hoverText} ${ti.hoverBg} transition-colors`,
+    zoomDivider: `w-px ${ti.divider} mx-0.5 my-1`,
     zoomDropdownGroup: "relative group flex items-center",
-    zoomDropdownToggle: "flex items-center justify-center px-2 min-w-[3rem] h-8 text-xs font-semibold rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors",
+    zoomDropdownToggle: `flex items-center justify-center px-2 min-w-[3rem] h-8 text-xs font-semibold rounded ${tx.muted} ${ti.hoverText} ${ti.hoverBg} transition-colors`,
     zoomDropdownMenu: "absolute bottom-full right-0 pb-1 hidden group-hover:block z-50",
-    zoomDropdownMenuInner: "w-36 bg-white border border-slate-200 rounded-md shadow-lg py-1",
-    zoomMenuBtn: "custom-zoom-btn w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-    zoomMenuDivider: "h-px bg-slate-200 my-1 mx-2",
-    zoomMenuLabel: "flex items-center w-full px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer",
-    zoomMenuCheckbox: "mr-2 rounded border-slate-300 text-blue-600 focus:ring-blue-500",
+    zoomDropdownMenuInner: `w-36 ${ts.main} border ${ts.border} rounded-md shadow-lg py-1`,
+    zoomMenuBtn: `custom-zoom-btn w-full text-left px-3 py-1.5 text-xs ${tx.muted} ${ti.hoverBg} ${ti.hoverText}`,
+    zoomMenuDivider: `h-px ${ti.divider} my-1 mx-2`,
+    zoomMenuLabel: `flex items-center w-full px-3 py-1.5 text-xs ${tx.muted} ${ti.hoverBg} ${ti.hoverText} cursor-pointer`,
+    zoomMenuCheckbox: `mr-2 rounded ${ti.controlBorder} ${ti.controlText} ${ti.ring}`,
 
     // Sidebar Shell
-    sidebarHeader: "p-4 border-b border-slate-100 bg-slate-50 rounded-t-lg",
-    sidebarTitle: "text-lg font-bold text-slate-800 flex items-center gap-2",
+    sidebarHeader: `p-4 border-b ${ts.borderLight} ${ts.subtle} rounded-t-lg`,
+    sidebarTitle: `text-lg font-bold ${tx.h2} flex items-center gap-2`,
     sidebarTitleText: "truncate",
-    sidebarLangBadge: "ml-auto text-xs font-bold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full flex-shrink-0",
+    sidebarLangBadge: `ml-auto text-xs font-bold px-2 py-0.5 ${t.badge.bg} ${t.badge.text} rounded-full flex-shrink-0`,
     sidebarContent: "p-6 flex-grow overflow-y-auto",
-    sidebarFooter: "p-4 border-t border-slate-100 bg-slate-50 rounded-b-lg flex justify-between items-center",
-    sidebarNavBtn: "text-sm px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-    sidebarNavCounter: "text-xs text-slate-500 font-medium whitespace-nowrap px-2"
+    sidebarFooter: `p-4 border-t ${ts.borderLight} ${ts.subtle} rounded-b-lg flex justify-between items-center`,
+    sidebarNavBtn: `text-sm px-3 py-1.5 ${ts.main} border ${ti.controlBorder} ${ti.hoverBgSubtle} ${tx.body} rounded shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed`,
+    sidebarNavCounter: `text-xs ${tx.light} font-medium whitespace-nowrap px-2`
 };
 
 const diagramZoomInIcon = () => iconSvg('zoomIn', 'w-4 h-4');
