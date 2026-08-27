@@ -1,5 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
-<node id="Server" next="ServerTransport" label="💻 Server Provider Environment" nodeType="Compute" nodeTypeIcon="💻" diagramClass="osiLayer">
+<?xml version="1.0" encoding="utf-8"?>
+<node id="Server" next="ServerTransport" label="Server Provider Environment" nodeType="Compute" diagramClass="osiLayer">
   <title>Server Provider Environment</title>
   <infoCard title="Overview">
     The remote environment hosting the <def id="SOAP">SOAP</def> web service. It receives network requests, unpackages the <def id="SOAP">SOAP</def> messages, validates them, and executes business logic.
@@ -31,16 +31,15 @@
   <definitionPills>
     <definitionPill id="Compute"/>
   </definitionPills>
-  <node id="ServerTransport" next="EdgeExtractsXML" nodeType="LibraryCode" nodeTypeIcon="📚">
+  <node id="ServerTransport" next="EdgeExtractsXML" nodeType="LibraryCode">
     <diagram>
-      <nodeLabel>📚 5. Web Server / Listener</nodeLabel>
-      <nodeId>ServerTransport</nodeId>
+      <nodeLabel>Web Server / Listener</nodeLabel>
       <classes>
-        <class name="process" />
-        <class name="clickable" />
+        <class name="process"/>
+        <class name="clickable"/>
       </classes>
       <edges direction="out">
-        <edge to="Deserialize" label="📚 Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML" next="Deserialize">
+        <edge to="Deserialize" label="Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML" next="Deserialize">
           <sidebar>
             <title>Action: Extracts <def id="XML">XML</def></title>
             <infoCard title="Overview">The web server identifies the request as a <def id="SOAP">SOAP</def> endpoint, extracts the HTTP body (the <def id="XML">XML</def>), and passes it to the <def id="SOAP">SOAP</def> engine.</infoCard>
@@ -54,7 +53,7 @@
         </edge>
       </edges>
       <edges direction="in">
-        <edge from="TCP" label="⚙️ ☁️ Receives Payload" type="solid-arrow" edgeKey="EdgeReceivesPayload" next="Server">
+        <edge from="TCP" label="Receives Payload" type="solid-arrow" edgeKey="EdgeReceivesPayload" next="Server">
           <sidebar>
             <title>Action: Receives Payload</title>
             <infoCard title="Overview">The server's network interface receives the TCP packets, reassembles them into an HTTP request, and passes them to the web server listener (e.g., IIS, Tomcat).</infoCard>
@@ -106,16 +105,15 @@ wsgi_app = WsgiApplication(application)
       <definitionPill id="LibraryCode"/>
     </definitionPills>
   </node>
-  <node id="Deserialize" next="EdgeValidatesWSDL" nodeType="LibraryCode" nodeTypeIcon="📚">
+  <node id="Deserialize" next="EdgeValidatesWSDL" nodeType="LibraryCode">
     <diagram>
-      <nodeLabel>📚 6. Parse <def id="SOAP">SOAP</def> <def id="XML">XML</def></nodeLabel>
-      <nodeId>Deserialize</nodeId>
+      <nodeLabel>Parse <def id="SOAP">SOAP</def> <def id="XML">XML</def></nodeLabel>
       <classes>
-        <class name="process" />
-        <class name="clickable" />
+        <class name="process"/>
+        <class name="clickable"/>
       </classes>
       <edges direction="out">
-        <edge to="Validate" label="📚 Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL" next="Validate">
+        <edge to="Validate" label="Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL" next="Validate">
           <sidebar>
             <title>Action: Validates vs <def id="WSDL">WSDL</def></title>
             <infoCard title="Overview">The <def id="SOAP">SOAP</def> framework parses the <def id="XML">XML</def> and validates it strictly against the service's <def id="XML">XML</def> Schema (XSD) defined in the <def id="WSDL">WSDL</def>.</infoCard>
@@ -129,7 +127,7 @@ wsgi_app = WsgiApplication(application)
         </edge>
       </edges>
       <edges direction="in">
-        <edge from="ServerTransport" label="📚 Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML" next="Deserialize">
+        <edge from="ServerTransport" label="Extracts XML" type="solid-arrow" edgeKey="EdgeExtractsXML" next="Deserialize">
           <sidebar>
             <title>Action: Extracts <def id="XML">XML</def></title>
             <infoCard title="Overview">The web server identifies the request as a <def id="SOAP">SOAP</def> endpoint, extracts the HTTP body (the <def id="XML">XML</def>), and passes it to the <def id="SOAP">SOAP</def> engine.</infoCard>
@@ -156,16 +154,15 @@ wsgi_app = WsgiApplication(application)
       <definitionPill id="LibraryCode"/>
     </definitionPills>
   </node>
-  <node id="Validate" next="EdgeInvokesLogic" nodeType="LibraryCode" nodeTypeIcon="📚">
+  <node id="Validate" next="EdgeInvokesLogic" nodeType="LibraryCode">
     <diagram>
-      <nodeLabel>📚 7. <def id="WSDL">WSDL</def> Contract Validation</nodeLabel>
-      <nodeId>Validate</nodeId>
+      <nodeLabel><def id="WSDL">WSDL</def> Contract Validation</nodeLabel>
       <classes>
-        <class name="process" />
-        <class name="clickable" />
+        <class name="process"/>
+        <class name="clickable"/>
       </classes>
       <edges direction="out">
-        <edge to="AppServer" label="🧑‍💻 Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic" next="AppServer">
+        <edge to="AppServer" label="Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic" next="AppServer">
           <sidebar>
             <title>Action: Invokes Logic</title>
             <infoCard title="Overview">Once validated, the framework translates the <def id="XML">XML</def> back into native server objects and calls the actual service implementation method written by the backend developer.</infoCard>
@@ -179,7 +176,7 @@ wsgi_app = WsgiApplication(application)
         </edge>
       </edges>
       <edges direction="in">
-        <edge from="Deserialize" label="📚 Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL" next="Validate">
+        <edge from="Deserialize" label="Validates vs WSDL" type="solid-arrow" edgeKey="EdgeValidatesWSDL" next="Validate">
           <sidebar>
             <title>Action: Validates vs <def id="WSDL">WSDL</def></title>
             <infoCard title="Overview">The <def id="SOAP">SOAP</def> framework parses the <def id="XML">XML</def> and validates it strictly against the service's <def id="XML">XML</def> Schema (XSD) defined in the <def id="WSDL">WSDL</def>.</infoCard>
@@ -205,16 +202,15 @@ wsgi_app = WsgiApplication(application)
       <definitionPill id="LibraryCode"/>
     </definitionPills>
   </node>
-  <node id="AppServer" next="EdgeGeneratesResponseXML" nodeType="ApplicationCode" nodeTypeIcon="🧑‍💻">
+  <node id="AppServer" next="EdgeGeneratesResponseXML" nodeType="ApplicationCode">
     <diagram>
-      <nodeLabel>🧑‍💻 8. Service Business Logic</nodeLabel>
-      <nodeId>AppServer</nodeId>
+      <nodeLabel>Service Business Logic</nodeLabel>
       <classes>
-        <class name="process" />
-        <class name="clickable" />
+        <class name="process"/>
+        <class name="clickable"/>
       </classes>
       <edges direction="out">
-        <edge to="SOAPResponse" label="📚 Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML" next="SOAPResponse">
+        <edge to="SOAPResponse" label="Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML" next="SOAPResponse">
           <sidebar>
             <title>Action: Generates Response <def id="XML">XML</def></title>
             <infoCard title="Overview">The server-side <def id="SOAP">SOAP</def> framework intercepts the return value (or exception) from the business logic and serializes it into a formal <def id="SOAP">SOAP</def> Response Envelope.</infoCard>
@@ -228,7 +224,7 @@ wsgi_app = WsgiApplication(application)
         </edge>
       </edges>
       <edges direction="in">
-        <edge from="Validate" label="🧑‍💻 Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic" next="AppServer">
+        <edge from="Validate" label="Invokes Logic" type="solid-arrow" edgeKey="EdgeInvokesLogic" next="AppServer">
           <sidebar>
             <title>Action: Invokes Logic</title>
             <infoCard title="Overview">Once validated, the framework translates the <def id="XML">XML</def> back into native server objects and calls the actual service implementation method written by the backend developer.</infoCard>
@@ -292,7 +288,7 @@ class PaymentService(ServiceBase):
       <definitionPill id="ApplicationCode"/>
     </definitionPills>
   </node>
-  <node id="SOAPResponse" next="RespEnvelope" label="📄 SOAP Response Message" nodeType="Serialization" nodeTypeIcon="📄" diagramClass="osiLayer">
+  <node id="SOAPResponse" next="RespEnvelope" label="SOAP Response Message" nodeType="Serialization" diagramClass="osiLayer">
     <title><def id="SOAP">SOAP</def> Response Message</title>
     <infoCard title="Overview">The standardized <def id="XML">XML</def> document the server constructs and returns after processing a request. It follows the same Envelope structure as the request but carries the result — either a populated Body with the return value, or a Body containing a <def id="SOAP">SOAP</def> Fault if the operation failed.</infoCard>
     <briefcaseCard title="Handled By">&lt;strong&gt;The <def id="SOAP">SOAP</def> Library:&lt;/strong&gt; The server-side framework serializes the result (or fault) into the response envelope automatically.</briefcaseCard>
@@ -308,16 +304,17 @@ class PaymentService(ServiceBase):
     <definitionPills>
       <definitionPill id="Serialization"/>
     </definitionPills>
-    <node id="RespEnvelope" next="RespHeader" nodeType="LibraryCode" nodeTypeIcon="📚">
+    <node id="RespEnvelope" next="RespHeader" nodeType="LibraryCode">
       <diagram>
-        <nodeLabel>📚 <def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def></nodeLabel>
-        <nodeId>RespEnvelope</nodeId>
+        <nodeLabel>
+          <def id="SOAPEnvelope"><def id="SOAP">SOAP</def> Envelope</def>
+        </nodeLabel>
         <classes>
-          <class name="soapResponse" />
-          <class name="clickable" />
+          <class name="soapResponse"/>
+          <class name="clickable"/>
         </classes>
         <edges direction="in">
-          <edge from="AppServer" label="📚 Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML" next="SOAPResponse">
+          <edge from="AppServer" label="Generates Response XML" type="solid-arrow" edgeKey="EdgeGeneratesResponseXML" next="SOAPResponse">
             <sidebar>
               <title>Action: Generates Response <def id="XML">XML</def></title>
               <infoCard title="Overview">The server-side <def id="SOAP">SOAP</def> framework intercepts the return value (or exception) from the business logic and serializes it into a formal <def id="SOAP">SOAP</def> Response Envelope.</infoCard>
@@ -331,7 +328,7 @@ class PaymentService(ServiceBase):
           </edge>
         </edges>
         <edges direction="out">
-          <edge to="TCP" label="⚙️ ☁️ Returns via Port 80/443" type="solid-arrow" edgeKey="EdgeReturnsViaPort" next="EdgeDeliversResponse">
+          <edge to="TCP" label="Returns via Port 80/443" type="solid-arrow" edgeKey="EdgeReturnsViaPort" next="EdgeDeliversResponse">
             <sidebar>
               <title>Action: Returns via Port 80/443</title>
               <infoCard title="Overview">The server sends the <def id="SOAP">SOAP</def> Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for <def id="SOAP">SOAP</def> Faults — the HTTP layer succeeds; the <def id="SOAP">SOAP</def> layer contains the error).</infoCard>
@@ -367,13 +364,12 @@ class PaymentService(ServiceBase):
         <definitionPill id="LibraryCode"/>
       </definitionPills>
     </node>
-    <node id="RespHeader" next="RespBody" nodeType="LibraryCode" nodeTypeIcon="📚">
+    <node id="RespHeader" next="RespBody" nodeType="LibraryCode">
       <diagram>
-        <nodeLabel>📚 <def id="SOAP">SOAP</def> Header - Optional</nodeLabel>
-        <nodeId>RespHeader</nodeId>
+        <nodeLabel><def id="SOAP">SOAP</def> Header - Optional</nodeLabel>
         <classes>
-          <class name="soapResponse" />
-          <class name="clickable" />
+          <class name="soapResponse"/>
+          <class name="clickable"/>
         </classes>
       </diagram>
       <sidebar>
@@ -389,13 +385,12 @@ class PaymentService(ServiceBase):
         <definitionPill id="LibraryCode"/>
       </definitionPills>
     </node>
-    <node id="RespBody" next="RespFault" nodeType="LibraryCode" nodeTypeIcon="📚">
+    <node id="RespBody" next="RespFault" nodeType="LibraryCode">
       <diagram>
-        <nodeLabel>📚 <def id="SOAP">SOAP</def> Body - Required</nodeLabel>
-        <nodeId>RespBody</nodeId>
+        <nodeLabel><def id="SOAP">SOAP</def> Body - Required</nodeLabel>
         <classes>
-          <class name="soapResponse" />
-          <class name="clickable" />
+          <class name="soapResponse"/>
+          <class name="clickable"/>
         </classes>
       </diagram>
       <sidebar>
@@ -419,13 +414,12 @@ class PaymentService(ServiceBase):
         <definitionPill id="LibraryCode"/>
       </definitionPills>
     </node>
-    <node id="RespFault" next="EdgeReturnsViaPort" nodeType="LibraryCode" nodeTypeIcon="📚">
+    <node id="RespFault" next="EdgeReturnsViaPort" nodeType="LibraryCode">
       <diagram>
-        <nodeLabel>📚 <def id="SOAP">SOAP</def> Fault - On Error</nodeLabel>
-        <nodeId>RespFault</nodeId>
+        <nodeLabel><def id="SOAP">SOAP</def> Fault - On Error</nodeLabel>
         <classes>
-          <class name="soapResponse" />
-          <class name="clickable" />
+          <class name="soapResponse"/>
+          <class name="clickable"/>
         </classes>
       </diagram>
       <sidebar>

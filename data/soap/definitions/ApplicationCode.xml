@@ -11,27 +11,21 @@
   Nodes that display this pill:
     AppClient, AppServer, EdgeInitiatesRequest, EdgeReturnsResult, EdgeInvokesLogic
 -->
-
 <definition id="ApplicationCode">
-
   <!-- ── Display ──────────────────────────────────────────────────────── -->
   <icon>🧑‍💻</icon>
   <label>Application Code</label>
-
   <!-- Modal title = icon + " " + label -->
   <modalTitle>🧑‍💻 Application Code</modalTitle>
-
   <!-- ── Styling ──────────────────────────────────────────────────────── -->
   <!-- Tailwind classes applied to the pill button -->
   <theme>pillTheme06</theme>
-
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <!-- Displayed as plain text inside the modal <p> element -->
   <body>
     This is the business logic and custom code written directly by the developer
     to solve a specific problem. It is the core reason the application exists.
   </body>
-
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
   <!-- Source: sidebar-detail.js line 65 -->
   <assignedTo>
@@ -41,7 +35,5 @@
     <nodeRef id="EdgeReturnsResult"/>
     <nodeRef id="EdgeInvokesLogic"/>
   </assignedTo>
-
   <!-- ── Source file map ──────────────────────────────────────────────── -->
-
 </definition>

@@ -9,12 +9,6 @@ import sys
 project_name = sys.argv[1] if len(sys.argv) > 1 else 'soap'
 
 # ---------------------------------------------------------
-# 1. GENERATE MERMAID DIAGRAM
-# ---------------------------------------------------------
-mermaid_code = generate_mermaid_code(project_name)
-
-
-# ---------------------------------------------------------
 # 2. ASSEMBLE HARNESS AND GENERATE JSON DATA
 # ---------------------------------------------------------
 import json
@@ -425,5 +419,10 @@ with open(f'../site/data/{project_name}/content.json', 'w') as f:
     
 with open(f'../site/data/{project_name}/language-data.json', 'w') as f:
     json.dump(language_data, f, indent=2)
+
+# ---------------------------------------------------------
+# 1. GENERATE MERMAID DIAGRAM
+# ---------------------------------------------------------
+mermaid_code = generate_mermaid_code(project_name, nav_seq)
 
 print(f"JSON data and diagram.mmd generated in ../site/data/{project_name}/")

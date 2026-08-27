@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
 import glob
+import re
 
-def generate_mermaid_code(project_name="soap"):
+def generate_mermaid_code(project_name, nav_seq):
     # Pre-defined app-level styles
     class_defs = {
         "osiLayer": "fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray:5 5",
@@ -10,6 +11,18 @@ def generate_mermaid_code(project_name="soap"):
         "soapResponse": "fill:#f0fdf4,stroke:#16a34a,stroke-width:2px",
         "soapLayer": "fill:#fef3c7,stroke:#d97706,stroke-width:2px"
     }
+    
+    node_type_icons = {
+        "LibraryCode": "📚",
+        "ApplicationCode": "🧑‍💻",
+        "Serialization": "📄",
+        "OSHardwareCode": "⚙️",
+        "Compute": "💻",
+        "Network": "☁️"
+    }
+    
+    diagram_nodes = []
+    
     edges_out = []
     click_handlers = []
 
@@ -34,6 +47,7 @@ def generate_mermaid_code(project_name="soap"):
         node_id = xml_node.get("id")
         label = xml_node.get("label")
         diagram_class = xml_node.get("diagramClass")
+        node_type = xml_node.get("nodeType")
         
         diagram = xml_node.find("diagram")
         indent = "  " * depth
@@ -42,7 +56,11 @@ def generate_mermaid_code(project_name="soap"):
         if diagram is not None:
             # LEAF NODE
             leaf_label = get_full_text(diagram.find("nodeLabel")) or ""
-            leaf_id = get_full_text(diagram.find("nodeId")) or node_id
+            leaf_id = node_id # We just use the node_id directly now since we removed <nodeId>
+            
+            # Inject Step Number
+            if leaf_id in nav_seq:
+                diagram_nodes.append(leaf_id)
             
             is_clickable = False
             classes_tags = diagram.findall("classes/class")
@@ -55,14 +73,21 @@ def generate_mermaid_code(project_name="soap"):
                     c_style = c_style.replace(";", ",")
                     if c_style.endswith(","): c_style = c_style[:-1]
                     class_defs[c_name] = c_style
-                # Instead of :::class1:::class2, we use class Node class1
                 click_handlers.append(f"class {leaf_id} {c_name}")
+                
+            # Inject emoji and number
+            if node_type in node_type_icons:
+                leaf_label = f"{node_type_icons[node_type]} {leaf_label}"
+                
+            # The step number will be computed at the end and string replaced. 
+            # We'll use a placeholder for now.
+            leaf_label = f"__STEP_{leaf_id}__ {leaf_label}"
                 
             out += f"{indent}{leaf_id}[{escape_label_node(leaf_label)}]\n"
             
             if is_clickable:
-                import re
-                clean_label = re.sub(r'^.*?[\d\.]+\s*', '', leaf_label).strip()
+                clean_label = re.sub(r'^.*?__STEP_[^ ]+__\s*', '', leaf_label)
+                clean_label = re.sub(r'^(' + '|'.join(node_type_icons.values()) + r'|\s)+', '', clean_label).strip()
                 if not clean_label:
                     clean_label = leaf_label
                 click_handlers.append(f'click {leaf_id} call showDetails() "Details on {clean_label}"')
@@ -73,6 +98,12 @@ def generate_mermaid_code(project_name="soap"):
                         to = edge.get("to")
                         e_label = edge.get("label") or ""
                         e_type = edge.get("type")
+                        
+                        # Add emojis based on definition pills
+                        pills = edge.findall("definitionPills/definitionPill")
+                        icons = [node_type_icons[p.get("id")] for p in pills if p.get("id") in node_type_icons]
+                        if icons:
+                            e_label = f"{' '.join(icons)} {e_label}"
                         
                         arrow = "-->"
                         if e_type == "solid-line": arrow = "---"
@@ -86,8 +117,11 @@ def generate_mermaid_code(project_name="soap"):
             # SUBGRAPH CONTAINER
             children = xml_node.findall("node")
             if children:
-                # Subgraph title should not have quotes for compatibility with older mermaid, use brackets
-                out += f"{indent}subgraph {node_id} [{escape_label_node(label)}]\n"
+                container_label = label
+                if node_type in node_type_icons:
+                    container_label = f"{node_type_icons[node_type]} {container_label}"
+                    
+                out += f"{indent}subgraph {node_id} [{escape_label_node(container_label)}]\n"
                 if diagram_class:
                     click_handlers.append(f"class {node_id} {diagram_class}")
                     
@@ -109,6 +143,11 @@ def generate_mermaid_code(project_name="soap"):
     for e in edges_out: mermaid_code += f"{e}\n"
     mermaid_code += "\n"
     for c in click_handlers: mermaid_code += f"{c}\n"
+
+    # Replace placeholders with actual step numbers
+    diagram_nodes_sorted = [n for n in nav_seq if n in diagram_nodes]
+    for idx, d_id in enumerate(diagram_nodes_sorted):
+        mermaid_code = mermaid_code.replace(f"__STEP_{d_id}__", f"{idx + 1}.")
 
     # Write standalone MMD just in case
     import os

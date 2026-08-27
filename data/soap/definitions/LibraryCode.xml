@@ -7,24 +7,18 @@
   Source: soap/templates/fragments/sidebar-detail.js  (lines 68-69)
   Rendered by: tooltipPillTpl() → window.showDefinitionModal()
 -->
-
 <definition id="LibraryCode">
-
   <!-- ── Display ──────────────────────────────────────────────────────── -->
   <icon>📚</icon>
   <label>Library Code</label>
-
   <!-- Modal title = icon + " " + label -->
   <modalTitle>📚 Library Code</modalTitle>
-
   <!-- ── Styling ──────────────────────────────────────────────────────── -->
   <theme>pillTheme02</theme>
-
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <body>
     Third-party or framework code designed to facilitate operations at the boundaries of your application, like serialization, contract validation, or network proxies.
   </body>
-
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
   <assignedTo>
     <nodeRef id="Proxy"/>
@@ -47,7 +41,5 @@
     <nodeRef id="EdgeGeneratesResponseXML"/>
     <nodeRef id="EdgeDeserializesResponseXML"/>
   </assignedTo>
-
   <!-- ── Source file map ──────────────────────────────────────────────── -->
-
 </definition>

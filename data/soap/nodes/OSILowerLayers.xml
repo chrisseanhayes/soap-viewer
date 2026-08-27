@@ -1,30 +1,21 @@
-<?xml version='1.0' encoding='utf-8'?>
-<node id="OSILowerLayers" next="TCP" label="☁️ OSI Layers 1-4: Transport/Network" nodeType="Network" nodeTypeIcon="☁️" diagramClass="osiLayer">
-
-  
-
+<?xml version="1.0" encoding="utf-8"?>
+<node id="OSILowerLayers" next="TCP" label="OSI Layers 1-4: Transport/Network" nodeType="Network" diagramClass="osiLayer">
   <title>OSI Layers 1-4: Transport/Network</title>
-
   <infoCard title="Overview">
     The physical and transport infrastructure responsible for routing packets across the internet. This includes IP routing and TCP connection management.
   </infoCard>
-
   <briefcaseCard title="Handled By">
     &lt;strong&gt;The Network Infrastructure:&lt;/strong&gt; Routers, switches, load balancers, and the OS TCP/IP stack.
   </briefcaseCard>
-
   <lightbulbCard title="Developer Considerations">
     Network instability, dropped packets, and latency all occur here. Developers must build resiliency (e.g. retry mechanisms) in the application layer to account for this.
   </lightbulbCard>
-
   <lightningCard title="Developer Impact">
     Failures here surface as timeouts, connection resets, or DNS resolution errors in the client application.
   </lightningCard>
-
   <arrowRightCard title="Next Steps">
     Carries the serialized <def id="SOAP">SOAP</def> HTTP payload over the wire between the client and server.
   </arrowRightCard>
-
   <bigPicture>
     <role>The Dumb Pipe — The Physical Reality <def id="RPC">RPC</def> Tries to Hide</role>
     <summary>
@@ -37,84 +28,73 @@
       Step 3 of 5: Bytes in transit. The <def id="SOAP">SOAP</def> message is invisible packets crossing the internet.
     </journeyStep>
   </bigPicture>
-
   <definitionPills>
     <definitionPill id="Network"/>
   </definitionPills>
-
-
-  
-
-  <node id="TCP" next="EdgeReceivesPayload" nodeType="OSHardwareCode" nodeTypeIcon="⚙️">
-
+  <node id="TCP" next="EdgeReceivesPayload" nodeType="OSHardwareCode">
     <diagram>
-      <nodeLabel>⚙️ TCP/IP Routing</nodeLabel>
-      <nodeId>TCP</nodeId>
-
+      <nodeLabel>TCP/IP Routing</nodeLabel>
       <classes>
-        <class name="osiLayer" />
-        <class name="clickable" />
+        <class name="osiLayer"/>
+        <class name="clickable"/>
       </classes>
-
       <edges direction="in">
-        <edge from="TransportProtocol" label="⚙️ ☁️ Transmits via Port 80/443" type="solid-arrow" edgeKey="EdgeTransmits" next="OSILowerLayers">
-      <sidebar>
-        <title>Action: Transmits via Port 80/443</title>
-        <infoCard title="Overview">The operating system takes the HTTP request, breaks it into TCP packets, and routes it across the network to the server's IP address.</infoCard>
-        <briefcaseCard title="Handled By">&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing, retries, and SSL/TLS encryption if using port 443.</briefcaseCard>
-        <lightningCard title="Developer Impact">Network latency is introduced here. Operations that take 1ms locally can take 50-500ms over the wire.</lightningCard>
-        <lightbulbCard title="Developer Considerations">Firewalls or network policies may block these ports. TLS handshakes can add latency.</lightbulbCard>
-      </sidebar>
-      <definitionPills>
-        <definitionPill id="Network"/>
-        <definitionPill id="OSHardwareCode"/>
-      </definitionPills>
-      </edge>
-        <edge from="SOAPResponse" label="⚙️ ☁️ Returns via Port 80/443" type="solid-arrow" edgeKey="EdgeReturnsViaPort" next="EdgeDeliversResponse">
-      <sidebar>
-        <title>Action: Returns via Port 80/443</title>
-        <infoCard title="Overview">The server sends the <def id="SOAP">SOAP</def> Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for <def id="SOAP">SOAP</def> Faults — the HTTP layer succeeds; the <def id="SOAP">SOAP</def> layer contains the error).</infoCard>
-        <briefcaseCard title="Handled By">&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing and SSL/TLS encryption on the return path.</briefcaseCard>
-        <lightningCard title="Developer Impact">The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return.</lightningCard>
-        <lightbulbCard title="Developer Considerations">Note that <def id="SOAP">SOAP</def> Faults are returned with an HTTP 200 status in <def id="SOAP">SOAP</def> 1.1. In <def id="SOAP">SOAP</def> 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</lightbulbCard>
-      </sidebar>
-      <definitionPills>
-        <definitionPill id="Network"/>
-        <definitionPill id="OSHardwareCode"/>
-      </definitionPills>
-      </edge>
+        <edge from="TransportProtocol" label="Transmits via Port 80/443" type="solid-arrow" edgeKey="EdgeTransmits" next="OSILowerLayers">
+          <sidebar>
+            <title>Action: Transmits via Port 80/443</title>
+            <infoCard title="Overview">The operating system takes the HTTP request, breaks it into TCP packets, and routes it across the network to the server's IP address.</infoCard>
+            <briefcaseCard title="Handled By">&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing, retries, and SSL/TLS encryption if using port 443.</briefcaseCard>
+            <lightningCard title="Developer Impact">Network latency is introduced here. Operations that take 1ms locally can take 50-500ms over the wire.</lightningCard>
+            <lightbulbCard title="Developer Considerations">Firewalls or network policies may block these ports. TLS handshakes can add latency.</lightbulbCard>
+          </sidebar>
+          <definitionPills>
+            <definitionPill id="Network"/>
+            <definitionPill id="OSHardwareCode"/>
+          </definitionPills>
+        </edge>
+        <edge from="SOAPResponse" label="Returns via Port 80/443" type="solid-arrow" edgeKey="EdgeReturnsViaPort" next="EdgeDeliversResponse">
+          <sidebar>
+            <title>Action: Returns via Port 80/443</title>
+            <infoCard title="Overview">The server sends the <def id="SOAP">SOAP</def> Response Message back to the client over the same TCP connection (or a new one). The response travels as an HTTP 200 OK (even for <def id="SOAP">SOAP</def> Faults — the HTTP layer succeeds; the <def id="SOAP">SOAP</def> layer contains the error).</infoCard>
+            <briefcaseCard title="Handled By">&lt;strong&gt;The Network Layer:&lt;/strong&gt; Handles packet routing and SSL/TLS encryption on the return path.</briefcaseCard>
+            <lightningCard title="Developer Impact">The same latency that affected the request affects the return path. Large response payloads take proportionally longer to return.</lightningCard>
+            <lightbulbCard title="Developer Considerations">Note that <def id="SOAP">SOAP</def> Faults are returned with an HTTP 200 status in <def id="SOAP">SOAP</def> 1.1. In <def id="SOAP">SOAP</def> 1.2, faults return HTTP 500. This affects how middleware and load balancers interpret errors.</lightbulbCard>
+          </sidebar>
+          <definitionPills>
+            <definitionPill id="Network"/>
+            <definitionPill id="OSHardwareCode"/>
+          </definitionPills>
+        </edge>
       </edges>
-
       <edges direction="out">
-        <edge to="ServerTransport" label="⚙️ ☁️ Receives Payload" type="solid-arrow" edgeKey="EdgeReceivesPayload" next="Server">
-      <sidebar>
-        <title>Action: Receives Payload</title>
-        <infoCard title="Overview">The server's network interface receives the TCP packets, reassembles them into an HTTP request, and passes them to the web server listener (e.g., IIS, Tomcat).</infoCard>
-        <briefcaseCard title="Handled By">&lt;strong&gt;The Server OS &amp; Web Server:&lt;/strong&gt; Manages the incoming connection and thread pool.</briefcaseCard>
-        <lightningCard title="Developer Impact">Usually transparent to the application code, but critical for server operations scaling.</lightningCard>
-        <lightbulbCard title="Developer Considerations">If the server is under heavy load, requests may queue here or be rejected with a 503 Service Unavailable.</lightbulbCard>
-      </sidebar>
-      <definitionPills>
-        <definitionPill id="Network"/>
-        <definitionPill id="OSHardwareCode"/>
-      </definitionPills>
-      </edge>
-        <edge to="ClientTransport" label="⚙️ ☁️ Delivers Response" type="solid-arrow" edgeKey="EdgeDeliversResponse" next="ClientTransport">
-      <sidebar>
-        <title>Action: Delivers Response</title>
-        <infoCard title="Overview">The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the <def id="SOAP">SOAP</def> library.</infoCard>
-        <briefcaseCard title="Handled By">&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</briefcaseCard>
-        <lightningCard title="Developer Impact">Transparent to developers, but contributes to the total round-trip time the application experiences.</lightningCard>
-        <lightbulbCard title="Developer Considerations">If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</lightbulbCard>
-      </sidebar>
-      <definitionPills>
-        <definitionPill id="Network"/>
-        <definitionPill id="OSHardwareCode"/>
-      </definitionPills>
-      </edge>
+        <edge to="ServerTransport" label="Receives Payload" type="solid-arrow" edgeKey="EdgeReceivesPayload" next="Server">
+          <sidebar>
+            <title>Action: Receives Payload</title>
+            <infoCard title="Overview">The server's network interface receives the TCP packets, reassembles them into an HTTP request, and passes them to the web server listener (e.g., IIS, Tomcat).</infoCard>
+            <briefcaseCard title="Handled By">&lt;strong&gt;The Server OS &amp; Web Server:&lt;/strong&gt; Manages the incoming connection and thread pool.</briefcaseCard>
+            <lightningCard title="Developer Impact">Usually transparent to the application code, but critical for server operations scaling.</lightningCard>
+            <lightbulbCard title="Developer Considerations">If the server is under heavy load, requests may queue here or be rejected with a 503 Service Unavailable.</lightbulbCard>
+          </sidebar>
+          <definitionPills>
+            <definitionPill id="Network"/>
+            <definitionPill id="OSHardwareCode"/>
+          </definitionPills>
+        </edge>
+        <edge to="ClientTransport" label="Delivers Response" type="solid-arrow" edgeKey="EdgeDeliversResponse" next="ClientTransport">
+          <sidebar>
+            <title>Action: Delivers Response</title>
+            <infoCard title="Overview">The TCP/IP stack reassembles the response packets and delivers the complete HTTP response to the client process. The client transport layer hands it to the <def id="SOAP">SOAP</def> library.</infoCard>
+            <briefcaseCard title="Handled By">&lt;strong&gt;The OS Network Stack:&lt;/strong&gt; Handles packet ordering, retransmission, and final delivery.</briefcaseCard>
+            <lightningCard title="Developer Impact">Transparent to developers, but contributes to the total round-trip time the application experiences.</lightningCard>
+            <lightbulbCard title="Developer Considerations">If packets are lost on the return path, TCP retransmits them automatically — adding latency to the perceived response time.</lightbulbCard>
+          </sidebar>
+          <definitionPills>
+            <definitionPill id="Network"/>
+            <definitionPill id="OSHardwareCode"/>
+          </definitionPills>
+        </edge>
       </edges>
     </diagram>
-
     <sidebar>
       <title>OSI Layers 1-4</title>
       <infoCard title="Overview">
@@ -133,11 +113,8 @@
         &lt;strong&gt;The Network Layer:&lt;/strong&gt; It's the network layer's responsibility to manage the connection and packets.
       </briefcaseCard>
     </sidebar>
-
     <definitionPills>
       <definitionPill id="OSHardwareCode"/>
     </definitionPills>
-
   </node>
-
 </node>

@@ -7,24 +7,18 @@
   Source: soap/templates/fragments/sidebar-detail.js  (lines 71-72)
   Rendered by: tooltipPillTpl() → window.showDefinitionModal()
 -->
-
 <definition id="OSHardwareCode">
-
   <!-- ── Display ──────────────────────────────────────────────────────── -->
   <icon>⚙️</icon>
   <label>OS/Hardware Code</label>
-
   <!-- Modal title = icon + " " + label -->
   <modalTitle>⚙️ OS/Hardware Code</modalTitle>
-
   <!-- ── Styling ──────────────────────────────────────────────────────── -->
   <theme>pillTheme04</theme>
-
   <!-- ── Definition body ──────────────────────────────────────────────── -->
   <body>
     Low-level code baked into the operating system and network hardware that handles the physical realities of routing bytes.
   </body>
-
   <!-- ── Nodes that carry this pill ──────────────────────────────────── -->
   <assignedTo>
     <nodeRef id="TransportProtocol"/>
@@ -35,7 +29,5 @@
     <nodeRef id="EdgeReturnsViaPort"/>
     <nodeRef id="EdgeDeliversResponse"/>
   </assignedTo>
-
   <!-- ── Source file map ──────────────────────────────────────────────── -->
-
 </definition>
