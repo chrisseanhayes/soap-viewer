@@ -56,7 +56,7 @@
     <xsl:choose>
       <xsl:when test="@layout='horizontal'">
         <div class="mt-4 p-4 rounded-lg border flex items-start gap-3 theme-target" data-theme="{@theme}">
-          <div class="theme-icon-placeholder flex-shrink-0 mt-0.5" data-icon="warning"></div>
+          <div class="theme-icon-placeholder flex-shrink-0 mt-0.5" data-icon="warning" data-icon-size="w-6 h-6"></div>
           <div>
             <strong class="block mb-1 text-xl font-semibold text-slate-800"><xsl:apply-templates select="heading/node()"/></strong>
             <p class="text-sm text-slate-600"><xsl:apply-templates select="body/node()"/></p>

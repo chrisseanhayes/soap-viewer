@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Communication Workflow & Layers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Styling the Mermaid container for better visibility */
+        .mermaid-container {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-800">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">SOAP Communication Architecture</h1>
+            <p class="text-slate-600">Visualizing the layers and message structure of a Simple Object Access Protocol interaction.</p>
+        </header>
+
+        <main class="mermaid-container">
+            <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eff6ff', 'primaryTextColor': '#1e293b', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#fef2f2'}}}%%
+graph TD
+    classDef osiLayer fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef process fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
+    classDef soapLayer fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef payload fill:#dcfce3,stroke:#22c55e,stroke-width:2px;
+
+    %% Client Side Process
+    subgraph Client [Client Application Environment]
+        AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
+        Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
+        class AppClient,Proxy,Serialize process;
+    end
+
+    %% Network / OSI Layers Mapping
+    subgraph OSILayer7 [OSI Layer 7: Application]
+        Serialize -->|Wraps in HTTP/SMTP| TransportProtocol[4. Transport Protocol]
+        class TransportProtocol process;
+        
+        %% The actual SOAP structure
+        subgraph SOAPMessage [SOAP Message Structure]
+            Envelope[SOAP Envelope]
+            Header[SOAP Header - Optional]
+            Body[SOAP Body - Required]
+            Fault[SOAP Fault - Optional Error Info]
+            
+            Envelope --- Header
+            Envelope --- Body
+            Body -.- Fault
+            
+            class Envelope,Header,Body,Fault soapLayer;
+        end
+        TransportProtocol -.-> SOAPMessage
+    end
+
+    %% Network transit
+    subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
+        TCP[TCP/IP Routing]
+        class TCP osiLayer;
+    end
+    TransportProtocol -->|Transmits via Port 80/443| TCP
+
+    %% Server Side Process
+    subgraph Server [Server Provider Environment]
+        TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
+        ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
+        Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
+        Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
+        class ServerTransport,Deserialize,Validate,AppServer process;
+    end
+
+    %% Return path
+    AppServer -.->|Generates Response XML| ServerTransport
+    
+    %% Styling notes
+    class Client,Server osiLayer;
+    class OSILayer7 osiLayer;
+            </pre>
+        </main>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <h2 class="text-xl font-semibold mb-4 text-slate-800">Understanding the Layers</h2>
+            
+            <div class="space-y-4 text-sm text-slate-700">
+                <div>
+                    <h3 class="font-bold text-blue-700">1. The Proxy/Stub Generation</h3>
+                    <p>In SOAP architectures, clients rarely build raw XML manually. They consume a WSDL (Web Services Description Language) file provided by the server to generate a strongly-typed proxy class.</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-amber-700">2. The SOAP Envelope Structure</h3>
+                    <p>The core of SOAP is the Envelope. It acts as the outermost container. The <strong>Header</strong> is used for meta-information like routing directives, authentication tokens (WS-Security), or transaction context. The <strong>Body</strong> contains the actual business payload.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-slate-900">3. OSI Layer 7 (Application Layer)</h3>
+                    <p>SOAP is an application-layer protocol. Unlike lower-level TCP sockets, SOAP messages are typically tunneled over other Layer 7 protocols like HTTP (most common), SMTP (email), or message queues (JMS). Because it rides on top of HTTP, it easily passes through standard corporate firewalls.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-green-700">4. Server-Side Validation</h3>
+                    <p>Before the server's business logic runs, the SOAP engine parses the XML and validates it strictly against the WSDL and XML Schemas (XSD). If a required element is missing, the server rejects the request at the boundary, often returning a structured <strong>SOAP Fault</strong>.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

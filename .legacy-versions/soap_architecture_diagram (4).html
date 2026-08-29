@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Communication Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        
+        .mermaid-container {
+            position: relative;
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            height: 600px;
+        }
+
+        .mermaid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12 max-w-7xl mx-auto">
+
+    <!-- Load Mermaid -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        
+        // Wait for DOM to be fully loaded before initializing
+        window.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+            
+            // Render the diagram and then apply pan/zoom
+            mermaid.run({
+                querySelector: '.mermaid',
+                postRenderCallback: (id) => {
+                    const svgElement = document.querySelector(`#${id}`);
+                    if (svgElement) {
+                        // We must explicitly set width and height for svg-pan-zoom to calculate correctly
+                        svgElement.setAttribute('width', '100%');
+                        svgElement.setAttribute('height', '100%');
+                        
+                        const panZoomInstance = svgPanZoom(svgElement, {
+                            zoomEnabled: true,
+                            controlIconsEnabled: true,
+                            fit: true,
+                            center: true,
+                            minZoom: 0.5,
+                            maxZoom: 5
+                        });
+
+                        // Handle window resize
+                        window.addEventListener('resize', function() {
+                            panZoomInstance.resize();
+                            panZoomInstance.fit();
+                            panZoomInstance.center();
+                        });
+                    }
+                }
+            });
+        });
+
+        // Data for sidebar
+        const stepDetails = {
+            'AppClient': { title: '1. Client Application', content: 'The originating software system (e.g., a web application or microservice) that needs to consume a remote SOAP service. It calls methods locally as if the service was hosted on the same machine.' },
+            'Proxy': { title: '2. Client Proxy / Stub', content: 'A piece of code generated from the WSDL file. It acts as a local representative of the remote service, intercepting method calls and packaging the parameters for transmission.' },
+            'Serialize': { title: '3. Serialize to SOAP Message', content: 'The proxy framework converts the application\'s native in-memory objects (like Java or C# classes) into a structured SOAP XML document format.' },
+            'TransportProtocol': { title: '4. Transport Protocol', content: 'The Application Layer protocol used to transmit the SOAP message. HTTP/HTTPS is the most common, but SOAP can also ride over SMTP (email), JMS queues, or raw TCP.' },
+            'Envelope': { title: 'SOAP Envelope', content: 'The root element of a SOAP message. It encapsulates the entire payload and defines the document explicitly as a SOAP message for the receiver.' },
+            'Header': { title: 'SOAP Header', content: 'An optional section for meta-information. Often used for WS-Security (authentication tokens, digital signatures) or WS-AtomicTransaction (distributed transaction context).' },
+            'Body': { title: 'SOAP Body', content: 'The required main payload. It contains the XML data representing the method being called and its parameters, or the result coming back from the server.' },
+            'Fault': { title: 'SOAP Fault', content: 'An optional block nested strictly inside the Body. It is used exclusively for returning error status and details if something fails during processing.' },
+            'TCP': { title: 'OSI Layers 1-4', content: 'The lower-level network stack that breaks the HTTP payload into packets, establishes the connection across the network/internet, and handles reliable delivery.' },
+            'ServerTransport': { title: '5. Web Server / Listener', content: 'The server-side endpoint (like IIS, Apache, or a gateway) that receives the network connection, strips HTTP headers, and extracts the raw SOAP XML payload.' },
+            'Deserialize': { title: '6. Parse SOAP XML', content: 'The server-side SOAP engine reads the XML and translates it back into native server-side objects that the backend code can execute against.' },
+            'Validate': { title: '7. WSDL Contract Validation', content: 'The server strictly checks the XML against its XML Schema Definition (XSD). If data types are wrong or required fields are missing, it rejects it immediately at the boundary.' },
+            'AppServer': { title: '8. Service Business Logic', content: 'The actual backend code that executes the requested operation (e.g., saving data to a database). It then returns a response that follows the same path backward.' }
+        };
+
+        // Global function to handle clicks from Mermaid diagram
+        window.showDetails = function(nodeId) {
+            const sidebarContent = document.getElementById('sidebar-content');
+            const data = stepDetails[nodeId];
+            
+            if (data) {
+                sidebarContent.innerHTML = `
+                    <div class="animate-fade-in">
+                        <h3 class="text-xl font-bold text-blue-700 mb-3">${data.title}</h3>
+                        <p class="text-slate-700 leading-relaxed">${data.content}</p>
+                        <div class="mt-6 pt-4 border-t border-slate-100">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Layer Identification: ${nodeId}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+    </script>
+    
+    <!-- Load svg-pan-zoom library -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+    <div class="space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">SOAP Communication Architecture</h1>
+            <p class="text-slate-600">Visualizing the layers and message structure of a Simple Object Access Protocol interaction.</p>
+            <p class="text-sm text-blue-600 mt-2 font-medium">✨ Use your mouse wheel to zoom, click/drag to pan, and click on nodes for details.</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Diagram Container -->
+            <main class="mermaid-container w-full lg:w-2/3">
+                <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eff6ff', 'primaryTextColor': '#1e293b', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#fef2f2'}}}%%
+graph TD
+    classDef osiLayer fill:#f3f4f6,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef process fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
+    classDef soapLayer fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef payload fill:#dcfce3,stroke:#22c55e,stroke-width:2px;
+    classDef clickable cursor:pointer,transition:all 0.2s;
+
+    %% Client Side Process
+    subgraph Client [Client Application Environment]
+        AppClient[1. Client Application] -->|Initiates Request| Proxy[2. Client Proxy / Stub]
+        Proxy -->|Generates XML| Serialize[3. Serialize to SOAP Message]
+        class AppClient,Proxy,Serialize process;
+        class AppClient,Proxy,Serialize clickable;
+    end
+
+    %% Network / OSI Layers Mapping
+    subgraph OSILayer7 [OSI Layer 7: Application]
+        Serialize -->|Wraps in HTTP/SMTP| TransportProtocol[4. Transport Protocol]
+        class TransportProtocol process;
+        class TransportProtocol clickable;
+        
+        %% The actual SOAP structure
+        subgraph SOAPMessage [SOAP Message Structure]
+            Envelope[SOAP Envelope]
+            Header[SOAP Header - Optional]
+            Body[SOAP Body - Required]
+            Fault[SOAP Fault - Optional Error Info]
+            
+            Envelope --- Header
+            Envelope --- Body
+            Body -.- Fault
+            
+            class Envelope,Header,Body,Fault soapLayer;
+            class Envelope,Header,Body,Fault clickable;
+        end
+        TransportProtocol -.-> SOAPMessage
+    end
+
+    %% Network transit
+    subgraph OSILowerLayers [OSI Layers 1-4: Transport/Network]
+        TCP[TCP/IP Routing]
+        class TCP osiLayer;
+        class TCP clickable;
+    end
+    TransportProtocol -->|Transmits via Port 80/443| TCP
+
+    %% Server Side Process
+    subgraph Server [Server Provider Environment]
+        TCP -->|Receives Payload| ServerTransport[5. Web Server / Listener]
+        ServerTransport -->|Extracts XML| Deserialize[6. Parse SOAP XML]
+        Deserialize -->|Validates vs WSDL| Validate[7. WSDL Contract Validation]
+        Validate -->|Invokes Logic| AppServer[8. Service Business Logic]
+        class ServerTransport,Deserialize,Validate,AppServer process;
+        class ServerTransport,Deserialize,Validate,AppServer clickable;
+    end
+
+    %% Return path
+    AppServer -.->|Generates Response XML| ServerTransport
+    
+    %% Styling notes
+    class Client,Server osiLayer;
+    class OSILayer7 osiLayer;
+
+    %% Interactive Click Events
+    click AppClient call showDetails() "Details on Client"
+    click Proxy call showDetails() "Details on Proxy"
+    click Serialize call showDetails() "Details on Serialization"
+    click TransportProtocol call showDetails() "Details on Transport"
+    click Envelope call showDetails() "Details on Envelope"
+    click Header call showDetails() "Details on Header"
+    click Body call showDetails() "Details on Body"
+    click Fault call showDetails() "Details on Fault"
+    click TCP call showDetails() "Details on Networking"
+    click ServerTransport call showDetails() "Details on Web Server"
+    click Deserialize call showDetails() "Details on Parsing"
+    click Validate call showDetails() "Details on Validation"
+    click AppServer call showDetails() "Details on Logic"
+                </pre>
+            </main>
+
+            <!-- Interactive Sidebar -->
+            <aside class="w-full lg:w-1/3 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-[600px]">
+                <div class="p-4 border-b border-slate-100 bg-slate-50 rounded-t-lg">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Component Details
+                    </h2>
+                </div>
+                <div id="sidebar-content" class="p-6 flex-grow overflow-y-auto">
+                    <div class="h-full flex flex-col items-center justify-center text-center text-slate-400">
+                        <svg class="w-12 h-12 mb-4 text-slate-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                        <p class="text-sm">Click on any colored component<br>in the diagram to view its details here.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+            <h2 class="text-xl font-semibold mb-4 text-slate-800">Understanding the Layers</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
+                <div>
+                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">OSI Layer 7 (Application)</h3>
+                    <p>SOAP operates entirely within the Application Layer. While it often uses HTTP as its transport mechanism (treating HTTP like a lower-level network protocol), it can conceptually sit on top of any Layer 7 protocol, including SMTP or FTP. The heavy lifting of security (WS-Security) and routing (WS-Addressing) happens here, inside the XML envelope.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">The Role of the Proxy</h3>
+                    <p>A key difference between SOAP and REST is the strong typing provided by WSDL (Web Services Description Language). The WSDL defines the exact shape of the XML required. Development tools use this to generate a "Proxy" class, allowing developers to call a remote API exactly like a local function, hiding all the XML serialization complexity.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

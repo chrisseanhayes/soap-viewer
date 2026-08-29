@@ -60,7 +60,7 @@ function processDefinitions(obj) {
 async function loadData() {
     try {
         const [contentRes, langRes] = await Promise.all([
-            fetch(`./data/${projectName}/content.json`),
+            fetch(`./data/${projectName}/content.json?t=${new Date().getTime()}`),
             fetch(`./data/${projectName}/language-data.json`)
         ]);
         

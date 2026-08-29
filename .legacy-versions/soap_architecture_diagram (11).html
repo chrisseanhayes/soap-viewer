@@ -1,0 +1,23 @@
+<!-- ... existing code ... -->
+            %% The actual SOAP structure
+            subgraph SOAPMessage [SOAP Message Structure]
+                Envelope[SOAP Envelope]
+                Header[SOAP Header - Optional]
+                Body[SOAP Body - Required]
+                Fault[SOAP Fault - Optional Error Info]
+                
+                Envelope --> Header
+                Envelope --> Body
+                Body -.-> Fault
+                
+                class Envelope,Header,Body,Fault soapLayer;
+                class Envelope,Header,Body,Fault clickable;
+            end
+            TransportProtocol -.->|Carries| Envelope
+        end
+
+        %% Network transit
+<!-- ... existing code ... -->
+```
+
+By explicitly routing the line to the `Envelope` node and changing the inner structure to use directed arrows (`-->`), the layout engine can properly calculate the distance between the points, resolving that unhandled rejection error.

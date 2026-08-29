@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Architecture Diagram</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .diagram-container { cursor: grab; }
+        .diagram-container:active { cursor: grabbing; }
+        .code-block { overflow-x: auto; white-space: pre; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 p-6 min-h-screen flex flex-col">
+
+    <div class="max-w-7xl mx-auto w-full">
+        <div class="flex justify-between items-end border-b border-gray-300 pb-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">SOAP Architecture & Workflow</h1>
+                <p class="text-gray-600 mt-2">Explore the lifecycle of a SOAP request. Click nodes for technical details.</p>
+            </div>
+            
+            <!-- Global Language Switcher -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <label for="language-selector" class="block text-sm font-medium text-gray-700 mb-1">Developer Context:</label>
+                <select id="language-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="java" selected>Java (JAX-WS)</option>
+                    <option value="dotnet">.NET (WCF)</option>
+                    <option value="python">Python (Zeep)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6 mb-12">
+            
+            <!-- Diagram Area -->
+            <div class="flex-grow bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden relative" style="height: 600px;">
+                <div class="absolute top-4 left-4 z-10 bg-white/90 px-3 py-1 text-sm rounded border shadow-sm">
+                    🖱️ Scroll to zoom, Drag to pan, Click a node to inspect
+                </div>
+                <!-- Mermaid Container -->
+                <div class="diagram-container w-full h-full flex items-center justify-center" id="mermaid-container">
+                    <pre class="mermaid" id="mermaid-code" style="display: none;">
+                        graph TD
+                            classDef application fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff;
+                            classDef proxy fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff;
+                            classDef network fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
+                            classDef soapLayer fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
+                            classDef default fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px;
+                            classDef clickable cursor:pointer;
+
+                            %% Client Side
+                            subgraph ClientNode [Client Environment]
+                                App[Client Application]:::application
+                                Proxy[Client Proxy / Stub]:::proxy
+                                App --> Proxy
+                                class App,Proxy clickable;
+                            end
+
+                            %% Network Transport Layer
+                            subgraph Transport [Transport Layer]
+                                direction TB
+                                TransportProtocol(HTTP / TCP / SMTP):::network
+                                
+                                %% The actual SOAP structure
+                                subgraph SOAPMessage [SOAP Message Structure]
+                                    Envelope[SOAP Envelope]
+                                    Header[SOAP Header - Optional]
+                                    Body[SOAP Body - Required]
+                                    Fault[SOAP Fault - Optional Error Info]
+                                    
+                                    Envelope --> Header
+                                    Envelope --> Body
+                                    Body -.-> Fault
+                                    
+                                    class Envelope,Header,Body,Fault soapLayer;
+                                    class Envelope,Header,Body,Fault clickable;
+                                end
+                                TransportProtocol --> Envelope
+                                class TransportProtocol clickable;
+                            end
+
+                            %% Network transit
+                            Proxy --> TransportProtocol
+
+                            %% Server Side
+                            subgraph ServerNode [Server Environment]
+                                Endpoint[Service Endpoint / Gateway]:::network
+                                Dispatcher[SOAP Dispatcher / Skeleton]:::proxy
+                                Service[Service Business Logic]:::application
+                                
+                                Endpoint --> Dispatcher
+                                Dispatcher --> Service
+                                
+                                class Endpoint,Dispatcher,Service clickable;
+                            end
+
+                            TransportProtocol --> Endpoint
+                    </pre>
+                    <!-- Render Target -->
+                    <div id="diagram-render-target" class="w-full h-full"></div>
+                </div>
+            </div>
+
+            <!-- Interactive Sidebar -->
+            <div class="w-full lg:w-96 bg-white rounded-xl shadow-md border border-gray-200 flex flex-col">
+                <div class="bg-gray-100 p-4 rounded-t-xl border-b border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-800" id="sidebar-title">Select a component</h2>
+                </div>
+                <div class="p-4 flex-grow overflow-y-auto" id="sidebar-content">
+                    <div class="text-gray-500 text-center mt-10">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                        Click any node in the diagram to view its technical details, developer impact, and code examples.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">The Proxy as a Facade Pattern</h2>
+            <p class="text-gray-600 mb-6">
+                SOAP architecture heavily relies on the <strong>Proxy Pattern</strong> (acting as a Facade) to abstract the immense complexity of network communication away from the developer. The developer writes code as if the remote service is running locally on their machine.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dev Code -->
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                    <h3 class="font-bold text-blue-600 mb-2">1. The Facade (What the Developer Writes)</h3>
+                    <p class="text-sm text-gray-500 mb-3">To the engineer, it's just a local method call. No JSON parsing, no HTTP headers, no routing logic.</p>
+                    <div class="bg-gray-900 rounded p-3 text-sm text-green-400 font-mono overflow-x-auto code-block" id="facade-code-display">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Proxy Hidden Logic -->
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                    <h3 class="font-bold text-purple-600 mb-2">2. Behind the Facade (What the Proxy Does)</h3>
+                    <ul class="text-sm text-gray-600 space-y-2 list-disc pl-4">
+                        <li><strong>Serialization:</strong> Converts native types (e.g., float, int) into standard XML.</li>
+                        <li><strong>Envelope Wrapping:</strong> Creates the SOAP Header (for security/routing) and SOAP Body.</li>
+                        <li><strong>Transport:</strong> Opens the HTTP/TCP connection and streams the XML over the network.</li>
+                        <li><strong>Deserialization:</strong> Reads the server's response XML and converts it back to a native object or exception.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Leaky Abstraction Warning -->
+            <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                <h4 class="font-bold text-amber-800">⚠️ The "Leaky Abstraction" Risk</h4>
+                <p class="text-sm text-amber-900 mt-1">
+                    Because the facade is so convincing, developers often forget a network boundary exists. Calling <code class="bg-amber-100 px-1 rounded">processCharge()</code> inside a tight loop with 10,000 iterations might compile cleanly, but will result in 10,000 expensive HTTP requests, crashing the application.
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Code Generation & Tooling</h2>
+            <p class="text-gray-600 mb-4">
+                Because SOAP is strictly defined by a WSDL (Web Services Description Language) file, developers rarely write the proxy classes manually. Tooling automatically generates them.
+            </p>
+            
+            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                <div class="text-gray-400 mb-2"># Terminal Command to generate the client proxy</div>
+                <div class="text-green-400 font-bold" id="tooling-cli-display">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="text-gray-400 mt-2" id="tooling-desc-display">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === GLOBAL DATA STATE ===
+        
+        let activeNodeId = null;
+        let currentLang = 'java';
+
+        // Language specific configuration data
+        const langConfig = {
+            java: {
+                facadeCode: `// Java Example\nPaymentService proxy = new PaymentService();\n\ntry {\n    // Developer is unaware of network layers\n    boolean result = proxy.processCharge(100.00);\n} catch (SOAPFaultException e) {\n    System.out.println("Payment Failed: " + e.getMessage());\n}`,
+                cliCmd: `$ wsimport -keep -s ./src http://api.example.com/payment?wsdl`,
+                cliDesc: `# wsimport reads the XML WSDL and physically writes .java class files to your /src directory.`
+            },
+            dotnet: {
+                facadeCode: `// C# .NET Example\nvar client = new PaymentServiceClient();\n\ntry {\n    // Developer is unaware of network layers\n    bool result = await client.ProcessChargeAsync(100.00);\n} catch (FaultException e) {\n    Console.WriteLine($"Payment Failed: {e.Message}");\n}`,
+                cliCmd: `$ dotnet-svcutil http://api.example.com/payment?wsdl`,
+                cliDesc: `# svcutil downloads the WSDL and generates strongly-typed C# async Task proxy classes.`
+            },
+            python: {
+                facadeCode: `# Python (Zeep) Example\nfrom zeep import Client\nimport zeep\n\n# Zeep dynamically parses WSDL at runtime\nclient = Client('http://api.example.com/payment?wsdl')\n\ntry:\n    result = client.service.processCharge(100.00)\nexcept zeep.exceptions.Fault as e:\n    print(f"Payment Failed: {e.message}")`,
+                cliCmd: `$ pip install zeep\n# (No static generation step needed)`,
+                cliDesc: `# Zeep typically parses the WSDL dynamically at runtime, though static generator scripts exist if IDE auto-complete is strictly required.`
+            }
+        };
+
+        // Node specific explanations
+        const stepData = {
+            'App': {
+                title: 'Client Application',
+                overview: 'The frontend application or microservice that needs to execute logic on a remote server.',
+                developerImpact: 'You write standard business logic here. You interact with native objects, lists, and variables, unaware that a network request is occurring.',
+                nextSteps: 'Calls a standard function on the injected Client Proxy class.',
+                branchingFlow: 'Must handle language-specific Exceptions thrown by the Proxy if the network call fails.',
+                code: {
+                    java: `// Calling the proxy method\nboolean success = paymentService.charge();`,
+                    dotnet: `// Awaiting the proxy method\nbool success = await paymentService.ChargeAsync();`,
+                    python: `# Calling the dynamically generated method\nsuccess = client.service.charge()`
+                }
+            },
+            'Proxy': {
+                title: 'Client Proxy / Stub',
+                overview: 'Auto-generated code that implements the Facade pattern. It intercepts local method calls and translates them into network requests.',
+                developerImpact: 'You rarely write this code; you generate it from a WSDL using CLI tools. It provides strict type-safety based on the remote schema.',
+                nextSteps: 'Serializes arguments into an XML SOAP body, wraps it in an Envelope, and passes it to the Transport Protocol.',
+                branchingFlow: 'If the server returns a SOAP Fault, the Proxy intercepts it and throws it as a native Exception back to the App.',
+                code: {
+                    java: `// Auto-generated proxy stub snippet\n@WebMethod\npublic boolean processCharge(\n    @WebParam(name="amount") double amount);`,
+                    dotnet: `// Auto-generated proxy interface\n[OperationContract]\nTask<bool> ProcessChargeAsync(double amount);`,
+                    python: `# Zeep handles proxying under the hood\n# Inspecting the client:\nclient.wsdl.dump()`
+                }
+            },
+            'TransportProtocol': {
+                title: 'Transport Layer (HTTP/TCP)',
+                overview: 'The mechanism used to move the SOAP XML payload across the network.',
+                developerImpact: 'Usually abstracted away via configuration. You might tweak timeouts or MTLS certificates, but you don\'t write sockets.',
+                nextSteps: 'Delivers the raw bits to the Service Endpoint.',
+                branchingFlow: 'Can fail with HTTP 500s or TCP timeouts before SOAP processing even begins.',
+                code: {
+                    java: `// Java HTTP Configuration\nBindingProvider bp = (BindingProvider) proxy;\nbp.getRequestContext().put(\n  "com.sun.xml.ws.request.timeout", 5000\n);`,
+                    dotnet: `<!-- WCF App.config binding -->\n<basicHttpBinding>\n  <binding name="SecureHttp" sendTimeout="00:05:00" />\n</basicHttpBinding>`,
+                    python: `# Zeep Transport Configuration\nfrom zeep.transports import Transport\ntransport = Transport(timeout=5)\nclient = Client(wsdl, transport=transport)`
+                }
+            },
+            'Envelope': {
+                title: 'SOAP Envelope',
+                overview: 'The mandatory root element of every SOAP message. It defines the XML namespace and version of the SOAP specification being used.',
+                developerImpact: 'Handled entirely by the framework. Ensures the receiving parser knows exactly how to decode the document.',
+                nextSteps: 'Contains the Header and Body child nodes.',
+                branchingFlow: 'If the namespace is incorrect, the server will immediately reject the payload.',
+                code: {
+                    all: `<?xml version="1.0"?>\n<soap:Envelope\nxmlns:soap="http://www.w3.org/2003/05/soap-envelope/"\nsoap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">\n  <!-- Header and Body go here -->\n</soap:Envelope>`
+                }
+            },
+            'Header': {
+                title: 'SOAP Header',
+                overview: 'An optional section used for cross-cutting enterprise features like WS-Security (signatures/encryption) or WS-Addressing (routing instructions).',
+                developerImpact: 'Configured at the framework level. For example, you tell the framework to "Sign this request with Certificate X" and the framework builds the XML header.',
+                nextSteps: 'Evaluated by intermediate routers, API Gateways, or the final Dispatcher.',
+                branchingFlow: 'If a header is marked `mustUnderstand="1"` and the server doesn\'t recognize it, the request immediately fails.',
+                code: {
+                    all: `<soap:Header>\n  <wsse:Security soap:mustUnderstand="1">\n    <wsse:UsernameToken>\n      <wsse:Username>admin</wsse:Username>\n      <wsse:Password>secret</wsse:Password>\n    </wsse:UsernameToken>\n  </wsse:Security>\n</soap:Header>`
+                }
+            },
+            'Body': {
+                title: 'SOAP Body',
+                overview: 'The required payload section containing the actual application data being sent or returned.',
+                developerImpact: 'This is the XML representation of the arguments you passed to the Client Proxy method.',
+                nextSteps: 'Parsed by the Dispatcher on the server to reconstruct the method arguments.',
+                branchingFlow: 'If structural validation (XSD validation) fails, a SOAP Fault is generated.',
+                code: {
+                    all: `<soap:Body>\n  <m:processCharge xmlns:m="http://api.example.com">\n    <m:amount>100.00</m:amount>\n  </m:processCharge>\n</soap:Body>`
+                }
+            },
+            'Fault': {
+                title: 'SOAP Fault',
+                overview: 'An optional block that lives inside the Body. It is only present if an error occurred on the server.',
+                developerImpact: 'The Client Proxy reads this XML block and converts it into a native language Exception for the developer to catch.',
+                nextSteps: 'Returned back to the Client Proxy.',
+                branchingFlow: 'Causes the Proxy to throw an Exception rather than returning a value.',
+                code: {
+                    all: `<soap:Fault>\n  <faultcode>soap:Server</faultcode>\n  <faultstring>Database connection timed out.</faultstring>\n</soap:Fault>`
+                }
+            },
+            'Endpoint': {
+                title: 'Service Endpoint',
+                overview: 'The physical network address (URI) that receives incoming traffic, often managed by a web server like IIS, Tomcat, or an API Gateway.',
+                developerImpact: 'DevOps/Infrastructure manages this layer. It offloads TLS/SSL decryption before passing data to the application.',
+                nextSteps: 'Forwards the raw HTTP/XML request to the application\'s SOAP Dispatcher.',
+                branchingFlow: 'May drop connections due to firewall rules, DDoS protection, or load balancer configurations.',
+                code: {
+                    java: `// application.properties\nserver.port=8080\ncxf.path=/services`,
+                    dotnet: `<!-- Web.config -->\n<system.serviceModel>\n  <services>\n    <endpoint address="/PaymentService.svc" ... />\n  </services>\n</system.serviceModel>`,
+                    python: `# Python WSGI/ASGI servers handle this layer (e.g., Gunicorn/Uvicorn)`
+                }
+            },
+            'Dispatcher': {
+                title: 'Dispatcher / Skeleton',
+                overview: 'The server-side equivalent of the Client Proxy. It reads the incoming XML, validates it, and translates it back into native objects.',
+                developerImpact: 'Hidden by the framework. You annotate a class or method, and the framework automatically wires up the dispatcher to route incoming XML to your code.',
+                nextSteps: 'Invokes the actual Service Business Logic.',
+                branchingFlow: 'If the incoming XML does not match the strict WSDL contract, the dispatcher rejects it and returns a SOAP Fault.',
+                code: {
+                    java: `// Framework handles dispatching automatically\n@WebService(endpointInterface = "com.example.Payment")\npublic class PaymentImpl implements Payment { ... }`,
+                    dotnet: `// Framework handles dispatching based on interface\n[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]\npublic class PaymentService : IPaymentService { ... }`,
+                    python: `# Spyne (Python SOAP Server) framework routing\napplication = Application([PaymentService], ...)`
+                }
+            },
+            'Service': {
+                title: 'Service Business Logic',
+                overview: 'The actual backend code that executes the operation (e.g., updating a database, calculating a value).',
+                developerImpact: 'This is where backend engineers spend their time. Like the frontend, this code usually has no idea it is part of a web service.',
+                nextSteps: 'Returns an object or throws an Exception. The Dispatcher captures this and serializes it back into a SOAP Response Envelope.',
+                branchingFlow: 'Standard business branching rules.',
+                code: {
+                    java: `public boolean processCharge(double amount) {\n    // Standard business logic\n    return database.insertCharge(amount);\n}`,
+                    dotnet: `public async Task<bool> ProcessChargeAsync(double amount) {\n    // Standard business logic\n    return await dbContext.InsertCharge(amount);\n}`,
+                    python: `def processCharge(ctx, amount):\n    # Standard business logic\n    return db.insert_charge(amount)`
+                }
+            }
+        };
+
+        // === LOGIC & INITIALIZATION ===
+
+        // 1. Update UI based on language selection
+        function updateGlobalLanguage() {
+            currentLang = document.getElementById('language-selector').value;
+            const config = langConfig[currentLang];
+            
+            // Update Facade Block
+            document.getElementById('facade-code-display').innerText = config.facadeCode;
+            
+            // Update Tooling Block
+            document.getElementById('tooling-cli-display').innerText = config.cliCmd;
+            document.getElementById('tooling-desc-display').innerText = config.cliDesc;
+
+            // If a node is currently selected in the sidebar, re-render it to switch its code language
+            if (activeNodeId) {
+                renderSidebar(activeNodeId);
+            }
+        }
+
+        // 2. Render Sidebar Data
+        function renderSidebar(nodeId) {
+            const data = stepData[nodeId];
+            if (!data) return;
+
+            activeNodeId = nodeId;
+            
+            const titleEl = document.getElementById('sidebar-title');
+            const contentEl = document.getElementById('sidebar-content');
+
+            titleEl.innerText = data.title;
+            
+            // Determine which code snippet to show based on global language, 
+            // unless it's a generic payload like "all"
+            let codeSnippet = '';
+            if (data.code.all) {
+                codeSnippet = data.code.all;
+            } else if (data.code[currentLang]) {
+                codeSnippet = data.code[currentLang];
+            } else {
+                codeSnippet = "// Code example unavailable";
+            }
+
+            // Safely escape the code for HTML rendering
+            const escapedCode = codeSnippet.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            contentEl.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Overview</h3>
+                        <p class="text-sm text-gray-800">${data.overview}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Developer Impact</h3>
+                        <p class="text-sm text-gray-800">${data.developerImpact}</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-1">Next Phase</h3>
+                        <p class="text-sm text-blue-900">${data.nextSteps}</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded border border-amber-100">
+                        <h3 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">Branching & Flow</h3>
+                        <p class="text-sm text-amber-900">${data.branchingFlow}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Context Payload/Code</h3>
+                        <div class="bg-gray-900 rounded p-3 text-xs text-green-400 font-mono code-block">${escapedCode}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. Initialize Mermaid and interactions
+        async function initDiagram() {
+            mermaid.initialize({ 
+                startOnLoad: false,
+                theme: 'base',
+                securityLevel: 'loose', // Required for click events
+                themeVariables: {
+                    fontFamily: 'Inter',
+                    fontSize: '14px'
+                }
+            });
+
+            try {
+                const code = document.getElementById('mermaid-code').innerText;
+                const renderTarget = document.getElementById('diagram-render-target');
+                
+                const { svg, bindFunctions } = await mermaid.render('mermaid-svg', code);
+                renderTarget.innerHTML = svg;
+                
+                if (bindFunctions) {
+                    bindFunctions(renderTarget);
+                }
+
+                // Add svg-pan-zoom to the resulting SVG
+                const svgElement = renderTarget.querySelector('svg');
+                if (svgElement) {
+                    svgElement.style.width = '100%';
+                    svgElement.style.height = '100%';
+                    svgPanZoom(svgElement, {
+                        zoomEnabled: true,
+                        controlIconsEnabled: true,
+                        fit: true,
+                        center: true,
+                        minZoom: 0.5,
+                        maxZoom: 5
+                    });
+
+                    // Hijack clicks on nodes to update sidebar
+                    const nodes = svgElement.querySelectorAll('.node');
+                    nodes.forEach(node => {
+                        // Mermaid wraps ID in a group, ID is usually format node-App-XX or App
+                        const id = node.getAttribute('id').split('-')[1] || node.getAttribute('id');
+                        
+                        // Add visual feedback class logic
+                        node.addEventListener('click', function() {
+                            renderSidebar(id);
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error("Mermaid parsing error:", error);
+                document.getElementById('diagram-render-target').innerHTML = 
+                    `<div class="text-red-500 p-4 border border-red-500 rounded bg-red-50">Diagram rendering failed: ${error.message}</div>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Setup listener for dropdown
+            document.getElementById('language-selector').addEventListener('change', updateGlobalLanguage);
+            
+            // Initial payload hydration
+            updateGlobalLanguage();
+            
+            // Render diagram
+            initDiagram();
+        });
+    </script>
+</body>
+</html>
